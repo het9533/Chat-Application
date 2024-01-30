@@ -27,7 +27,7 @@ class AuthenticationRepositoryImplementation extends AuthenticationRepository {
         accessToken: googleSignInAuthentication.accessToken,
         idToken: googleSignInAuthentication.idToken,
       );
-
+    
       try {
         final UserCredential userCredential =
             await _auth.signInWithCredential(credential);

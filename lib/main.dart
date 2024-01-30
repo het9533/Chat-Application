@@ -1,12 +1,14 @@
 // main.dart
+import 'package:chat_app/common/constants/color_constants.dart';
 import 'package:chat_app/features/Presentation/authbloc/authentication_bloc.dart';
+import 'package:chat_app/features/Presentation/pages/login_screen.dart';
+import 'package:chat_app/features/Presentation/pages/signup_page.dart';
 import 'package:chat_app/features/dependencyInjector/injector.dart';
 import 'package:chat_app/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'features/Presentation/pages/sample.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,7 +30,10 @@ class MyApp extends StatelessWidget {
         
       ],
       child: MaterialApp(
-        home: AuthenticationScreen(),
+        theme: ThemeData(
+          scaffoldBackgroundColor: ColorAssets.neomCream,
+        ),
+        home: LoginPage(),
         ),
        
     
