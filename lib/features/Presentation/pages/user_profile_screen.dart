@@ -1,11 +1,14 @@
 // presentation/user_profile/user_profile_screen.dart
-import 'package:chat_app/features/Presentation/pages/authentication_screen.dart';
-import 'package:chat_app/features/data/entity/user.dart';
+import 'package:chat_app/features/Presentation/authbloc/authentication_bloc.dart';
+import 'package:chat_app/features/Presentation/authbloc/authentication_events.dart';
+import 'package:chat_app/features/Presentation/pages/sample.dart';
 import 'package:chat_app/features/domain/usecase/authentication_usecase.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class UserProfileScreen extends StatelessWidget {
-  final UserDetails? user;
+  final User? user;
   final AuthenticationUseCase authenticationUseCase;
 
   UserProfileScreen({required this.user, required this.authenticationUseCase});
@@ -28,14 +31,14 @@ class UserProfileScreen extends StatelessWidget {
           children: [
             Text('Name: ${user?.displayName ?? "N/A"}'),
             Text('Email: ${user?.email ?? "N/A"}'),
-            Text('Number: ${user?.number ?? "N/A"}'),
+            Text('Number: ${user?.phoneNumber ?? "N/A"}'),
             SizedBox(
               height: 20,
             ),
             ElevatedButton(
                 onPressed: () async {
-                  authenticationUseCase.signout();
-                  await Future.delayed(Duration(seconds: 1));
+                  context.read<AuthenticationBloc>().add(LogoutRequested());
+                 
                   Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(

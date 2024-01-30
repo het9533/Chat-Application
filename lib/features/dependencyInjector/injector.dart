@@ -1,3 +1,4 @@
+import 'package:chat_app/features/Presentation/authbloc/authentication_bloc.dart';
 import 'package:chat_app/features/data/repository/authentication_repository_impl.dart';
 import 'package:chat_app/features/domain/repository/authentication_repository.dart';
 import 'package:chat_app/features/domain/usecase/authentication_usecase.dart';
@@ -9,35 +10,21 @@ bool initialized = false;
 
 /// Setting up injector with All repository, use-cases, blocs and other necessary Classes.
 Future<void> setup() async {
-  
-  
-  
-
-
-
-
   /// Injecting Repository Implementation to be used by UseCases.
   // sl.registerFactory<AuthRepository>(() => AuthRepositoryImpl(sl(), sl()));
-    sl.registerFactory<AuthenticationRepository>(
+  sl.registerFactory<AuthenticationRepository>(
       () => AuthenticationRepositoryImplementation());
-    
-    
-    sl.registerLazySingleton<AuthenticationUseCase>(
+
+  sl.registerLazySingleton<AuthenticationUseCase>(
       () => AuthenticationUseCase(sl()));
 
   // model
-
-
-
-
-
-  
 
   /// Use-Cases For All the APIs resting in Data Layer
   // sl.registerLazySingleton(() => LoginUseCase(sl()));
 
   /// Blocs for State-Management
-  // sl.registerSingleton(GlobalBloc(preferences, sl()));
+  sl.registerSingleton(AuthenticationBloc(authenticationRepository: sl()));
   // sl.registerFactory(() => ClipboardBloc(sl(), sl()));
   // sl.registerLazySingleton(() => ChatBotBloc(sl()));
 

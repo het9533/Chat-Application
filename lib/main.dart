@@ -1,11 +1,14 @@
 // main.dart
-import 'package:chat_app/features/Presentation/pages/phone_number.dart';
+import 'package:chat_app/features/Presentation/authbloc/authentication_bloc.dart';
 import 'package:chat_app/features/dependencyInjector/injector.dart';
 import 'package:chat_app/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-void main() async{
+import 'features/Presentation/pages/sample.dart';
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -15,11 +18,20 @@ void main() async{
 }
 
 class MyApp extends StatelessWidget {
-  
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: LoginWithOtp(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AuthenticationBloc>(
+          create: (BuildContext context) => sl(),
+        ),
+        
+      ],
+      child: MaterialApp(
+        home: AuthenticationScreen(),
+        ),
+       
+    
     );
   }
 }
