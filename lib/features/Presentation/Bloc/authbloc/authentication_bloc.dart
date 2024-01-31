@@ -1,5 +1,5 @@
-import 'package:chat_app/features/Presentation/authbloc/authentication_events.dart';
-import 'package:chat_app/features/Presentation/authbloc/authentication_states.dart';
+import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_events.dart';
+import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_states.dart';
 import 'package:chat_app/features/data/entity/user.dart';
 import 'package:chat_app/features/domain/repository/authentication_repository.dart';
 import 'package:dartz/dartz.dart';
@@ -13,15 +13,15 @@ class AuthenticationBloc
 
   AuthenticationBloc({required  this.authenticationRepository})
       : super(AuthenticationInitial()) {
-    on<AuthenticationStarted>(_onAuthenticationStarted);
-    on<GoogleSignInRequested>(_onGoogleSignInRequested);
-    on<EmailSignInRequested>(_onEmailSignInRequested);
-    on<SignUpRequested>(_onSignUpRequested);
-    on<LogoutRequested>(_onLogoutRequested);
+    on<AuthenticationStartedEvent>(_onAuthenticationStarted);
+    on<GoogleSignInRequestedEvent>(_onGoogleSignInRequested);
+    on<EmailSignInRequestedEvent>(_onEmailSignInRequested);
+    on<EmailSignUpRequestedEvent>(_onSignUpRequested);
+    on<LogoutRequestedEvent>(_onLogoutRequested);
   }
 
   Future<void> _onAuthenticationStarted(
-      AuthenticationStarted event, Emitter<AuthenticationState> emit) async {
+      AuthenticationStartedEvent event, Emitter<AuthenticationState> emit) async {
     try {
       Either<User, String> userOption =
           await authenticationRepository.getCurrentUser();
@@ -35,7 +35,7 @@ class AuthenticationBloc
   }
 
   Future<void> _onGoogleSignInRequested(
-      GoogleSignInRequested event, Emitter<AuthenticationState> emit) async {
+      GoogleSignInRequestedEvent event, Emitter<AuthenticationState> emit,) async {
     emit(AuthenticationLoading());
     try {
       final Either<User, String>  userOption = await authenticationRepository.signInWithGoogle();
@@ -51,7 +51,7 @@ class AuthenticationBloc
   }
 
   void _onEmailSignInRequested(
-      EmailSignInRequested event, Emitter<AuthenticationState> emit) async {
+      EmailSignInRequestedEvent event, Emitter<AuthenticationState> emit) async {
         emit(AuthenticationLoading());
     try {
       final userOption = await authenticationRepository.createAccountWithEmail(UserDetails(
@@ -85,7 +85,7 @@ class AuthenticationBloc
   // }
 
   void _onSignUpRequested(
-      SignUpRequested event, Emitter<AuthenticationState> emit) async {
+      EmailSignUpRequestedEvent event, Emitter<AuthenticationState> emit) async {
    emit(AuthenticationLoading());
     try {
       final userOption = await authenticationRepository.createAccountWithEmail(UserDetails(
@@ -101,7 +101,7 @@ class AuthenticationBloc
   }
 
   void _onLogoutRequested(
-      LogoutRequested event, Emitter<AuthenticationState> emit) async {
+      LogoutRequestedEvent event, Emitter<AuthenticationState> emit) async {
     try {
       final success = await authenticationRepository.signout();
     

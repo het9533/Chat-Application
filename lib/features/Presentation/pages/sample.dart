@@ -1,10 +1,7 @@
-import 'package:chat_app/features/Presentation/authbloc/authentication_bloc.dart';
-import 'package:chat_app/features/Presentation/authbloc/authentication_events.dart';
-import 'package:chat_app/features/Presentation/authbloc/authentication_states.dart';
+import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_bloc.dart';
+import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_events.dart';
+import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_states.dart';
 import 'package:chat_app/features/Presentation/pages/user_profile_screen.dart';
-import 'package:chat_app/features/dependencyInjector/injector.dart';
-import 'package:chat_app/features/domain/repository/authentication_repository.dart';
-import 'package:chat_app/features/domain/usecase/authentication_usecase.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -31,8 +28,7 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => UserProfileScreen(
-                    authenticationUseCase:
-                        AuthenticationUseCase(sl<AuthenticationRepository>()),
+                    
                     user: state.user,
                   ),
                 )); // Replace with your success UI
@@ -100,7 +96,7 @@ class AuthenticationBody extends StatelessWidget {
         children: [
           ElevatedButton(
             onPressed: () {
-             context.read<AuthenticationBloc>().add(GoogleSignInRequested());
+             context.read<AuthenticationBloc>().add(GoogleSignInRequestedEvent());
              
             },
             child: Text('Login with Google'),
@@ -110,7 +106,7 @@ class AuthenticationBody extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              context.read<AuthenticationBloc>().add(LogoutRequested());
+              context.read<AuthenticationBloc>().add(LogoutRequestedEvent());
             },
             child: Text('SignOut'),
           ),

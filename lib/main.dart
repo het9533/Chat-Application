@@ -1,8 +1,7 @@
 // main.dart
 import 'package:chat_app/common/constants/color_constants.dart';
-import 'package:chat_app/features/Presentation/authbloc/authentication_bloc.dart';
-import 'package:chat_app/features/Presentation/pages/login_screen.dart';
-import 'package:chat_app/features/Presentation/pages/signup_page.dart';
+import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_bloc.dart';
+import 'package:chat_app/features/Presentation/pages/welcome_screen.dart';
 import 'package:chat_app/features/dependencyInjector/injector.dart';
 import 'package:chat_app/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -33,7 +32,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           scaffoldBackgroundColor: ColorAssets.neomCream,
         ),
-        home: LoginPage(),
+        home: WelcomeScreen(),
         ),
        
     

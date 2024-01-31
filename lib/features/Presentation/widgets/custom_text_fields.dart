@@ -6,18 +6,13 @@ class CustomTextFormField extends StatelessWidget {
   final String label;
   final String hint;
   final TextEditingController controller;
-  final bool? isSuffixIcon;
-  final Icon? suffixIcon;
-  final bool? obSecureText;
-   final suffixOnTap;
+ 
 
   const CustomTextFormField({
     required this.label,
     required this.hint,
     required this.controller,
-     this.isSuffixIcon = false,
-     this.obSecureText = false,
-    super.key,  required this.suffixIcon,  required this.suffixOnTap, 
+    super.key,
   });
 
   @override
@@ -36,12 +31,10 @@ class CustomTextFormField extends StatelessWidget {
         Container(
           height: 50,
           child: TextFormField(
-            obscureText: obSecureText!,
+           
             controller: controller,
             decoration: InputDecoration(
-              suffixIcon: isSuffixIcon! ? GestureDetector(
-                onTap: suffixOnTap(),
-                child: suffixIcon) : null,
+              
             
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(10)),

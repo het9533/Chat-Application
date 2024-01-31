@@ -1,17 +1,14 @@
-// presentation/user_profile/user_profile_screen.dart
-import 'package:chat_app/features/Presentation/authbloc/authentication_bloc.dart';
-import 'package:chat_app/features/Presentation/authbloc/authentication_events.dart';
-import 'package:chat_app/features/Presentation/pages/sample.dart';
-import 'package:chat_app/features/domain/usecase/authentication_usecase.dart';
+import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_bloc.dart';
+import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_events.dart';
+import 'package:chat_app/features/Presentation/pages/welcome_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class UserProfileScreen extends StatelessWidget {
   final User? user;
-  final AuthenticationUseCase authenticationUseCase;
 
-  UserProfileScreen({required this.user, required this.authenticationUseCase});
+  UserProfileScreen({required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -37,12 +34,12 @@ class UserProfileScreen extends StatelessWidget {
             ),
             ElevatedButton(
                 onPressed: () async {
-                  context.read<AuthenticationBloc>().add(LogoutRequested());
+                  context.read<AuthenticationBloc>().add(LogoutRequestedEvent());
                  
                   Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => AuthenticationScreen()));
+                          builder: (context) => WelcomeScreen()));
                 },
                 child: Text("SignOut"))
           ],

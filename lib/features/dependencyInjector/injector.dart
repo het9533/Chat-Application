@@ -1,7 +1,10 @@
-import 'package:chat_app/features/Presentation/authbloc/authentication_bloc.dart';
+import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_bloc.dart';
 import 'package:chat_app/features/data/repository/authentication_repository_impl.dart';
+import 'package:chat_app/features/data/repository/firebase_firestore_repository_impl.dart';
 import 'package:chat_app/features/domain/repository/authentication_repository.dart';
+import 'package:chat_app/features/domain/repository/firebase_firestore_repository.dart';
 import 'package:chat_app/features/domain/usecase/authentication_usecase.dart';
+import 'package:chat_app/features/domain/usecase/firebase_firestore_usecase.dart';
 import 'package:get_it/get_it.dart';
 
 final GetIt sl = GetIt.instance;
@@ -17,6 +20,12 @@ Future<void> setup() async {
 
   sl.registerLazySingleton<AuthenticationUseCase>(
       () => AuthenticationUseCase(sl()));
+
+       sl.registerFactory<FirebaseFirestoreRepository>(
+      () => FirebaseFirestoreRepositoryImplement());
+
+  sl.registerLazySingleton<FirebaseFirestoreUseCase>(
+      () => FirebaseFirestoreUseCase(firebaseFirestoreRepository: sl()));
 
   // model
 
