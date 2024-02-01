@@ -1,18 +1,26 @@
+
 import 'package:chat_app/common/constants/color_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:intl_phone_field/phone_number.dart';
 
 class CustomPhoneFeild extends StatelessWidget {
   final String label;
   final String hint;
   final TextEditingController controller;
+  final Function(String)? onsubmitted;
+  final Function(PhoneNumber)? onChanged;
+  
+  
+  
 
   const CustomPhoneFeild({
   
     required this.label,
     required this.hint,
     required this.controller,
-    super.key,
+    super.key, required this.onsubmitted(String),
+    required this.onChanged,
   });
 
   @override
@@ -34,8 +42,14 @@ class CustomPhoneFeild extends StatelessWidget {
         Container(
           height: 50,
           child: IntlPhoneField(
+            onCountryChanged: (value) {
+              
+            },
+            keyboardType: TextInputType.phone,
             
-            
+            onSubmitted: onsubmitted,
+          
+              onChanged: onChanged,
             
             initialCountryCode: '+91',
             initialValue: '+91',

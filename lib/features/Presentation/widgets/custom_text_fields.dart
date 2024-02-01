@@ -6,13 +6,14 @@ class CustomTextFormField extends StatelessWidget {
   final String label;
   final String hint;
   final TextEditingController controller;
+  final String? Function(String?)? validator;
  
 
   const CustomTextFormField({
-    required this.label,
+     this.label= '',
     required this.hint,
     required this.controller,
-    super.key,
+    super.key, required this.validator,
   });
 
   @override
@@ -28,42 +29,41 @@ class CustomTextFormField extends StatelessWidget {
         SizedBox(
           height: 10,
         ),
-        Container(
-          height: 50,
-          child: TextFormField(
-           
-            controller: controller,
-            decoration: InputDecoration(
-              
+        TextFormField(
+        
+         validator: validator ,
+          controller: controller,
+          decoration: InputDecoration(
             
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                  borderSide:
-                      BorderSide(color: ColorAssets.neomBlack, width: 1),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                  borderSide:
-                      BorderSide(color: ColorAssets.neomBlack, width: 1),
-                ),
-                disabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                  borderSide:
-                      BorderSide(color: ColorAssets.neomBlack, width: 1),
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                  borderSide:
-                      BorderSide(color: ColorAssets.neomBlack, width: 1),
-                ),
-                contentPadding: EdgeInsets.only(left: 20, right: 20, top: 0 , bottom: 0),
-                hintText: hint,
+          
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+                borderSide:
+                    BorderSide(color: ColorAssets.neomBlack, width: 1),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+                borderSide:
+                    BorderSide(color: ColorAssets.neomBlack, width: 1),
+              ),
+              disabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+                borderSide:
+                    BorderSide(color: ColorAssets.neomBlack, width: 1),
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+                borderSide:
+                    BorderSide(color: ColorAssets.neomBlack, width: 1),
+              ),
+              contentPadding: EdgeInsets.only(left: 20, right: 20, top: 0 , bottom: 0),
+          
+              hintText: hint,
+              
+              hintStyle: TextStyle(
+                color: Colors.grey,
                 
-                hintStyle: TextStyle(
-                  color: Colors.grey,
-                  
-                )),
-          ),
+              )),
         ),
       ],
     );

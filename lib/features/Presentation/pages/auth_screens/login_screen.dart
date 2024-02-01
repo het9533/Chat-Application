@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  const LoginPage({Key? key}) : super(key: key);
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -19,28 +19,33 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool agree = false;
   bool obSecureText = true;
-  final FirebaseFirestoreUseCase firebaseFirestoreUseCase = sl<FirebaseFirestoreUseCase>();
+  final FirebaseFirestoreUseCase firebaseFirestoreUseCase =
+      sl<FirebaseFirestoreUseCase>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
         child: BlocListener<AuthenticationBloc, AuthenticationState>(
           listener: (context, state) {
-                      if (state is AuthenticationLoading) {
-             Center(child: CircularProgressIndicator(),);
-          }
-          if (state is AuthenticationSuccess) {
-            Navigator.pushNamed(context, UserProfileScreenRoute,arguments: {
-              state.user
-            });
-          }
-          if(state is AuthenticationFailure){
-            ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(content: Text(state.error),actions: [],));
-          }
+            if (state is AuthenticationLoading) {
+              Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            if (state is AuthenticationSuccess) {
+              Navigator.pushNamed(context, UserProfileScreenRoute,
+                  arguments: {state.user});
+            }
+            if (state is AuthenticationFailure) {
+              ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
+                content: Text(state.error),
+                actions: [],
+              ));
+            }
           },
           child: Padding(
             padding: EdgeInsets.only(left: 20, right: 20, top: 70),
@@ -68,20 +73,40 @@ class _LoginPageState extends State<LoginPage> {
                   height: 50,
                 ),
                 Form(
-                    child: Column(
-                  children: [
-                    CustomTextFormField(
-                      label: "Email Adress",
-                      hint: "Enter your email",
-                      controller: emailController,
-                    ),
-                    SizedBox(height: 20),
-                    CustomTextFormField(
+                  child: Column(
+                    children: [
+                      CustomTextFormField(
+                        label: "Email Address",
+                        hint: "Enter your email",
+                        controller: emailController,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your email';
+                          }
+                          if (!RegExp(
+                                  r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$')
+                              .hasMatch(value)) {
+                            return 'Please enter a valid email address';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 20),
+                      CustomTextFormField(
                         label: "Password",
                         hint: "Enter your password",
-                        controller: passwordController),
-                  ],
-                )),
+                        controller: passwordController,
+                        
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your password';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                  ),
+                ),
                 SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -117,14 +142,15 @@ class _LoginPageState extends State<LoginPage> {
                     Align(
                       alignment: Alignment.bottomRight,
                       child: TextButton(
-                          onPressed: () {},
-                          child: Text(
-                            "Forgot Password",
-                            style: TextStyle(
-                              color: Colors.red,
-                            ),
-                            textAlign: TextAlign.center,
-                          )),
+                        onPressed: () {},
+                        child: Text(
+                          "Forgot Password",
+                          style: TextStyle(
+                            color: Colors.red,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
                     )
                   ],
                 ),
@@ -135,18 +161,24 @@ class _LoginPageState extends State<LoginPage> {
                   height: 50,
                   width: double.infinity,
                   child: FilledButton(
-                      style: ButtonStyle(
-                          shape: MaterialStateProperty.all(
-                              RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10))),
-                          backgroundColor:
-                              MaterialStateProperty.all(ColorAssets.neomGold)),
-                      onPressed: () {},
-                      child: Text(
-                        "Login",
-                        style: TextStyle(
-                            color: ColorAssets.neomBlack2, fontSize: 15),
-                      )),
+                    style: ButtonStyle(
+                      shape: MaterialStateProperty.all(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      backgroundColor:
+                          MaterialStateProperty.all(ColorAssets.neomGold),
+                    ),
+                    onPressed: () {
+                      // TODO: Add your login logic here
+                    },
+                    child: Text(
+                      "Login",
+                      style:
+                          TextStyle(color: ColorAssets.neomBlack2, fontSize: 15),
+                    ),
+                  ),
                 ),
                 SizedBox(
                   height: 20,
@@ -159,18 +191,21 @@ class _LoginPageState extends State<LoginPage> {
                   height: 50,
                   width: double.infinity,
                   child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                    style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      onPressed: () {},
-                      icon: Image.asset(
-                        "assets/images/google_icon.png",
-                        width: 20,
-                      ),
-                      label: Text("Login With Google")),
+                    ),
+                    onPressed: () {
+                      // TODO: Add your Google login logic here
+                    },
+                    icon: Image.asset(
+                      "assets/images/google_icon.png",
+                      width: 20,
+                    ),
+                    label: Text("Login With Google"),
+                  ),
                 ),
               ],
             ),
@@ -178,16 +213,18 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
       bottomNavigationBar: TextButton(
-          onPressed: () {
-            Navigator.pushNamed(context, SignUpPageRoute, arguments: {firebaseFirestoreUseCase});
-          },
-          child: Text(
-            "Don't have an account? SignUp",
-            style: TextStyle(
-              color: ColorAssets.neomBlack2,
-            ),
-            textAlign: TextAlign.center,
-          )),
+        onPressed: () {
+          Navigator.pushNamed(context, SignUpPageRoute,
+              arguments: {'firebaseFirestoreUseCase': firebaseFirestoreUseCase});
+        },
+        child: Text(
+          "Don't have an account? Sign Up",
+          style: TextStyle(
+            color: ColorAssets.neomBlack2,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
     );
   }
 }

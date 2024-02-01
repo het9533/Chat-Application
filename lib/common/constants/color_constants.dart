@@ -7,6 +7,7 @@ abstract class ColorAssets {
   static const neomCream = Color(0xffF1EFE0);
   static const neomGold = Color(0xffEBC03F);
   static const neomBlack2 = Color(0xff0E1318);
+  static const neomGrey = Color(0xffC7C8CC);
   // static const salonLogoColor2 = Color(0xff74C58C);
   // static const salonLogoColor3 = Color(0xffFAAC58);
   // static const salonLogoColor4 = Color(0xffF05D61);

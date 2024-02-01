@@ -2,10 +2,12 @@
 import 'package:chat_app/common/constants/color_constants.dart';
 import 'package:chat_app/common/constants/routes.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_bloc.dart';
-import 'package:chat_app/features/Presentation/pages/login_screen.dart';
-import 'package:chat_app/features/Presentation/pages/signup_page.dart';
-import 'package:chat_app/features/Presentation/pages/user_profile_screen.dart';
-import 'package:chat_app/features/Presentation/pages/welcome_screen.dart';
+import 'package:chat_app/features/Presentation/pages/auth_screens/login_screen.dart';
+import 'package:chat_app/features/Presentation/pages/auth_screens/signup_page.dart';
+import 'package:chat_app/features/Presentation/pages/email_verification/account_success_screen.dart';
+import 'package:chat_app/features/Presentation/pages/email_verification/email_verification_screen.dart';
+import 'package:chat_app/features/Presentation/pages/user_profile/user_profile_screen.dart';
+import 'package:chat_app/features/Presentation/pages/auth_screens/welcome_screen.dart';
 import 'package:chat_app/features/dependencyInjector/injector.dart';
 import 'package:chat_app/features/domain/usecase/firebase_firestore_usecase.dart';
 import 'package:chat_app/firebase_options.dart';
@@ -45,6 +47,8 @@ class MyApp extends StatelessWidget {
           LoginPageRoute: (context) => LoginPage(),
           SignUpPageRoute : (context) => SignUpPage(firebaseFirestoreUseCase: sl<FirebaseFirestoreUseCase>()),
           UserProfileScreenRoute:(context) => UserProfileScreen(user: auth.currentUser!),
+          VerifyEmailScreenRoute : (context) => VerifyEmailScreen(),
+          AccountCreatedSuccessScreenRoute : (context)=>AccountCreatedSuccessScreen()
         },
       ),
     );

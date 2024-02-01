@@ -1,6 +1,6 @@
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_bloc.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_events.dart';
-import 'package:chat_app/features/Presentation/pages/welcome_screen.dart';
+import 'package:chat_app/features/Presentation/pages/auth_screens/welcome_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
