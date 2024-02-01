@@ -1,9 +1,8 @@
 import 'package:chat_app/common/constants/color_constants.dart';
+import 'package:chat_app/common/constants/routes.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_bloc.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_events.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_states.dart';
-import 'package:chat_app/features/Presentation/pages/login_screen.dart';
-import 'package:chat_app/features/Presentation/pages/user_profile_screen.dart';
 import 'package:chat_app/features/Presentation/widgets/custom_phone_feild.dart';
 import 'package:chat_app/features/Presentation/widgets/custom_text_fields.dart';
 import 'package:chat_app/features/Presentation/widgets/horizontal_or_line.dart';
@@ -51,12 +50,9 @@ class _SignUpPageState extends State<SignUpPage> {
                 password: passwordController.text));
             Future.delayed(Duration(seconds: 1));
 
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => UserProfileScreen(
-                          user: state.user,
-                        )));
+            Navigator.pushNamed(context, UserProfileScreenRoute,arguments: {
+              state.user
+            });
           }
           if (state is AuthenticationFailure) {
             ScaffoldMessenger.of(context)
@@ -198,8 +194,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 alignment: Alignment.center,
                 child: TextButton(
                     onPressed: () {
-                      Navigator.pushReplacement(context,
-                          MaterialPageRoute(builder: (context) => LoginPage()));
+                      Navigator.pushNamed(context, LoginPageRoute);
                     },
                     child: Text(
                       "Already have an account? Login",

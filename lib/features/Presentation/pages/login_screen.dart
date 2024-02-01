@@ -1,8 +1,7 @@
 import 'package:chat_app/common/constants/color_constants.dart';
+import 'package:chat_app/common/constants/routes.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_bloc.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_states.dart';
-import 'package:chat_app/features/Presentation/pages/signup_page.dart';
-import 'package:chat_app/features/Presentation/pages/user_profile_screen.dart';
 import 'package:chat_app/features/Presentation/widgets/custom_text_fields.dart';
 import 'package:chat_app/features/Presentation/widgets/horizontal_or_line.dart';
 import 'package:chat_app/features/dependencyInjector/injector.dart';
@@ -35,10 +34,9 @@ class _LoginPageState extends State<LoginPage> {
              Center(child: CircularProgressIndicator(),);
           }
           if (state is AuthenticationSuccess) {
-            Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => UserProfileScreen(
-              user: state.user,
-            )));
+            Navigator.pushNamed(context, UserProfileScreenRoute,arguments: {
+              state.user
+            });
           }
           if(state is AuthenticationFailure){
             ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(content: Text(state.error),actions: [],));
@@ -181,8 +179,7 @@ class _LoginPageState extends State<LoginPage> {
       ),
       bottomNavigationBar: TextButton(
           onPressed: () {
-            Navigator.pushReplacement(
-                context, MaterialPageRoute(builder: (context) => SignUpPage(firebaseFirestoreUseCase: firebaseFirestoreUseCase)));
+            Navigator.pushNamed(context, SignUpPageRoute, arguments: {firebaseFirestoreUseCase});
           },
           child: Text(
             "Don't have an account? SignUp",

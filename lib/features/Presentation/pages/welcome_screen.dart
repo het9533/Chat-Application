@@ -2,8 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:chat_app/common/constants/color_constants.dart';
-import 'package:chat_app/features/Presentation/pages/login_screen.dart';
-import 'package:chat_app/features/Presentation/pages/signup_page.dart';
+import 'package:chat_app/common/constants/routes.dart';
 import 'package:chat_app/features/dependencyInjector/injector.dart';
 import 'package:chat_app/features/domain/usecase/firebase_firestore_usecase.dart';
 import 'package:flutter/material.dart';
@@ -251,11 +250,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       backgroundColor:
                           MaterialStateProperty.all(ColorAssets.neomWhite)),
                   onPressed: () {
-                    Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SignUpPage(firebaseFirestoreUseCase: firebaseFirestoreUseCase,)
-                    ));
+                    Navigator.pushNamed(context, SignUpPageRoute);
                   },
                   child: Text(
                         "Join Now",
@@ -277,11 +272,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 alignment: Alignment.center,
                 child: TextButton(
                     onPressed: () {
-                       Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => LoginPage()
-                  ));
+                      Navigator.pushNamed(context, LoginPageRoute);
                     },
                     child: Text(
                       "Already have an account? Login",

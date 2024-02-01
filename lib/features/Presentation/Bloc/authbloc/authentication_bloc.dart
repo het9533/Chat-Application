@@ -34,7 +34,7 @@ class AuthenticationBloc
     }
   }
 
-  Future<void> _onGoogleSignInRequested(
+  void  _onGoogleSignInRequested(
       GoogleSignInRequestedEvent event, Emitter<AuthenticationState> emit,) async {
     emit(AuthenticationLoading());
     try {
