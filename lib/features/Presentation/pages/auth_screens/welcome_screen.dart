@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:chat_app/common/constants/color_constants.dart';
 import 'package:chat_app/common/constants/routes.dart';
@@ -51,6 +50,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   @override
   Widget build(BuildContext context) {
+
+    final double width= MediaQuery.of(context).size.width;
+    final double height= MediaQuery.of(context).size.height;
     return Scaffold(
       
       body: Column(
@@ -61,7 +63,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             child: Stack(
               children: [
                 Positioned(
-                  top: 300,
+                  top: height * 0.35,
                   child: AnimatedBuilder(
                     animation: chatIconController,
                     builder: (context, child) {
@@ -79,8 +81,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         child: Container(
                           transform: Matrix4.rotationZ(-50),
                           transformAlignment: Alignment.center,
-                          width: 120,
-                          height: 120,
+                          width: width * 0.40,
+                          height: height * 0.17,
                           decoration: BoxDecoration(
                             image: DecorationImage(
                                 image:
@@ -94,8 +96,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   ),
                 ),
                 Positioned(
-                  top: 250,
-                  left: 200,
+                  top: height * 0.31,
+                  left: width * 0.55,
                   child: AnimatedBuilder(
                     animation: chatIconController,
                     builder: (context, child) {
@@ -113,8 +115,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         child: Container(
                           transform: Matrix4.rotationZ(50),
                           transformAlignment: Alignment.center,
-                          width: 200,
-                          height: 200,
+                          width: width * 0.50,
+                          height: height * 0.25,
                           decoration: BoxDecoration(
                             image: DecorationImage(
                                 image: AssetImage(
@@ -128,8 +130,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   ),
                 ),
                 Positioned(
-                  top: 80,
-                  left: 150,
+                  top: height * 0.1,
+                  left: width * 0.55,
                   child: AnimatedBuilder(
                     animation: chatIconController,
                     builder: (context, child) {
@@ -162,8 +164,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   ),
                 ),
                 Positioned(
-                  top: 160,
-                  left: 20,
+                  top: height * 0.16,
+                  left: width * 0.07,
                   child: AnimatedBuilder(
                     animation: chatIconController,
                     builder: (context, child) {
@@ -197,18 +199,20 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             
             ),
   
-          FadeTransition(
-            opacity: controller,
-              child: Padding(
-              padding: const EdgeInsets.only(left: 20, right: 40),
-              child: SizedBox(
-                width: 170,
-                child: Text(
-                  "Let's Get Started",
-                  style: TextStyle(
-                      color: ColorAssets.neomBlack2,
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold),
+          Expanded(
+            child: FadeTransition(
+              opacity: controller,
+                child: Padding(
+                padding: const EdgeInsets.only(left: 20, right: 40),
+                child: SizedBox(
+                  
+                  child: Text(
+                    "Let's Get Started",
+                    style: TextStyle(
+                        color: ColorAssets.neomBlack2,
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ),
@@ -216,71 +220,77 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           SizedBox(
             height: 10,
           ),
-          FadeTransition(
-            opacity: controller,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 20, right: 50, top: 10),
-              child: Text(
-                "Connect with each other with chatting or calling.Enjoy Safe and Private texting",
-                textAlign: TextAlign.justify,
-                style: TextStyle(
-                    color: ColorAssets.neomBlack2,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w300),
+          Expanded(
+            child: FadeTransition(
+              opacity: controller,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 20, right: 50, top: 10),
+                child: Text(
+                  "Connect with each other with chatting or calling.Enjoy Safe and Private texting",
+                  textAlign: TextAlign.justify,
+                  style: TextStyle(
+                      color: ColorAssets.neomBlack2,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w300),
+                ),
               ),
             ),
           ),
           SizedBox(
             height: 40,
           ),
-          SlideTransition(
-                  position: Tween<Offset>(begin: Offset(-1, 0), end: Offset(0, 0))
-                            .animate(controller),
-                  child: FadeTransition(
-                    opacity: controller,
-                    
-            child: Container(
-              height: 50,
-              margin: EdgeInsets.only(right: 20, left: 20),
-              width: double.infinity,
-              child: FilledButton(
-                  style: ButtonStyle(
-                      shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10))),
-                      backgroundColor:
-                          MaterialStateProperty.all(ColorAssets.neomWhite)),
-                  onPressed: () {
-                    Navigator.pushNamed(context, SignUpPageRoute);
-                  },
-                  child: Text(
-                        "Join Now",
-                        style: TextStyle(color: ColorAssets.neomBlack2, fontSize: 15),
+          Expanded(
+            child: SlideTransition(
+                    position: Tween<Offset>(begin: Offset(-1, 0), end: Offset(0, 0))
+                              .animate(controller),
+                    child: FadeTransition(
+                      opacity: controller,
+                      
+              child: Container(
+                height: 50,
+                margin: EdgeInsets.only(right: 20, left: 20),
+                width: double.infinity,
+                child: FilledButton(
+                    style: ButtonStyle(
+                        shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10))),
+                        backgroundColor:
+                            MaterialStateProperty.all(ColorAssets.neomWhite)),
+                    onPressed: () {
+                      Navigator.pushNamed(context, SignUpPageRoute);
+                    },
+                    child: Text(
+                          "Join Now",
+                          style: TextStyle(color: ColorAssets.neomBlack2, fontSize: 15),
+                        ),
                       ),
                     ),
-                  ),
-          )),
-          
+            )),
+          ),
+
           SizedBox(
             height: 10,
           ),
-          SlideTransition(
-            position: Tween<Offset>(begin: Offset(0, 1), end: Offset(0, 0))
-                            .animate(controller),
-            child: FadeTransition(
-              opacity: controller,
-              child: Align(
-                alignment: Alignment.center,
-                child: TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, LoginPageRoute);
-                    },
-                    child: Text(
-                      "Already have an account? Login",
-                      style: TextStyle(
-                        color: ColorAssets.neomBlack2,
-                      ),
-                      textAlign: TextAlign.center,
-                    )),
+          Expanded(
+            child: SlideTransition(
+              position: Tween<Offset>(begin: Offset(0, 1), end: Offset(0, 0))
+                              .animate(controller),
+              child: FadeTransition(
+                opacity: controller,
+                child: Align(
+                  alignment: Alignment.center,
+                  child: TextButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, LoginPageRoute);
+                      },
+                      child: Text(
+                        "Already have an account? Login",
+                        style: TextStyle(
+                          color: ColorAssets.neomBlack2,
+                        ),
+                        textAlign: TextAlign.center,
+                      )),
+                ),
               ),
             ),
           )
