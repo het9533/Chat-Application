@@ -2,25 +2,33 @@ import 'dart:async';
 
 import 'package:chat_app/common/constants/color_constants.dart';
 import 'package:chat_app/features/Presentation/pages/email_verification/account_success_screen.dart';
+import 'package:chat_app/features/data/entity/user.dart';
+import 'package:chat_app/features/domain/usecase/firebase_firestore_usecase.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:page_transition/page_transition.dart';
 
 class VerifyEmailScreen extends StatefulWidget {
+
+  final FirebaseFirestoreUseCase firebaseFirestoreUseCase;
   
-  const VerifyEmailScreen({super.key});
+  const VerifyEmailScreen({super.key, required this.firebaseFirestoreUseCase});
 
   @override
-  State<VerifyEmailScreen> createState() => _VerifyEmailScreenState();
+  State<VerifyEmailScreen> createState() => _VerifyEmailScreenState(firebaseFirestoreUseCase: firebaseFirestoreUseCase);
 }
 
 class _VerifyEmailScreenState extends State<VerifyEmailScreen>
     with TickerProviderStateMixin,WidgetsBindingObserver {
+final user = FirebaseAuth.instance.currentUser!;
+ final FirebaseFirestoreUseCase firebaseFirestoreUseCase;
   late AnimationController controller;
   late bool isClicked = false;
   bool isEmailVerified = false;
   late Timer timer;
+
+  _VerifyEmailScreenState({required this.firebaseFirestoreUseCase});
 
 void didChangeAppLifecycleState(AppLifecycleState state) async {
 
@@ -56,7 +64,13 @@ void didChangeAppLifecycleState(AppLifecycleState state) async {
     setState(() {
       isEmailVerified = FirebaseAuth.instance.currentUser!.emailVerified;
     });
-    if (isEmailVerified) timer.cancel();
+    if (isEmailVerified){
+       
+      timer.cancel();
+      
+      //firebase firestore
+      firebaseFirestoreUseCase.addUser(UserDetails(displayName: user.displayName, email: user.email, number: user.phoneNumber, password: ''));
+    }
   }
 
   Future sendVerificationEmail() async {
@@ -79,7 +93,7 @@ void didChangeAppLifecycleState(AppLifecycleState state) async {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser!;
+    
 
     return isEmailVerified
         ? AccountCreatedSuccessScreen()

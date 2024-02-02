@@ -1,8 +1,14 @@
 class UserDetails {
-   String? displayName;
-   String? email;
-   String? number;
-   String? password;
+  String? displayName;
+  String? email;
+  String? number;
+  String? password;
+  String? imagepath;
 
-  UserDetails({required this.displayName,  required this.email , required this.number , required this.password});
+  UserDetails(
+      {this.displayName,
+      this.email,
+      this.number,
+      this.password,
+      this.imagepath});
 }

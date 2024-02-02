@@ -12,10 +12,12 @@ class AuthenticationRepositoryImplementation extends AuthenticationRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   User? user;
+    String receivedVerificationId = ''; 
+
 
   // signin with google 
   @override
-  Future<Either<User, String>> signInWithGoogle() async {
+  Future<Either<User, String>> signInWithGoogle(UserDetails userDetails) async {
     final GoogleSignInAccount? googleSignInAccount =
         await _googleSignIn.signIn();
 
@@ -54,11 +56,10 @@ class AuthenticationRepositoryImplementation extends AuthenticationRepository {
   Future<Either<User, String>> createAccountWithEmail(
       UserDetails userDetails) async {
     try {
-      final credential = await _auth.createUserWithEmailAndPassword(
-        email: userDetails.email!,
-        password: userDetails.password!,
-      );
-      user = credential.user;
+            final credential= await EmailAuthProvider.credential(email: userDetails.email!,password: userDetails.password!);
+      final finalCredential = await _auth.currentUser!.linkWithCredential(credential);
+      user = finalCredential.user;
+
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         return const Right("Weak-Password");
@@ -123,9 +124,44 @@ class AuthenticationRepositoryImplementation extends AuthenticationRepository {
   }
 
   //lOGIN With otp
-  
+   @override
+  Future<void> verifyPhoneNumber(String phoneNumber) async {
+    try {
+      await _auth.verifyPhoneNumber(
+        phoneNumber: phoneNumber,
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          print(" verificationCompleted credential : ${credential}");
+          await _auth.signInWithCredential(credential);
 
+        
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          throw e;
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          // Store the received verificationId
+          receivedVerificationId = verificationId;
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {
 
-
-
+        },
+      );
+    } catch (e) {
+      throw e;
+    }
+  }
+@override
+ Future<void> verifyOTPCode(String smsCode) async {
+    try {
+      PhoneAuthCredential credential = PhoneAuthProvider.credential(
+        verificationId: receivedVerificationId,
+        smsCode: smsCode,
+      );
+        print(" verifyOTPCode credential : ${credential}");
+      await _auth.signInWithCredential(credential);
+    } catch (e) {
+      throw e;
+    }
+  }
 }
+
