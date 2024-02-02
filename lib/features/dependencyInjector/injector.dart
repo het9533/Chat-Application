@@ -1,4 +1,5 @@
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_bloc.dart';
+import 'package:chat_app/features/Presentation/Bloc/phone_authentication_bloc/phone_authentication_bloc.dart';
 import 'package:chat_app/features/data/repository/authentication_repository_impl.dart';
 import 'package:chat_app/features/data/repository/firebase_firestore_repository_impl.dart';
 import 'package:chat_app/features/domain/repository/authentication_repository.dart';
@@ -34,6 +35,7 @@ Future<void> setup() async {
 
   /// Blocs for State-Management
   sl.registerSingleton(AuthenticationBloc(authenticationRepository: sl()));
+    sl.registerSingleton(PhoneAuthenticationBloc(authenticationRepository: sl()));
   // sl.registerFactory(() => ClipboardBloc(sl(), sl()));
   // sl.registerLazySingleton(() => ChatBotBloc(sl()));
 

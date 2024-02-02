@@ -13,8 +13,8 @@ class AuthenticationUseCase {
 
   
 
-  Future<Either<User,String>> signInWithGoogle() async {
-    return await authenticationRepository.signInWithGoogle();
+  Future<Either<User,String>> signInWithGoogle(UserDetails params) async {
+    return await authenticationRepository.signInWithGoogle(params);
   }
    Future<bool> signout() async {
     return await authenticationRepository.signout();
@@ -30,5 +30,12 @@ class AuthenticationUseCase {
     return await authenticationRepository.getCurrentUser();
   }
 
-  // Other authentication-related use cases...
+  // Phone authentication-related use cases...
+  Future<void> verifyPhoneNumber(String phoneNumber) async{
+    return await authenticationRepository.verifyPhoneNumber(phoneNumber);
+  }
+
+Future<void> verifyOTPCode(String smsCode) async{
+  return await authenticationRepository.verifyOTPCode(smsCode);
+}
 }

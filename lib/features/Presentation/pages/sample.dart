@@ -1,7 +1,6 @@
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_bloc.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_events.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_states.dart';
-import 'package:chat_app/features/Presentation/pages/user_profile/user_profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,14 +23,14 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
           } else if (state is AuthenticationLoading) {
              buildLoadingUI(); // Replace with your loading UI
           } else if (state is AuthenticationSuccess) {
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => UserProfileScreen(
+            // Navigator.pushReplacement(
+            //     context,
+            //     MaterialPageRoute(
+            //       builder: (context) => UserProfileScreen(
                     
-                    user: state.user,
-                  ),
-                )); // Replace with your success UI
+            //         user: state.user,
+            //       ),
+            //     )); // Replace with your success UI
           } else if (state is AuthenticationFailure) {
             buildFailureUI(state.error); // Replace with your failure UI
           } 

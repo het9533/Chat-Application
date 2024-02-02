@@ -38,7 +38,14 @@ class AuthenticationBloc
       GoogleSignInRequestedEvent event, Emitter<AuthenticationState> emit,) async {
     emit(AuthenticationLoading());
     try {
-      final Either<User, String>  userOption = await authenticationRepository.signInWithGoogle();
+      final user = FirebaseAuth.instance.currentUser;
+      print(user);
+      final Either<User, String>  userOption = await authenticationRepository.signInWithGoogle(UserDetails(
+        displayName: user?.displayName,
+        email: user?.email,
+        imagepath: user?.photoURL,
+        number: user?.phoneNumber,
+      ));
       userOption.fold((l) => emit(AuthenticationSuccess(l)), (r) => emit(AuthenticationFailure("Error signing in with Google")));
       // userOption.fold(
       //   (user) => emit(AuthenticationSuccess(user)),
@@ -54,7 +61,7 @@ class AuthenticationBloc
       EmailSignInRequestedEvent event, Emitter<AuthenticationState> emit) async {
         emit(AuthenticationLoading());
     try {
-      final userOption = await authenticationRepository.createAccountWithEmail(UserDetails(
+      final userOption = await authenticationRepository.signInWithEmail(UserDetails(
         displayName: event.user.displayName, email: event.user.email, number: event.user.number, password: event.user.password));
       userOption.fold(
         (user) => emit(AuthenticationSuccess(user)),

@@ -1,9 +1,11 @@
 import 'package:chat_app/common/constants/color_constants.dart';
 import 'package:chat_app/common/constants/routes.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_bloc.dart';
+import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_events.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_states.dart';
 import 'package:chat_app/features/Presentation/widgets/custom_text_fields.dart';
 import 'package:chat_app/features/Presentation/widgets/horizontal_or_line.dart';
+import 'package:chat_app/features/data/entity/user.dart';
 import 'package:chat_app/features/dependencyInjector/injector.dart';
 import 'package:chat_app/features/domain/usecase/firebase_firestore_usecase.dart';
 
@@ -22,6 +24,8 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController passwordController = TextEditingController();
   bool agree = false;
   bool obSecureText = true;
+
+
   final FirebaseFirestoreUseCase firebaseFirestoreUseCase =
       sl<FirebaseFirestoreUseCase>();
 
@@ -37,14 +41,12 @@ class _LoginPageState extends State<LoginPage> {
               );
             }
             if (state is AuthenticationSuccess) {
-              Navigator.pushNamed(context, UserProfileScreenRoute,
-                  arguments: {state.user});
+              Future.delayed(Duration(seconds: 4));
+              Navigator.pushNamed(context, HomeScreenRoute);
             }
             if (state is AuthenticationFailure) {
-              ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
-                content: Text(state.error),
-                actions: [],
-              ));
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error),));
+              
             }
           },
           child: Padding(
@@ -171,7 +173,7 @@ class _LoginPageState extends State<LoginPage> {
                           MaterialStateProperty.all(ColorAssets.neomGold),
                     ),
                     onPressed: () {
-                      // TODO: Add your login logic here
+                      context.read<AuthenticationBloc>().add(EmailSignInRequestedEvent(UserDetails(displayName: '', email: emailController.text, number: '', password: passwordController.text)));
                     },
                     child: Text(
                       "Login",
@@ -198,7 +200,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     onPressed: () {
-                      // TODO: Add your Google login logic here
+                      
                     },
                     icon: Image.asset(
                       "assets/images/google_icon.png",

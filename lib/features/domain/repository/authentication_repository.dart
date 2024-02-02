@@ -6,12 +6,17 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 abstract class AuthenticationRepository {
 
-Future<Either<User, String>> signInWithGoogle();
+Future<Either<User, String>> signInWithGoogle(UserDetails userDetails);
 
 Future<bool> signout();
 
 Future<Either<User,String>> createAccountWithEmail(UserDetails userDetails);
 Future<Either<User,String>> signInWithEmail(UserDetails userDetails);
 Future<Either<User,String>> getCurrentUser();
+
+Future<void> verifyPhoneNumber(String phoneNumber);
+
+Future<void> verifyOTPCode(String smsCode);
+
 
 }

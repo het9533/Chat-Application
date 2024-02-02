@@ -10,10 +10,10 @@ class FirebaseFirestoreRepositoryImplement extends FirebaseFirestoreRepository {
   Future<void> addUser(UserDetails userDetails) async {
     try {
       final user = FirebaseAuth.instance.currentUser!;
-      final userID = user.uid; // Get the authenticated user's UID
+      final userID = user.uid; 
 
       users
-          .doc(userID) // Set the document ID as the user's UID
+          .doc(userID) 
           .set({
             // Add user data
             'Full Name': userDetails.displayName,
