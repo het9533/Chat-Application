@@ -6,6 +6,9 @@ import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_stat
 import 'package:chat_app/features/Presentation/Bloc/phone_authentication_bloc/phone_authentication_bloc.dart';
 import 'package:chat_app/features/Presentation/Bloc/phone_authentication_bloc/phone_authentication_events.dart';
 import 'package:chat_app/features/Presentation/Bloc/phone_authentication_bloc/phone_authentication_states.dart';
+import 'package:chat_app/features/Presentation/pages/auth_screens/login_screen.dart';
+import 'package:chat_app/features/Presentation/pages/email_verification/email_verification_screen.dart';
+import 'package:chat_app/features/Presentation/pages/user_profile/profile_page.dart';
 import 'package:chat_app/features/Presentation/widgets/custom_phone_feild.dart';
 import 'package:chat_app/features/Presentation/widgets/custom_text_fields.dart';
 import 'package:chat_app/features/Presentation/widgets/horizontal_or_line.dart';
@@ -16,6 +19,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SignUpPage extends StatefulWidget {
+  static const signuppage = 'signuppage';
+
   final FirebaseFirestoreUseCase firebaseFirestoreUseCase;
 
   const SignUpPage({Key? key, required this.firebaseFirestoreUseCase})
@@ -61,25 +66,29 @@ class _SignUpPageState extends State<SignUpPage> {
               );
             }
             if (state is AuthenticationSuccess) {
-          
-             if (isClickedSignUpGoogle) {
-                  Future.delayed(Duration(seconds: 1));
-                Navigator.pushNamed(context, UserProfileScreenRoute ,arguments: {
-                  UserDetails(
-                  displayName: state.user.displayName,
-                  email: state.user.email,
-                  imagepath: state.user.photoURL,
-                  number: state.user.phoneNumber
-                )});
-             }
-             if (!isClickedSignUpGoogle) {
-                  Future.delayed(Duration(seconds: 1));
-                Navigator.pushNamed(context, VerifyEmailScreenRoute, arguments: {
-                  firebaseFirestoreUseCase
-                });
-             }
+              if (isClickedSignUpGoogle) {
+                Future.delayed(Duration(seconds: 1));
+                Navigator.pushNamed(
+                  context,
+                  ProfilePage.profilepage,
+                  arguments: UserDetails(
+                    displayName: state.user.displayName,
+                    email: state.user.email,
+                    imagepath: state.user.photoURL,
+                    number: state.user.phoneNumber,
+                  ),
+                );
               }
-          
+
+              
+              if (!isClickedSignUpGoogle) {
+                Future.delayed(Duration(seconds: 1));
+                Navigator.pushNamed(
+                    context, VerifyEmailScreen.verifyemailscreen,
+                    arguments: {firebaseFirestoreUseCase});
+              }
+            }
+
             if (state is AuthenticationFailure) {
               ScaffoldMessenger.of(context)
                   .showSnackBar(SnackBar(content: Text(state.error)));
@@ -294,8 +303,8 @@ class _SignUpPageState extends State<SignUpPage> {
                             }
 
                             setState(() {
-                                isClickedSignUpGoogle = false;
-                              }); 
+                              isClickedSignUpGoogle = false;
+                            });
                           },
                           child: Text(
                             "Sign Up",
@@ -306,38 +315,35 @@ class _SignUpPageState extends State<SignUpPage> {
                     SizedBox(
                       height: 20,
                     ),
-                   
-                      HorizontalOrLine(label: "Or Sign Up With", height: 0),
+                    HorizontalOrLine(label: "Or Sign Up With", height: 0),
                     SizedBox(
                       height: 15,
                     ),
-                  
-                      Container(
-                        height: 50,
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                            style: OutlinedButton.styleFrom(
-                              padding: EdgeInsets.zero,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
+                    Container(
+                      height: 50,
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            onPressed: () async {
-                              context
-                                  .read<AuthenticationBloc>()
-                                  .add(GoogleSignInRequestedEvent());
+                          ),
+                          onPressed: () async {
+                            context
+                                .read<AuthenticationBloc>()
+                                .add(GoogleSignInRequestedEvent());
 
-
-                              setState(() {
-                                isClickedSignUpGoogle = true;
-                              });    
-                            },
-                            icon: Image.asset(
-                              "assets/images/google_icon.png",
-                              width: 20,
-                            ),
-                            label: Text("Sign Up With Google")),
-                      ),
+                            setState(() {
+                              isClickedSignUpGoogle = true;
+                            });
+                          },
+                          icon: Image.asset(
+                            "assets/images/google_icon.png",
+                            width: 20,
+                          ),
+                          label: Text("Sign Up With Google")),
+                    ),
                     SizedBox(
                       height: 10,
                     ),
@@ -346,7 +352,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         alignment: Alignment.center,
                         child: TextButton(
                             onPressed: () {
-                              Navigator.pushNamed(context, LoginPageRoute);
+                              Navigator.pushNamed(context, LoginPage.loginpage);
                             },
                             child: Text(
                               "Already have an account? Login",

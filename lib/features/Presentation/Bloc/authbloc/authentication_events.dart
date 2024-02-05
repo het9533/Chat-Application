@@ -1,8 +1,11 @@
 import 'package:chat_app/features/data/entity/user.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 abstract class AuthenticationEvent {}
 
 class AuthenticationStartedEvent extends AuthenticationEvent {}
+
+class AuthentticatedUserEvent extends AuthenticationEvent {}
 
 class GoogleSignInRequestedEvent extends AuthenticationEvent {}
 

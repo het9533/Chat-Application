@@ -18,6 +18,7 @@ class AuthenticationBloc
     on<EmailSignInRequestedEvent>(_onEmailSignInRequested);
     on<EmailSignUpRequestedEvent>(_onSignUpRequested);
     on<LogoutRequestedEvent>(_onLogoutRequested);
+     on<AuthentticatedUserEvent>(_onAuthentticatedUser);
   }
 
   Future<void> _onAuthenticationStarted(
@@ -33,6 +34,18 @@ class AuthenticationBloc
       emit(AuthenticationFailure(error.toString()));
     }
   }
+void _onAuthentticatedUser(AuthentticatedUserEvent event, Emitter<AuthenticationState> emit) async{
+    emit(AuthenticationLoading());
+    try {
+      final userOption = await authenticationRepository.getCurrentUser();
+      userOption.fold(
+        (user) => emit(AuthenticationSuccess(user)),
+         (error) => emit(AuthenticationFailure("Error signing in with Google")),
+      );
+    } catch (error) {
+      emit(AuthenticationFailure(error.toString()));
+    }
+}
 
   void  _onGoogleSignInRequested(
       GoogleSignInRequestedEvent event, Emitter<AuthenticationState> emit,) async {
@@ -56,6 +69,7 @@ class AuthenticationBloc
       emit(AuthenticationFailure(error.toString()));
     }
   }
+  
 
   void _onEmailSignInRequested(
       EmailSignInRequestedEvent event, Emitter<AuthenticationState> emit) async {

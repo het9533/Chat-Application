@@ -25,16 +25,13 @@ class CustomTextFormField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: Theme.of(context)
-              .primaryTextTheme
-              .bodyMedium
-              ?.copyWith(fontWeight: FontWeight.w500),
+        style: TextStyle(
+              color: ColorAssets.neomBlack2, fontWeight: FontWeight.bold),
         ),
         SizedBox(
           height: 10,
         ),
         TextFormField(
-          
           enabled: enabled,
           controller: controller,
           decoration:InputDecoration(
@@ -45,7 +42,7 @@ class CustomTextFormField extends StatelessWidget {
                 color: enabled ? ColorAssets.kblackcolor : Colors.transparent,
                 width: 1
               ),
-              
+
             ), 
             enabledBorder: OutlineInputBorder(
               borderRadius:

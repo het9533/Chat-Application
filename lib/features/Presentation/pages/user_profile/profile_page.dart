@@ -13,6 +13,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatefulWidget {
+  static const profilepage = 'profilepage';
   final UserDetails userDetails;
 
   const ProfilePage({super.key, required this.userDetails});
@@ -134,7 +135,7 @@ class _ProfilePageState extends State<ProfilePage>
         ),
         title: Text(
           editMode ? "Edit Profile" : "Profile",
-          style: Theme.of(context).primaryTextTheme.headlineLarge,
+          
         ),
         centerTitle: true,
       ),
@@ -176,7 +177,7 @@ class _ProfilePageState extends State<ProfilePage>
                                         child: Padding(
                                           padding: const EdgeInsets.all(15),
                                           child: SvgPicture.asset(
-                                              "assets/images/edit.svg"),
+                                              "assets/images/edit.svg", color: Colors.white,),
                                         ),
                                       ),
                                     ),

@@ -11,6 +11,8 @@ import 'package:page_transition/page_transition.dart';
 
 class VerifyEmailScreen extends StatefulWidget {
 
+  static const  verifyemailscreen = 'verifyemailscreen';
+  
   final FirebaseFirestoreUseCase firebaseFirestoreUseCase;
   
   const VerifyEmailScreen({super.key, required this.firebaseFirestoreUseCase});

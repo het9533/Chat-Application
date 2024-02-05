@@ -1,80 +1,63 @@
+import 'package:chat_app/features/Presentation/pages/auth_screens/login_screen.dart';
+import 'package:chat_app/features/Presentation/pages/auth_screens/signup_page.dart';
+import 'package:chat_app/features/Presentation/pages/auth_screens/welcome_screen.dart';
+import 'package:chat_app/features/Presentation/pages/email_verification/account_success_screen.dart';
+import 'package:chat_app/features/Presentation/pages/email_verification/email_verification_screen.dart';
+import 'package:chat_app/features/Presentation/pages/homepage.dart';
+import 'package:chat_app/features/Presentation/pages/user_profile/profile_page.dart';
+import 'package:chat_app/features/data/entity/user.dart';
+import 'package:chat_app/features/dependencyInjector/injector.dart';
+import 'package:chat_app/features/domain/usecase/firebase_firestore_usecase.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:neom_demo/features/data/model/user_profile.dart';
-import 'package:neom_demo/features/presentation/chat_screen/chatting_screen_bloc/chatting_bloc.dart';
-import 'package:neom_demo/features/presentation/chat_screen/pages/chatting_screen.dart';
-import 'package:neom_demo/features/presentation/chat_screen/pages/new_conversation.dart';
-import 'package:neom_demo/features/presentation/chat_screen/pages/pagination_data.dart';
-import 'package:neom_demo/features/presentation/login/pages/login_screen.dart';
-import 'package:neom_demo/features/presentation/otp/pages/otp_screen.dart';
-import 'package:neom_demo/features/presentation/select_language/pages/select_language_screen.dart';
-import 'package:neom_demo/features/presentation/splash/pages/splash_screen.dart';
-import 'package:neom_demo/features/presentation/user_profile/pages/user_profile_screen.dart';
-
-import '../../di/injector.dart';
-import '../../features/presentation/chat_screen/pages/chat.dart';
-import '../../features/presentation/chat_screen/pages/random_user_data.dart';
-import '../../features/presentation/chat_screen/pages/sliver_scroll_with_cupertino_refresh_indicator.dart';
 
 GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class AppNavigator {
-  static GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+  static GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
 
   static Route<dynamic> materialAppsRoute(RouteSettings settings) {
     switch (settings.name) {
-      case SliverScrollWithCupertinoRefreshIndicator.sliverScrollWithCupertinoRefreshIndicator:
-        return MaterialPageRoute(builder: (context) => const SliverScrollWithCupertinoRefreshIndicator());
-      case PaginationWithData.paginationWithDio:
-        return MaterialPageRoute(builder: (context) => const PaginationWithData());
-      case RandomData.randomData:
+      case WelcomeScreen.welcomescreen:
+        return MaterialPageRoute(builder: (context) => const WelcomeScreen());
+      case LoginPage.loginpage:
+        return MaterialPageRoute(builder: (context) => const LoginPage());
+      case SignUpPage.signuppage:
         return MaterialPageRoute(
-          builder: (context) => const RandomData(),
+          builder: (context) => SignUpPage(
+              firebaseFirestoreUseCase: sl<FirebaseFirestoreUseCase>()),
         );
-      case SplashScreen.splash:
-        return MaterialPageRoute(
-          builder: (context) => const SplashScreen(),
+      case ProfilePage.profilepage:
+        var args = settings.arguments as UserDetails;
+
+        return MaterialPageRoute<UserDetails>(
+          builder: (context) => ProfilePage(
+              userDetails: args),
+              settings: settings
+      
         );
-      case SelectLanguage.selectLanguage:
+      case VerifyEmailScreen.verifyemailscreen:
         return MaterialPageRoute(
-          builder: (context) => const SelectLanguage(),
+          builder: (context) => VerifyEmailScreen(
+              firebaseFirestoreUseCase: sl<FirebaseFirestoreUseCase>()),
         );
-      case LoginScreen.loginScreen:
+
+        case AccountCreatedSuccessScreen.accountCreatedSuccessScreen:
         return MaterialPageRoute(
-          builder: (context) => const LoginScreen(),
+          builder: (context) => AccountCreatedSuccessScreen(
+              ),
         );
-      case OtpScreen.otpScreen:
-        var args = settings.arguments as Map<String, dynamic>?;
+        case HomePage.homePage:
         return MaterialPageRoute(
-          builder: (context) => OtpScreen(email: args?['email'] ?? "", phone: args?['phone'] ?? ""),
+          builder: (context) => HomePage(
+              ),
         );
-      case UserProfileScreen.userProfileScreen:
-        var args = settings.arguments as Map<String, dynamic>?;
-        return MaterialPageRoute(
-            builder: (context) => UserProfileScreen(
-                  email: args?['email'] ?? "",
-                  mobileNumber: args?['phone'] ?? "",
-                ));
-      case ChatScreen.chatScreen:
-        var args = settings.arguments as Map<String, dynamic>?;
-        return MaterialPageRoute(
-          builder: (context) => ChatScreen(userProfileDetail: args?['userProfileDetail'] ?? UserProfile()),
-        );
-      case SearchPage.searchPage:
-        return MaterialPageRoute(
-          builder: (context) => const SearchPage(),
-        );
-      case ChattingScreen.chattingScreen:
-        var args = settings.arguments as Map<String, dynamic>?;
-        return MaterialPageRoute(
-          builder: (context) => BlocProvider(
-            create: (context) => ChattingBloc(chattingUseCase: sl(), getUpdateChatUseCase: sl()),
-            child: ChattingScreen(userProfile: args?['userProfile'] ?? UserProfile()),
-          ),
-        );
+
+
       default:
         return MaterialPageRoute(
-          builder: (context) => UndefinedView(name: settings.name ?? 'undefined name'),
+          builder: (context) =>
+              UndefinedView(name: settings.name ?? 'undefined name'),
         );
     }
   }
@@ -97,4 +80,3 @@ class UndefinedView extends StatelessWidget {
     );
   }
 }
-

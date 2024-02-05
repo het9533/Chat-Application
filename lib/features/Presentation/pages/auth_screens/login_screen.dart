@@ -1,8 +1,9 @@
 import 'package:chat_app/common/constants/color_constants.dart';
-import 'package:chat_app/common/constants/routes.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_bloc.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_events.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_states.dart';
+import 'package:chat_app/features/Presentation/pages/auth_screens/signup_page.dart';
+import 'package:chat_app/features/Presentation/pages/homepage.dart';
 import 'package:chat_app/features/Presentation/widgets/custom_text_fields.dart';
 import 'package:chat_app/features/Presentation/widgets/horizontal_or_line.dart';
 import 'package:chat_app/features/data/entity/user.dart';
@@ -13,6 +14,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LoginPage extends StatefulWidget {
+
+  static const loginpage = 'LoginPage';
+
   const LoginPage({Key? key}) : super(key: key);
 
   @override
@@ -42,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
             }
             if (state is AuthenticationSuccess) {
               Future.delayed(Duration(seconds: 4));
-              Navigator.pushNamed(context, HomeScreenRoute);
+              Navigator.pushNamed(context, HomePage.homePage);
             }
             if (state is AuthenticationFailure) {
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error),));
@@ -216,7 +220,7 @@ class _LoginPageState extends State<LoginPage> {
       ),
       bottomNavigationBar: TextButton(
         onPressed: () {
-          Navigator.pushNamed(context, SignUpPageRoute,
+          Navigator.pushNamed(context, SignUpPage.signuppage,
               arguments: {'firebaseFirestoreUseCase': firebaseFirestoreUseCase});
         },
         child: Text(
