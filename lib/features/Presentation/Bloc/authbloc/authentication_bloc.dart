@@ -54,7 +54,8 @@ void _onAuthentticatedUser(AuthentticatedUserEvent event, Emitter<Authentication
       final user = FirebaseAuth.instance.currentUser;
       print(user);
       final Either<User, String>  userOption = await authenticationRepository.signInWithGoogle(UserDetails(
-        displayName: user?.displayName,
+        firstName: user?.displayName,
+        lastName: user?.displayName,
         email: user?.email,
         imagepath: user?.photoURL,
         number: user?.phoneNumber,
@@ -76,7 +77,9 @@ void _onAuthentticatedUser(AuthentticatedUserEvent event, Emitter<Authentication
         emit(AuthenticationLoading());
     try {
       final userOption = await authenticationRepository.signInWithEmail(UserDetails(
-        displayName: event.user.displayName, email: event.user.email, number: event.user.number, password: event.user.password));
+        firstName: event.user.firstName, 
+        lastName: event.user.lastName,
+        email: event.user.email, number: event.user.number, password: event.user.password));
       userOption.fold(
         (user) => emit(AuthenticationSuccess(user)),
          (error) => emit(AuthenticationFailure("Error signing in with Google")),
@@ -110,7 +113,9 @@ void _onAuthentticatedUser(AuthentticatedUserEvent event, Emitter<Authentication
    emit(AuthenticationLoading());
     try {
       final userOption = await authenticationRepository.createAccountWithEmail(UserDetails(
-        displayName: event.user.displayName, email: event.user.email, number: event.user.number, password: event.user.password));
+        firstName: event.user.firstName,
+        lastName: event.user.lastName,
+         email: event.user.email, number: event.user.number, password: event.user.password));
       userOption.fold(
         (user) => emit(AuthenticationSuccess(user)),
          (error) => emit(AuthenticationFailure("Error signing in with Google")),

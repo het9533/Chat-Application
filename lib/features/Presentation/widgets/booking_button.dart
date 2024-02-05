@@ -1,7 +1,8 @@
+import 'package:chat_app/common/constants/color_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class rowBottomButtons extends StatelessWidget {
+class RowBottomButtons extends StatelessWidget {
   final String FirstButtonText;
   final String SecondButtonText;
   final Function()? OnFirstButtonPressed;
@@ -9,7 +10,7 @@ class rowBottomButtons extends StatelessWidget {
 
 
 
-  const rowBottomButtons({
+  const RowBottomButtons({
     required this.FirstButtonText,
     required this.SecondButtonText,
     this.OnFirstButtonPressed,
@@ -25,14 +26,7 @@ class rowBottomButtons extends StatelessWidget {
     return Container(
       margin: EdgeInsets.only(left: 20,right: 20 , bottom: 7),
       decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Colors.white.withOpacity(0.7),
-            offset: Offset(0, -20),
-            blurRadius: 7.0,
-            spreadRadius: 0.5,
-          )
-        ]
+        
       ),
       width: double.infinity,
       height: 70,
@@ -76,7 +70,7 @@ class rowBottomButtons extends StatelessWidget {
               
                     shape: MaterialStateProperty.all(RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10))),
-                    backgroundColor: MaterialStateProperty.all(Color(0xff1A1A1A)),
+                    backgroundColor: MaterialStateProperty.all(ColorAssets.neomBlack2),
                   ),
                   onPressed:OnSecondButtonPressed,
                   child: Text(

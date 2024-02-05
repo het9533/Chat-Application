@@ -52,6 +52,9 @@ dependencies:
   shared_preferences: ^2.2.2
   google_fonts: ^6.1.0
   json_annotation: ^4.8.1
+  http: ^1.2.0
+  firebase_storage: ^11.6.4
+  firebase_app_check: ^0.2.1+12
 
 dev_dependencies:
   flutter_test:

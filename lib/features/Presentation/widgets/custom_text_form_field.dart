@@ -8,6 +8,7 @@ class CustomTextFormField extends StatelessWidget {
   final TextEditingController controller;
   final bool enabled;
   final bool filled;
+  final String? Function(String?)? validator;
 
   const CustomTextFormField({
     this.filled = false,
@@ -15,7 +16,7 @@ class CustomTextFormField extends StatelessWidget {
     required this.label,
     required this.hint,
     required this.controller,
-    super.key,
+    super.key, this.validator,
   });
 
   @override
@@ -32,9 +33,17 @@ class CustomTextFormField extends StatelessWidget {
           height: 10,
         ),
         TextFormField(
+          validator: validator,
           enabled: enabled,
           controller: controller,
+          style: Theme.of(context)
+              .primaryTextTheme
+              .bodyMedium
+              ?.copyWith(
+                color: Color(0xff777777),
+                fontWeight: FontWeight.w500),
           decoration:InputDecoration(
+            
             focusedBorder: OutlineInputBorder(
               borderRadius:
                     BorderRadius.all(Radius.circular(10)),
@@ -73,7 +82,7 @@ class CustomTextFormField extends StatelessWidget {
             ),
             hintText: hint,
             fillColor: ColorAssets.klightgrey,
-          filled: !enabled,
+            filled: !enabled,
             hintStyle: Theme.of(context)
               .primaryTextTheme
               .bodyMedium

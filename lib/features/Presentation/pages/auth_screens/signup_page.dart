@@ -1,5 +1,4 @@
 import 'package:chat_app/common/constants/color_constants.dart';
-import 'package:chat_app/common/constants/routes.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_bloc.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_events.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_states.dart';
@@ -12,6 +11,7 @@ import 'package:chat_app/features/Presentation/pages/user_profile/profile_page.d
 import 'package:chat_app/features/Presentation/widgets/custom_phone_feild.dart';
 import 'package:chat_app/features/Presentation/widgets/custom_text_fields.dart';
 import 'package:chat_app/features/Presentation/widgets/horizontal_or_line.dart';
+import 'package:chat_app/features/Presentation/widgets/verify_otp_dialouge.dart';
 import 'package:chat_app/features/data/entity/user.dart';
 import 'package:chat_app/features/domain/usecase/firebase_firestore_usecase.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -72,7 +72,8 @@ class _SignUpPageState extends State<SignUpPage> {
                   context,
                   ProfilePage.profilepage,
                   arguments: UserDetails(
-                    displayName: state.user.displayName,
+                    firstName: state.user.displayName,
+                    lastName: state.user.displayName,
                     email: state.user.email,
                     imagepath: state.user.photoURL,
                     number: state.user.phoneNumber,
@@ -80,7 +81,6 @@ class _SignUpPageState extends State<SignUpPage> {
                 );
               }
 
-              
               if (!isClickedSignUpGoogle) {
                 Future.delayed(Duration(seconds: 1));
                 Navigator.pushNamed(
@@ -102,10 +102,39 @@ class _SignUpPageState extends State<SignUpPage> {
                   child: CircularProgressIndicator(),
                 );
               }
+              if (state is PhoneNumberVerifiedState) {
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) => verifyOtpDialouge(
+                          userNumber: userNumber,
+                          otpController: otpController,
+                          otpVerified: otpVerified,
+                          onAcceptPressed: () async {
+                            context.read<PhoneAuthenticationBloc>().add(
+                                VerifyOTPCodeEvent(
+                                    otpController.text, otpVerified));
+                          },
+                          onCancelPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ));
+              }
               if (state is PhoneAuthenticationSuccess) {
+                context.read<AuthenticationBloc>().add(
+                    EmailSignUpRequestedEvent(UserDetails(
+                        firstName: '',
+                        lastName: '',
+                        email: emailController.text,
+                        number: phoneController.text,
+                        password: passwordController.text)));
+
+                setState(() {
+                  isClickedSignUpGoogle = false;
+                });
                 otpVerified = true;
                 print("phone auth  Success");
               }
+
               if (state is PhoneAuthenticationFailure) {
                 ScaffoldMessenger.of(context)
                     .showSnackBar(SnackBar(content: Text(state.error)));
@@ -168,67 +197,11 @@ class _SignUpPageState extends State<SignUpPage> {
                             userNumber = val.completeNumber;
                           },
                           onsubmitted: (String) {
-                            if (otpFieldVisibility) {
-                              print(
-                                  "phone number is : ${phoneController.text}");
-                              context.read<PhoneAuthenticationBloc>().add(
-                                  VerifyOTPCodeEvent(
-                                      otpController.text, otpVerified));
-                            } else {
-                              context
-                                  .read<PhoneAuthenticationBloc>()
-                                  .add(VerifyPhoneNumberEvent(userNumber));
-                              setState(() {
-                                otpFieldVisibility = true;
-                              });
-                            }
                             FocusManager.instance.primaryFocus?.unfocus();
                           },
                         ),
                         SizedBox(
                           height: 16,
-                        ),
-                        Visibility(
-                          visible: otpFieldVisibility,
-                          child: TextFormField(
-                            onFieldSubmitted: (value) {
-                              context.read<PhoneAuthenticationBloc>().add(
-                                  VerifyOTPCodeEvent(
-                                      otpController.text, otpVerified));
-                            },
-                            controller: otpController,
-                            decoration: InputDecoration(
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(10)),
-                                  borderSide: BorderSide(
-                                      color: ColorAssets.neomBlack, width: 1),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(10)),
-                                  borderSide: BorderSide(
-                                      color: ColorAssets.neomBlack, width: 1),
-                                ),
-                                disabledBorder: OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(10)),
-                                  borderSide: BorderSide(
-                                      color: ColorAssets.neomBlack, width: 1),
-                                ),
-                                border: OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(10)),
-                                  borderSide: BorderSide(
-                                      color: ColorAssets.neomBlack, width: 1),
-                                ),
-                                contentPadding: EdgeInsets.only(
-                                    left: 20, right: 20, top: 0, bottom: 0),
-                                hintText: 'OTP',
-                                hintStyle: TextStyle(
-                                  color: Colors.grey,
-                                )),
-                          ),
                         ),
                         SizedBox(height: 20),
                         CustomTextFormField(
@@ -292,19 +265,15 @@ class _SignUpPageState extends State<SignUpPage> {
                               backgroundColor: MaterialStateProperty.all(
                                   ColorAssets.neomGold)),
                           onPressed: () async {
-                            // Validate the form before submitting
                             if (_formKey.currentState?.validate() ?? false) {
-                              context.read<AuthenticationBloc>().add(
-                                  EmailSignUpRequestedEvent(UserDetails(
-                                      displayName: '',
-                                      email: emailController.text,
-                                      number: phoneController.text,
-                                      password: passwordController.text)));
-                            }
+                              // verify phone number
+                              context
+                                  .read<PhoneAuthenticationBloc>()
+                                  .add(VerifyPhoneNumberEvent(userNumber));
 
-                            setState(() {
-                              isClickedSignUpGoogle = false;
-                            });
+                              // verify otp
+                            }
+                            // // Validate the form before submitting
                           },
                           child: Text(
                             "Sign Up",

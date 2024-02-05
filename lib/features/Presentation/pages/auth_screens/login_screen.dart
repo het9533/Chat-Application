@@ -3,7 +3,7 @@ import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_bloc
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_events.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_states.dart';
 import 'package:chat_app/features/Presentation/pages/auth_screens/signup_page.dart';
-import 'package:chat_app/features/Presentation/pages/homepage.dart';
+import 'package:chat_app/features/Presentation/pages/chat_screens/chat_home_page.dart';
 import 'package:chat_app/features/Presentation/widgets/custom_text_fields.dart';
 import 'package:chat_app/features/Presentation/widgets/horizontal_or_line.dart';
 import 'package:chat_app/features/data/entity/user.dart';
@@ -46,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
             }
             if (state is AuthenticationSuccess) {
               Future.delayed(Duration(seconds: 4));
-              Navigator.pushNamed(context, HomePage.homePage);
+              Navigator.pushNamed(context, ChatHomePage.chatHomePage);
             }
             if (state is AuthenticationFailure) {
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error),));
@@ -177,7 +177,7 @@ class _LoginPageState extends State<LoginPage> {
                           MaterialStateProperty.all(ColorAssets.neomGold),
                     ),
                     onPressed: () {
-                      context.read<AuthenticationBloc>().add(EmailSignInRequestedEvent(UserDetails(displayName: '', email: emailController.text, number: '', password: passwordController.text)));
+                      context.read<AuthenticationBloc>().add(EmailSignInRequestedEvent(UserDetails(firstName: '',lastName: '', email: emailController.text, number: '', password: passwordController.text)));
                     },
                     child: Text(
                       "Login",

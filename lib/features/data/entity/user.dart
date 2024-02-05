@@ -4,14 +4,16 @@ part 'user.g.dart';
 
 @JsonSerializable()
 class UserDetails {
-  String? displayName;
+  String? firstName;
+  String? lastName;
   String? email;
   String? number;
   String? password;
   String? imagepath;
 
   UserDetails(
-      {this.displayName,
+      {this.firstName,
+      this.lastName,
       this.email,
       this.number,
       this.password,

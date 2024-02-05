@@ -1,22 +1,29 @@
 import 'dart:io';
-
+import 'package:chat_app/common/constants/color_constants.dart';
+import 'package:chat_app/features/Presentation/pages/email_verification/account_success_screen.dart';
 import 'package:chat_app/features/Presentation/widgets/booking_button.dart';
 import 'package:chat_app/features/Presentation/widgets/customCircle_page.dart';
 import 'package:chat_app/features/Presentation/widgets/custom_text_form_field.dart';
 import 'package:chat_app/features/data/entity/user.dart';
+import 'package:chat_app/features/dependencyInjector/injector.dart';
+import 'package:chat_app/features/domain/usecase/firebase_firestore_usecase.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 class ProfilePage extends StatefulWidget {
   static const profilepage = 'profilepage';
   final UserDetails userDetails;
 
-  const ProfilePage({super.key, required this.userDetails});
+  const ProfilePage({Key? key, required this.userDetails}) : super(key: key);
 
   @override
   State<ProfilePage> createState() =>
@@ -30,60 +37,82 @@ class _ProfilePageState extends State<ProfilePage>
   TextEditingController firstnamecontroller = TextEditingController();
   TextEditingController lastnamecontroller = TextEditingController();
   TextEditingController emailnamecontroller = TextEditingController();
-  TextEditingController ssncontroller = TextEditingController();
+  TextEditingController phonenumbercontroller = TextEditingController();
+  firebase_storage.FirebaseStorage storage =
+      firebase_storage.FirebaseStorage.instance;
 
   final UserDetails userDetails;
-
-  File? _image;
-  String? myImagePath;
+  Uint8List? myImagePath;
+  String? myImageName;
+  final FirebaseFirestoreUseCase firebaseFirestoreUseCase =
+      sl<FirebaseFirestoreUseCase>();
 
   _ProfilePageState({required this.userDetails});
 
   @override
   void initState() {
+    initializeData();
     super.initState();
-    loadImage(userDetails);
   }
 
-  Future getImage(ImageSource source) async {
+  Future<void> pickImage(ImageSource source) async {
     try {
-      final XFile? imagePath = await ImagePicker().pickImage(source: source);
+      final XFile? imagePath =
+          await ImagePicker().pickImage(source: source);
       if (imagePath == null) return;
-
       final imagePermanent = await saveFilePermanently(imagePath);
-
       setState(() {
-        this._image = imagePermanent;
+        this.myImagePath = imagePermanent;
       });
     } on PlatformException catch (e) {
       print("error $e");
     }
   }
 
-  Future<File> saveFilePermanently(XFile imagePath) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  String convertUint8ListToString(Uint8List uint8list) {
+    return String.fromCharCodes(uint8list);
+  }
+
+  Future<Uint8List> saveFilePermanently(XFile imagePath) async {
     final directory = await getApplicationDocumentsDirectory();
     final file = File("${directory.path}/images/${imagePath.name}");
-
     await file.create(recursive: true);
     await file.writeAsBytes(await imagePath.readAsBytes());
-    userDetails.imagepath = file.path;
-    prefs.setString("profilImage", userDetails.imagepath!);
+    userDetails.imagepath = await imageUploadToFirebase(file);
+    myImagePath = await imagePath.readAsBytes();
+    myImageName = imagePath.name;
 
-    return file;
+    return myImagePath!;
   }
 
-  loadImage(UserDetails userDetails) async {
-    setState(() {
-      _image = File(userDetails.imagepath!);
-    });
+  Future<String> imageUploadToFirebase(File image) async {
+    FirebaseStorage storage = FirebaseStorage.instance;
+
+    final StorageReference =
+        storage.ref().child("UserProfile/user : ${userDetails.email}");
+
+    final file = StorageReference.putFile(image);
+
+    String imagePathUrl = await file.snapshot.ref.getDownloadURL();
+
+    return imagePathUrl;
   }
 
-  void DeleteAccountData() {
+  void DeleteAccountData() async {
     firstnamecontroller.text = "";
     lastnamecontroller.text = "";
     emailnamecontroller.text = "";
-    _image = null;
+  }
+
+  void initializeData() async {
+    firstnamecontroller.text = userDetails.firstName ?? "";
+    emailnamecontroller.text = userDetails.email ?? "";
+    lastnamecontroller.text = userDetails.lastName ?? "";
+    http.Response response =
+        await http.get(Uri.parse(userDetails.imagepath ?? ""));
+    myImagePath = response.bodyBytes;
+
+    setState(() {});
   }
 
   void DeleteAccountDialouge(BuildContext context) {
@@ -103,7 +132,8 @@ class _ProfilePageState extends State<ProfilePage>
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () async {
-              SharedPreferences prefs = await SharedPreferences.getInstance();
+              SharedPreferences prefs =
+                  await SharedPreferences.getInstance();
               DeleteAccountData();
               setState(() {
                 prefs.clear();
@@ -121,11 +151,11 @@ class _ProfilePageState extends State<ProfilePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: ColorAssets.neomCream,
       appBar: AppBar(
         scrolledUnderElevation: 0.0,
         elevation: 0.0,
-        backgroundColor: Colors.white,
+        backgroundColor: ColorAssets.neomCream,
         leading: IconButton(
           onPressed: () {},
           icon: Icon(
@@ -135,7 +165,6 @@ class _ProfilePageState extends State<ProfilePage>
         ),
         title: Text(
           editMode ? "Edit Profile" : "Profile",
-          
         ),
         centerTitle: true,
       ),
@@ -148,72 +177,75 @@ class _ProfilePageState extends State<ProfilePage>
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
                 child: Column(
                   children: [
-                    _image != null
-                        ? Container(
-                            height: 150,
-                            width: 150,
-                            decoration: BoxDecoration(
-                              image: DecorationImage(
-                                image: FileImage(_image!),
-                                fit: BoxFit.cover,
-                              ),
-                              shape: BoxShape.circle,
-                              border:
-                                  Border.all(width: 1.5, color: Colors.black),
-                            ),
-                            child: editMode
-                                ? Center(
-                                    child: Container(
-                                      width: 50,
-                                      height: 50,
-                                      decoration: BoxDecoration(
-                                        color: Colors.black.withOpacity(0.5),
-                                        shape: BoxShape.circle,
+                    if (myImagePath != null)
+                      Container(
+                        height: 150,
+                        width: 150,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: MemoryImage(myImagePath!),
+                            fit: BoxFit.cover,
+                          ),
+                          shape: BoxShape.circle,
+                          border:
+                              Border.all(width: 1.5, color: Colors.black),
+                        ),
+                        child: editMode
+                            ? Center(
+                                child: Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.5),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: InkWell(
+                                    onTap: () {
+                                      pickImage(ImageSource.gallery);
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(15),
+                                      child: SvgPicture.asset(
+                                        "assets/images/edit.svg",
                                       ),
-                                      child: InkWell(
-                                        onTap: () {
-                                          getImage(ImageSource.gallery);
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(15),
-                                          child: SvgPicture.asset(
-                                              "assets/images/edit.svg", color: Colors.white,),
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : null,
+                      )
+                    else
+                      Container(
+                        height: 150,
+                        width: 150,
+                        child: CustomPaint(
+                          child: editMode
+                              ? Center(
+                                  child: Container(
+                                    width: 50,
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.5),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: InkWell(
+                                      onTap: () {
+                                        pickImage(ImageSource.gallery);
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(15),
+                                        child: SvgPicture.asset(
+                                          "assets/images/edit.svg",
                                         ),
                                       ),
                                     ),
-                                  )
-                                : null,
-                          )
-                        : Container(
-                            height: 150,
-                            width: 150,
-                            child: CustomPaint(
-                              child: editMode
-                                  ? Center(
-                                      child: Container(
-                                        width: 50,
-                                        height: 50,
-                                        decoration: BoxDecoration(
-                                          color: Colors.black.withOpacity(0.5),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: InkWell(
-                                          onTap: () {
-                                            getImage(ImageSource.gallery);
-                                          },
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(15),
-                                            child: SvgPicture.asset(
-                                                "assets/images/edit.svg"),
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                  : null,
-                              painter: customCirclePainter(),
-                              size: Size(150, 150),
-                            ),
-                          ),
+                                  ),
+                                )
+                              : null,
+                          painter: customCirclePainter(),
+                          size: Size(150, 150),
+                        ),
+                      ),
                     SizedBox(
                       height: 30,
                     ),
@@ -221,8 +253,14 @@ class _ProfilePageState extends State<ProfilePage>
                       child: Column(
                         children: [
                           CustomTextFormField(
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'This field is required';
+                              }
+                              return null;
+                            },
                             label: "First name",
-                            hint: userDetails.displayName ?? "",
+                            hint: "First Name",
                             controller: firstnamecontroller,
                             enabled: editMode ? true : false,
                           ),
@@ -230,8 +268,14 @@ class _ProfilePageState extends State<ProfilePage>
                             height: 16,
                           ),
                           CustomTextFormField(
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'This field is required';
+                              }
+                              return null;
+                            },
                             label: "Last name",
-                            hint: userDetails.displayName ?? "",
+                            hint: "Last Name",
                             controller: lastnamecontroller,
                             enabled: editMode ? true : false,
                           ),
@@ -239,19 +283,31 @@ class _ProfilePageState extends State<ProfilePage>
                             height: 16,
                           ),
                           CustomTextFormField(
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'This field is required';
+                              }
+                              return null;
+                            },
                             label: "Email",
-                            hint: userDetails.email ?? "",
+                            hint: 'Email',
                             controller: emailnamecontroller,
-                            enabled: editMode ? true : false,
+                            enabled: false,
                           ),
                           SizedBox(
                             height: 16,
                           ),
                           CustomTextFormField(
-                            label: "Social security number",
-                            hint: '1997-07-14-0000',
-                            controller: ssncontroller,
-                            enabled: false,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'This field is required';
+                              }
+                              return null;
+                            },
+                            label: "Phone Number",
+                            hint: 'XXXXXXXXXX',
+                            controller: phonenumbercontroller,
+                            enabled: editMode ? true : false,
                           )
                         ],
                       ),
@@ -261,27 +317,80 @@ class _ProfilePageState extends State<ProfilePage>
               ),
             ),
           ),
-          rowBottomButtons(
-              FirstButtonText: editMode ? "Discard" : "Delete Account",
-              SecondButtonText: editMode ? "Save Changes" : "Edit Details",
-              OnSecondButtonPressed: () async {
-                if (editMode == false) {
-                  setState(() {
-                    editMode = true;
-                  });
+          RowBottomButtons(
+            FirstButtonText: editMode ? "Delete Account" : "Continue",
+            SecondButtonText: editMode ? "Save Changes" : "Edit Details",
+          
+            OnSecondButtonPressed: () async {
+              if (editMode == false) {
+                setState(() {
+                  editMode = true;
+                });
+              } else {
+                if (firstnamecontroller.text == '') {
+                  firstnamecontroller.text = userDetails.firstName!;
                 } else {
-                  setState(() {
-                    editMode = false;
-                    userDetails.displayName = firstnamecontroller.text;
-                    userDetails.email = emailnamecontroller.text;
-                  });
+                  firstnamecontroller.text = firstnamecontroller.text;
                 }
-              },
-              OnFirstButtonPressed: () {
-                editMode == false
-                    ? DeleteAccountDialouge(context)
-                    : Navigator.pop(context);
-              }),
+                if (lastnamecontroller.text == '') {
+                  lastnamecontroller.text = userDetails.lastName!;
+                } else {
+                  lastnamecontroller.text = lastnamecontroller.text;
+                }
+                if (emailnamecontroller.text == '') {
+                  emailnamecontroller.text = userDetails.email!;
+                } else {
+                  emailnamecontroller.text = emailnamecontroller.text;
+                }
+               
+
+                final user = FirebaseAuth.instance.currentUser!;
+
+                final bool docExist =
+                    await firebaseFirestoreUseCase.checkIfDocExists(user.uid);
+                if (docExist) {
+                  firebaseFirestoreUseCase.updateUser(UserDetails(
+                      firstName: firstnamecontroller.text,
+                      lastName: lastnamecontroller.text,
+                      email: emailnamecontroller.text,
+                      imagepath: userDetails.imagepath,
+                      number: phonenumbercontroller.text));
+                }
+
+                if (!docExist) {
+                  firebaseFirestoreUseCase.addUser(UserDetails(
+                      firstName: firstnamecontroller.text,
+                      lastName: lastnamecontroller.text,
+                      email: emailnamecontroller.text,
+                      imagepath: userDetails.imagepath,
+                      number: phonenumbercontroller.text));
+                }
+                
+               
+
+                setState(() {
+                  editMode = false;
+                });
+              }
+            },
+            OnFirstButtonPressed: () {
+            if (!editMode) {
+               if (phonenumbercontroller.text == '') {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Phone number is required'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                  return;
+                } else {
+                  Navigator.pushNamed(context, AccountCreatedSuccessScreen.accountCreatedSuccessScreen);
+                }
+            }else{
+              Navigator.pop(context);
+            }
+            },
+          ),
         ],
       ),
     );

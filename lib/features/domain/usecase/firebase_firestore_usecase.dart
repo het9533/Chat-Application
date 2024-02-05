@@ -11,6 +11,15 @@ Future<void> addUser(UserDetails params)async{
   return await firebaseFirestoreRepository.addUser(params); 
 }
 
+Future<void> updateUser(UserDetails params)async{
+  return await firebaseFirestoreRepository.addUser(params); 
+}
+Future<bool> checkIfDocExists(String docId) async{
+  return await firebaseFirestoreRepository.checkIfDocExists(docId);
+}
+Future<UserDetails> getCurrentUserDetails(String docID) {
+  return firebaseFirestoreRepository.getCurrentUserDetails(docID);
+}
 
 
 }

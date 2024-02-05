@@ -20,7 +20,7 @@ class PhoneAuthenticationBloc
 
       await authenticationRepository.verifyPhoneNumber(event.phoneNumber);
 
-      emit(PhoneAuthenticationSuccess());
+      emit(PhoneNumberVerifiedState());
     } catch (e) {
       emit(PhoneAuthenticationFailure('Failed to verify phone number'));
     }
