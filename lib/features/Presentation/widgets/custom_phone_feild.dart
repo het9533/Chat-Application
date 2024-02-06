@@ -12,10 +12,6 @@ class CustomPhoneFeild extends StatelessWidget {
   final TextEditingController controller;
   final Function(String)? onsubmitted;
   final Function(PhoneNumber)? onChanged;
-  
-  
-  
-
   const CustomPhoneFeild({
     
     required this.label,
@@ -42,7 +38,6 @@ class CustomPhoneFeild extends StatelessWidget {
           height: 10,
         ),
         Container(
-        
           child: IntlPhoneField(
           readOnly: isEnabled,
             onCountryChanged: (value) {

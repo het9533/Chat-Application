@@ -5,6 +5,7 @@ import 'package:chat_app/features/Presentation/widgets/booking_button.dart';
 import 'package:chat_app/features/Presentation/widgets/customCircle_page.dart';
 import 'package:chat_app/features/Presentation/widgets/custom_text_form_field.dart';
 import 'package:chat_app/features/data/entity/user.dart';
+import 'package:chat_app/features/data/entity/user_session.dart';
 import 'package:chat_app/features/dependencyInjector/injector.dart';
 import 'package:chat_app/features/domain/usecase/firebase_firestore_usecase.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -33,7 +34,7 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage>
     with SingleTickerProviderStateMixin {
   bool editMode = false;
-
+  final _userSession = sl<UserSession>();
   TextEditingController firstnamecontroller = TextEditingController();
   TextEditingController lastnamecontroller = TextEditingController();
   TextEditingController emailnamecontroller = TextEditingController();
@@ -108,6 +109,7 @@ class _ProfilePageState extends State<ProfilePage>
     firstnamecontroller.text = userDetails.firstName ?? "";
     emailnamecontroller.text = userDetails.email ?? "";
     lastnamecontroller.text = userDetails.lastName ?? "";
+    phonenumbercontroller.text = userDetails.number ??"";
     http.Response response =
         await http.get(Uri.parse(userDetails.imagepath ?? ""));
     myImagePath = response.bodyBytes;
@@ -157,7 +159,9 @@ class _ProfilePageState extends State<ProfilePage>
         elevation: 0.0,
         backgroundColor: ColorAssets.neomCream,
         leading: IconButton(
-          onPressed: () {},
+          onPressed: () {
+                          Navigator.pop(context);
+          },
           icon: Icon(
             CupertinoIcons.arrow_left,
             size: 30,
@@ -342,6 +346,11 @@ class _ProfilePageState extends State<ProfilePage>
                 } else {
                   emailnamecontroller.text = emailnamecontroller.text;
                 }
+                  if (phonenumbercontroller.text == '') {
+                  phonenumbercontroller.text = userDetails.number!;
+                } else {
+                  phonenumbercontroller.text = phonenumbercontroller.text;
+                }
                
 
                 final user = FirebaseAuth.instance.currentUser!;
@@ -366,6 +375,13 @@ class _ProfilePageState extends State<ProfilePage>
                       number: phonenumbercontroller.text));
                 }
                 
+                _userSession.userDetails = UserDetails(
+                  firstName: firstnamecontroller.text,
+                      lastName: lastnamecontroller.text,
+                      email: emailnamecontroller.text,
+                      imagepath: userDetails.imagepath,
+                      number: phonenumbercontroller.text
+                );
                
 
                 setState(() {
