@@ -2,8 +2,7 @@ import 'package:chat_app/common/constants/color_constants.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_bloc.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_events.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_states.dart';
-import 'package:chat_app/features/Presentation/pages/user_profile/profile_page.dart';
-import 'package:chat_app/features/data/entity/user.dart';
+import 'package:chat_app/features/Presentation/pages/chat_screens/chat_home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -63,13 +62,7 @@ class _AccountCreatedSuccessScreenState
                 Future.delayed(Duration(seconds: 1));
                 Navigator.pushNamed(
                   context,
-                  ProfilePage.profilepage,
-                  arguments: UserDetails(
-                    displayName: state.user.displayName,
-                    email: state.user.email,
-                    imagepath: state.user.photoURL,
-                    number: state.user.phoneNumber,
-                  ),
+                  ChatHomePage.chatHomePage
                 );
               }
 

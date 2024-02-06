@@ -10,20 +10,74 @@ class FirebaseFirestoreRepositoryImplement extends FirebaseFirestoreRepository {
   Future<void> addUser(UserDetails userDetails) async {
     try {
       final user = FirebaseAuth.instance.currentUser!;
-      final userID = user.uid; 
-
+      final userID = user.uid;
       users
-          .doc(userID) 
+          .doc(userID)
           .set({
             // Add user data
-            'Full Name': userDetails.displayName,
+            'First Name': "${userDetails.firstName}",
+            'Last Name' : "${userDetails.lastName}",
             'email': userDetails.email,
             'PhoneNumber': userDetails.number,
+            'Profile Photo': userDetails.imagepath,
           })
-          .then((value) => print("User Added : ${users.doc(userID).toString()}"))
+          .then(
+              (value) => print("User Added : ${users.doc(userID).toString()}"))
           .catchError((error) => print("Failed to add user: $error"));
     } catch (error) {
       print("Error adding user: $error");
+    }
+  }
+
+  Future<void> updateUser(UserDetails userDetails) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser!;
+      final userID = user.uid;
+      users
+          .doc(userID)
+          .update({
+            'First Name': "${userDetails.firstName}",
+            'Last Name' : "${userDetails.lastName}",
+            'email': userDetails.email,
+            'PhoneNumber': userDetails.number,
+            'Profile Photo': userDetails.imagepath,
+          })
+          .then(
+              (value) => print("User Added : ${users.doc(userID).toString()}"))
+          .catchError((error) => print("Failed to add user: $error"));
+    } catch (error) {
+      print("Error adding user: $error");
+    }
+  }
+
+  Future<UserDetails> getCurrentUserDetails(String docID){
+    try {
+      return users.doc(docID).get().then((value) {
+       return UserDetails(
+          email: value['email'],
+          firstName: value['First Name'],
+          lastName: value['Last Name'],
+          number: value['PhoneNumber'],
+          imagepath: value['Profile Photo'],
+        );
+      }).catchError((error) {
+         return error;
+      });
+    } catch (error) {
+      throw error;
+    }
+    
+  }
+
+  Future<bool> checkIfDocExists(String docId) async {
+    try {
+      var collectionRef =
+          FirebaseFirestore.instance.collection('collectionName');
+
+      var doc = await collectionRef.doc(docId).get();
+      return doc.exists;
+    } catch (e) {
+      throw e;
     }
   }
 }

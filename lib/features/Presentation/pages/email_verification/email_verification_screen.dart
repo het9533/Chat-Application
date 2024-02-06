@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chat_app/common/constants/color_constants.dart';
 import 'package:chat_app/features/Presentation/pages/email_verification/account_success_screen.dart';
+import 'package:chat_app/features/Presentation/pages/user_profile/profile_page.dart';
 import 'package:chat_app/features/data/entity/user.dart';
 import 'package:chat_app/features/domain/usecase/firebase_firestore_usecase.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,21 +11,20 @@ import 'package:flutter_svg/svg.dart';
 import 'package:page_transition/page_transition.dart';
 
 class VerifyEmailScreen extends StatefulWidget {
+  static const verifyemailscreen = 'verifyemailscreen';
 
-  static const  verifyemailscreen = 'verifyemailscreen';
-  
   final FirebaseFirestoreUseCase firebaseFirestoreUseCase;
-  
+
   const VerifyEmailScreen({super.key, required this.firebaseFirestoreUseCase});
 
   @override
-  State<VerifyEmailScreen> createState() => _VerifyEmailScreenState(firebaseFirestoreUseCase: firebaseFirestoreUseCase);
+  State<VerifyEmailScreen> createState() => _VerifyEmailScreenState(
+      firebaseFirestoreUseCase: firebaseFirestoreUseCase);
 }
 
 class _VerifyEmailScreenState extends State<VerifyEmailScreen>
-    with TickerProviderStateMixin,WidgetsBindingObserver {
-final user = FirebaseAuth.instance.currentUser!;
- final FirebaseFirestoreUseCase firebaseFirestoreUseCase;
+    with TickerProviderStateMixin, WidgetsBindingObserver {
+  final FirebaseFirestoreUseCase firebaseFirestoreUseCase;
   late AnimationController controller;
   late bool isClicked = false;
   bool isEmailVerified = false;
@@ -32,18 +32,16 @@ final user = FirebaseAuth.instance.currentUser!;
 
   _VerifyEmailScreenState({required this.firebaseFirestoreUseCase});
 
-void didChangeAppLifecycleState(AppLifecycleState state) async {
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.inactive) {
+      print('app inactive MINIMIZED!');
 
-  if (state == AppLifecycleState.inactive ) {
-    
-    
-       print('app inactive MINIMIZED!');
-    
-    // print('app inactive in lock screen!');
-  } else if (state == AppLifecycleState.resumed) {
-    print('app resumed');
+      // print('app inactive in lock screen!');
+    } else if (state == AppLifecycleState.resumed) {
+      print('app resumed');
+    }
   }
-}
+
   @override
   void initState() {
     isClicked = false;
@@ -59,19 +57,29 @@ void didChangeAppLifecycleState(AppLifecycleState state) async {
     }
     super.initState();
   }
- 
+
+  final user = FirebaseAuth.instance.currentUser!;
   Future checkEmailVerified() async {
     await FirebaseAuth.instance.currentUser?.reload();
 
     setState(() {
       isEmailVerified = FirebaseAuth.instance.currentUser!.emailVerified;
     });
-    if (isEmailVerified){
-       
+    if (isEmailVerified) {
       timer.cancel();
-      
-      //firebase firestore
-      firebaseFirestoreUseCase.addUser(UserDetails(displayName: user.displayName, email: user.email, number: user.phoneNumber, password: ''));
+
+      //Navigate to Profile Page
+
+      Navigator.pushNamed(
+        context,
+        ProfilePage.profilepage,
+        arguments: UserDetails(
+          email: user.email ?? null,
+          number: user.phoneNumber ?? null,
+        ),
+      );
+
+      // firebaseFirestoreUseCase.addUser(UserDetails(displayName: user.displayName, email: user.email, number: user.phoneNumber, password: ''));
     }
   }
 
@@ -95,8 +103,6 @@ void didChangeAppLifecycleState(AppLifecycleState state) async {
 
   @override
   Widget build(BuildContext context) {
-    
-
     return isEmailVerified
         ? AccountCreatedSuccessScreen()
         : Scaffold(
@@ -122,7 +128,7 @@ void didChangeAppLifecycleState(AppLifecycleState state) async {
                     },
                   ),
                   SizedBox(
-                    height: 16,
+                    height: 30,
                   ),
                   Text(
                     "Verify your email address!",
