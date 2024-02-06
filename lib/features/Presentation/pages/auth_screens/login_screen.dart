@@ -4,17 +4,18 @@ import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_even
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_states.dart';
 import 'package:chat_app/features/Presentation/pages/auth_screens/signup_page.dart';
 import 'package:chat_app/features/Presentation/pages/chat_screens/chat_home_page.dart';
+import 'package:chat_app/features/Presentation/pages/user_profile/profile_page.dart';
 import 'package:chat_app/features/Presentation/widgets/custom_text_fields.dart';
 import 'package:chat_app/features/Presentation/widgets/horizontal_or_line.dart';
 import 'package:chat_app/features/data/entity/user.dart';
 import 'package:chat_app/features/dependencyInjector/injector.dart';
 import 'package:chat_app/features/domain/usecase/firebase_firestore_usecase.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LoginPage extends StatefulWidget {
-
   static const loginpage = 'LoginPage';
 
   const LoginPage({Key? key}) : super(key: key);
@@ -28,10 +29,18 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController passwordController = TextEditingController();
   bool agree = false;
   bool obSecureText = true;
-
+  bool isLoginWithGoogle = false;
+  bool userExist = false;
 
   final FirebaseFirestoreUseCase firebaseFirestoreUseCase =
       sl<FirebaseFirestoreUseCase>();
+
+  Future<bool> checkUserExist() async {
+    final user = FirebaseAuth.instance.currentUser!;
+    userExist = await firebaseFirestoreUseCase.checkIfDocExists(user.uid);
+    setState(() {});
+    return userExist;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,12 +54,27 @@ class _LoginPageState extends State<LoginPage> {
               );
             }
             if (state is AuthenticationSuccess) {
-              Future.delayed(Duration(seconds: 4));
-              Navigator.pushNamed(context, ChatHomePage.chatHomePage);
+              if (isLoginWithGoogle) {
+                if (state.isUserExist) {
+                  Navigator.pushNamed(context, ChatHomePage.chatHomePage);
+                } else {
+                  Navigator.pushNamed(context, ProfilePage.profilepage,
+                      arguments: UserDetails(
+                        email: state.user.email,
+                        firstName: state.user.displayName,
+                        imagepath: state.user.photoURL,
+                        number: state.user.phoneNumber,
+                      ));
+                }
+              }
+              if (!isLoginWithGoogle) {
+                Navigator.pushNamed(context, ChatHomePage.chatHomePage);
+              }
             }
             if (state is AuthenticationFailure) {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error),));
-              
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text(state.error),
+              ));
             }
           },
           child: Padding(
@@ -102,7 +126,6 @@ class _LoginPageState extends State<LoginPage> {
                         label: "Password",
                         hint: "Enter your password",
                         controller: passwordController,
-                        
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your password';
@@ -177,12 +200,22 @@ class _LoginPageState extends State<LoginPage> {
                           MaterialStateProperty.all(ColorAssets.neomGold),
                     ),
                     onPressed: () {
-                      context.read<AuthenticationBloc>().add(EmailSignInRequestedEvent(UserDetails(firstName: '',lastName: '', email: emailController.text, number: '', password: passwordController.text)));
+                      context.read<AuthenticationBloc>().add(
+                          EmailSignInRequestedEvent(UserDetails(
+                              firstName: '',
+                              lastName: '',
+                              email: emailController.text,
+                              number: '',
+                              password: passwordController.text)));
+
+                      setState(() {
+                        isLoginWithGoogle = false;
+                      });
                     },
                     child: Text(
                       "Login",
-                      style:
-                          TextStyle(color: ColorAssets.neomBlack2, fontSize: 15),
+                      style: TextStyle(
+                          color: ColorAssets.neomBlack2, fontSize: 15),
                     ),
                   ),
                 ),
@@ -203,8 +236,14 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    onPressed: () {
-                      
+                    onPressed: () async {
+                      setState(() {
+                        isLoginWithGoogle = true;
+                      });
+
+                      context
+                          .read<AuthenticationBloc>()
+                          .add(GoogleSignInRequestedEvent());
                     },
                     icon: Image.asset(
                       "assets/images/google_icon.png",
@@ -220,8 +259,9 @@ class _LoginPageState extends State<LoginPage> {
       ),
       bottomNavigationBar: TextButton(
         onPressed: () {
-          Navigator.pushNamed(context, SignUpPage.signuppage,
-              arguments: {'firebaseFirestoreUseCase': firebaseFirestoreUseCase});
+          Navigator.pushNamed(context, SignUpPage.signuppage, arguments: {
+            'firebaseFirestoreUseCase': firebaseFirestoreUseCase
+          });
         },
         child: Text(
           "Don't have an account? Sign Up",

@@ -52,28 +52,20 @@ class _AccountCreatedSuccessScreenState
       ),
       body: BlocListener<AuthenticationBloc, AuthenticationState>(
         listener: (context, state) {
-         if (state is AuthenticationLoading) {
-              Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-            if (state is AuthenticationSuccess) {
-              
-                Future.delayed(Duration(seconds: 1));
-                Navigator.pushNamed(
-                  context,
-                  ChatHomePage.chatHomePage
-                );
-              }
+          if (state is AuthenticationLoading) {
+            Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          if (state is AuthenticationSuccess) {
+            Future.delayed(Duration(seconds: 1));
+            Navigator.pushNamed(context, ChatHomePage.chatHomePage);
+          }
 
-              
-              
-              
-
-            if (state is AuthenticationFailure) {
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(content: Text(state.error)));
-            }
+          if (state is AuthenticationFailure) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text(state.error)));
+          }
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -128,9 +120,9 @@ class _AccountCreatedSuccessScreenState
                         backgroundColor:
                             MaterialStateProperty.all(ColorAssets.neomGold)),
                     onPressed: () async {
-                      context.read<AuthenticationBloc>().add(AuthentticatedUserEvent());
-                      
-                      
+                      context
+                          .read<AuthenticationBloc>()
+                          .add(AuthentticatedUserEvent());
                     },
                     child: Text(
                       "Continue",
