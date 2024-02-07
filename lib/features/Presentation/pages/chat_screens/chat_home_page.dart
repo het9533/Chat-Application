@@ -82,7 +82,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
           }))
         ],
       ),
-      bottomNavigationBar: FloatingNavigationBar(
+      bottomNavigationBar: FloatingNavigationBar(  
         backgroundColor: Colors.white,
         barHeight: 60.0,
         barWidth: double.infinity,
