@@ -2,6 +2,7 @@
 import 'package:chat_app/common/constants/color_constants.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_bloc.dart';
 import 'package:chat_app/features/Presentation/Bloc/phone_authentication_bloc/phone_authentication_bloc.dart';
+import 'package:chat_app/features/Presentation/Bloc/profile_page_bloc/profile_page_bloc.dart';
 import 'package:chat_app/features/Presentation/pages/auth_screens/welcome_screen.dart';
 import 'package:chat_app/features/Presentation/pages/chat_screens/home_page.dart';
 import 'package:chat_app/features/dependencyInjector/injector.dart';
@@ -35,6 +36,9 @@ class MyApp extends StatelessWidget {
           create: (BuildContext context) => sl(),
         ),
         BlocProvider<PhoneAuthenticationBloc>(
+          create: (BuildContext context) => sl(),
+        ),
+        BlocProvider<ProfilePageBloc>(
           create: (BuildContext context) => sl(),
         ),
       ],

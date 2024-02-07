@@ -17,3 +17,4 @@ class AuthenticationFailure extends AuthenticationState {
 
   AuthenticationFailure(this.error);
 }
+class LogoutSucessState extends AuthenticationState{}

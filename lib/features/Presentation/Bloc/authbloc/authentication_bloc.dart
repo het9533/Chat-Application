@@ -71,7 +71,7 @@ void _onAuthentticatedUser(AuthentticatedUserEvent event, Emitter<Authentication
       print(">>>>>>>>>>>>>>>>$isUserExist<<<<<<<<<<<<");
 
       
-      userOption.fold((l,) => emit(AuthenticationSuccess(l,isUserExist)), (r) => emit(AuthenticationFailure("Error signing in with Google")));
+      userOption.fold((l) => emit(AuthenticationSuccess(l,isUserExist)), (r) => emit(AuthenticationFailure("Error signing in with Google")));
       // userOption.fold(
       //   (user) => emit(AuthenticationSuccess(user)),
       //    (error) => emit(AuthenticationFailure("Error signing in with Google")),

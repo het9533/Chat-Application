@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chat_app/features/data/entity/user.dart';
 import 'package:chat_app/features/domain/repository/authentication_repository.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -18,6 +19,9 @@ class AuthenticationRepositoryImplementation extends AuthenticationRepository {
   // signin with google 
   @override
   Future<Either<User, String>> signInWithGoogle(UserDetails userDetails) async {
+    await _googleSignIn.signOut();
+      await FirebaseFirestore.instance.clearPersistence();
+      await FirebaseAuth.instance.signOut();
     final GoogleSignInAccount? googleSignInAccount =
         await _googleSignIn.signIn();
 
@@ -104,7 +108,9 @@ class AuthenticationRepositoryImplementation extends AuthenticationRepository {
     try {
       print(user?.uid);
       await _googleSignIn.signOut();
+      await FirebaseFirestore.instance.clearPersistence();
       await FirebaseAuth.instance.signOut();
+   
     } on Exception catch (e) {
       print(e.toString());
       return false;
