@@ -2,7 +2,7 @@ import 'package:chat_app/common/constants/color_constants.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_bloc.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_events.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_states.dart';
-import 'package:chat_app/features/Presentation/pages/chat_screens/chat_home_page.dart';
+import 'package:chat_app/features/Presentation/pages/chat_screens/chat_home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -52,20 +52,24 @@ class _AccountCreatedSuccessScreenState
       ),
       body: BlocListener<AuthenticationBloc, AuthenticationState>(
         listener: (context, state) {
-          if (state is AuthenticationLoading) {
-            Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-          if (state is AuthenticationSuccess) {
-            Future.delayed(Duration(seconds: 1));
-            Navigator.pushNamed(context, ChatHomePage.chatHomePage);
-          }
+         if (state is AuthenticationLoading) {
+              Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            if (state is AuthenticationSuccess) {
+              
+                Future.delayed(Duration(seconds: 1));
+                Navigator.pushNamed(
+                  context,
+                  ChatHomePage.chatHomePage
+                );
+              }
 
-          if (state is AuthenticationFailure) {
-            ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text(state.error)));
-          }
+            if (state is AuthenticationFailure) {
+              ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(state.error)));
+            }
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -120,9 +124,9 @@ class _AccountCreatedSuccessScreenState
                         backgroundColor:
                             MaterialStateProperty.all(ColorAssets.neomGold)),
                     onPressed: () async {
-                      context
-                          .read<AuthenticationBloc>()
-                          .add(AuthentticatedUserEvent());
+                      context.read<AuthenticationBloc>().add(AuthentticatedUserEvent());
+                      
+                      
                     },
                     child: Text(
                       "Continue",

@@ -3,7 +3,7 @@ import 'package:chat_app/common/constants/color_constants.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_bloc.dart';
 import 'package:chat_app/features/Presentation/Bloc/phone_authentication_bloc/phone_authentication_bloc.dart';
 import 'package:chat_app/features/Presentation/pages/auth_screens/welcome_screen.dart';
-import 'package:chat_app/features/Presentation/pages/chat_screens/chat_home_page.dart';
+import 'package:chat_app/features/Presentation/pages/chat_screens/home_page.dart';
 import 'package:chat_app/features/dependencyInjector/injector.dart';
 import 'package:chat_app/firebase_options.dart';
 import 'package:chat_app/common/constants/routes.dart';
@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
           scaffoldBackgroundColor: ColorAssets.neomCream,
         ),
         onGenerateRoute: AppNavigator.materialAppsRoute,
-        initialRoute: user != null ? ChatHomePage.chatHomePage : WelcomeScreen.welcomescreen,
+        initialRoute: user != null ? ChatMainScreen.chatMainScreen : WelcomeScreen.welcomescreen,
       ),
     );
   }

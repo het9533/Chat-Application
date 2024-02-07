@@ -3,7 +3,7 @@ import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_bloc
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_events.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_states.dart';
 import 'package:chat_app/features/Presentation/pages/auth_screens/signup_page.dart';
-import 'package:chat_app/features/Presentation/pages/chat_screens/chat_home_page.dart';
+import 'package:chat_app/features/Presentation/pages/chat_screens/chat_home.dart';
 import 'package:chat_app/features/Presentation/pages/user_profile/profile_page.dart';
 import 'package:chat_app/features/Presentation/widgets/custom_text_fields.dart';
 import 'package:chat_app/features/Presentation/widgets/horizontal_or_line.dart';
@@ -251,6 +251,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     label: Text("Login With Google"),
                   ),
+
                 ),
               ],
             ),

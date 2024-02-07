@@ -1,7 +1,8 @@
 import 'package:chat_app/features/Presentation/pages/auth_screens/login_screen.dart';
 import 'package:chat_app/features/Presentation/pages/auth_screens/signup_page.dart';
 import 'package:chat_app/features/Presentation/pages/auth_screens/welcome_screen.dart';
-import 'package:chat_app/features/Presentation/pages/chat_screens/chat_home_page.dart';
+import 'package:chat_app/features/Presentation/pages/chat_screens/chat_home.dart';
+import 'package:chat_app/features/Presentation/pages/chat_screens/home_page.dart';
 import 'package:chat_app/features/Presentation/pages/email_verification/account_success_screen.dart';
 import 'package:chat_app/features/Presentation/pages/email_verification/email_verification_screen.dart';
 import 'package:chat_app/features/Presentation/pages/user_profile/profile_page.dart';
@@ -50,6 +51,11 @@ class AppNavigator {
         case ChatHomePage.chatHomePage:
         return MaterialPageRoute(
           builder: (context) => ChatHomePage(
+              ),
+        );
+        case ChatMainScreen.chatMainScreen:
+        return MaterialPageRoute(
+          builder: (context) => ChatMainScreen(
               ),
         );
 

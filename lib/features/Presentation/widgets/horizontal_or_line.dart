@@ -9,8 +9,6 @@ class HorizontalOrLine extends StatelessWidget {
     required this.height,
   });
 
-
-
   @override
   Widget build(BuildContext context) {
 
