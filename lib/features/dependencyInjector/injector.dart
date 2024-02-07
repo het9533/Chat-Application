@@ -1,5 +1,6 @@
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_bloc.dart';
 import 'package:chat_app/features/Presentation/Bloc/phone_authentication_bloc/phone_authentication_bloc.dart';
+import 'package:chat_app/features/data/entity/user_session.dart';
 import 'package:chat_app/features/data/repository/authentication_repository_impl.dart';
 import 'package:chat_app/features/data/repository/firebase_firestore_repository_impl.dart';
 import 'package:chat_app/features/domain/repository/authentication_repository.dart';
@@ -29,12 +30,12 @@ Future<void> setup() async {
       () => FirebaseFirestoreUseCase(firebaseFirestoreRepository: sl()));
 
   // model
-
+  sl.registerSingleton(UserSession());
   /// Use-Cases For All the APIs resting in Data Layer
   // sl.registerLazySingleton(() => LoginUseCase(sl()));
 
   /// Blocs for State-Management
-  sl.registerSingleton(AuthenticationBloc(authenticationRepository: sl()));
+  sl.registerSingleton(AuthenticationBloc(authenticationRepository: sl<AuthenticationRepository>(), firebaseFirestoreUseCase: sl<FirebaseFirestoreUseCase>()));
     sl.registerSingleton(PhoneAuthenticationBloc(authenticationRepository: sl()));
   // sl.registerFactory(() => ClipboardBloc(sl(), sl()));
   // sl.registerLazySingleton(() => ChatBotBloc(sl()));

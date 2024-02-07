@@ -16,7 +16,7 @@ class FirebaseFirestoreRepositoryImplement extends FirebaseFirestoreRepository {
           .set({
             // Add user data
             'First Name': "${userDetails.firstName}",
-            'Last Name' : "${userDetails.lastName}",
+            'Last Name': "${userDetails.lastName}",
             'email': userDetails.email,
             'PhoneNumber': userDetails.number,
             'Profile Photo': userDetails.imagepath,
@@ -37,7 +37,7 @@ class FirebaseFirestoreRepositoryImplement extends FirebaseFirestoreRepository {
           .doc(userID)
           .update({
             'First Name': "${userDetails.firstName}",
-            'Last Name' : "${userDetails.lastName}",
+            'Last Name': "${userDetails.lastName}",
             'email': userDetails.email,
             'PhoneNumber': userDetails.number,
             'Profile Photo': userDetails.imagepath,
@@ -50,10 +50,10 @@ class FirebaseFirestoreRepositoryImplement extends FirebaseFirestoreRepository {
     }
   }
 
-  Future<UserDetails> getCurrentUserDetails(String docID){
+  Future<UserDetails> getCurrentUserDetails(String docID) {
     try {
       return users.doc(docID).get().then((value) {
-       return UserDetails(
+        return UserDetails(
           email: value['email'],
           firstName: value['First Name'],
           lastName: value['Last Name'],
@@ -61,18 +61,16 @@ class FirebaseFirestoreRepositoryImplement extends FirebaseFirestoreRepository {
           imagepath: value['Profile Photo'],
         );
       }).catchError((error) {
-         return error;
+        return error;
       });
     } catch (error) {
       throw error;
     }
-    
   }
 
   Future<bool> checkIfDocExists(String docId) async {
     try {
-      var collectionRef =
-          FirebaseFirestore.instance.collection('collectionName');
+      var collectionRef = FirebaseFirestore.instance.collection('users');
 
       var doc = await collectionRef.doc(docId).get();
       return doc.exists;

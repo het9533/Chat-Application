@@ -2,7 +2,7 @@ import 'package:chat_app/common/constants/color_constants.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_bloc.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_events.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_states.dart';
-import 'package:chat_app/features/Presentation/pages/chat_screens/chat_home_page.dart';
+import 'package:chat_app/features/Presentation/pages/chat_screens/chat_home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -66,13 +66,9 @@ class _AccountCreatedSuccessScreenState
                 );
               }
 
-              
-              
-              
-
             if (state is AuthenticationFailure) {
               ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(content: Text(state.error)));
+              .showSnackBar(SnackBar(content: Text(state.error)));
             }
         },
         child: Padding(
