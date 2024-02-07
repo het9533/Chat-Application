@@ -22,7 +22,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
       sl<FirebaseFirestoreUseCase>();
   final user = FirebaseAuth.instance.currentUser;
   int currentIndex = 0;
-   
+
 
   @override
   void initState() {
@@ -35,10 +35,10 @@ class _ChatHomePageState extends State<ChatHomePage> {
         await firebaseFirestoreUseCase.getCurrentUserDetails(user!.uid);
     setState(() {});
   }
- 
+
   @override
   Widget build(BuildContext context) {
- 
+
     return Scaffold(
       body:   CustomScrollView(
         slivers: <Widget>[
@@ -54,4 +54,3 @@ class _ChatHomePageState extends State<ChatHomePage> {
     );
   }
 }
-
