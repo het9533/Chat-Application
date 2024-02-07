@@ -68,7 +68,7 @@ class _SignUpPageState extends State<SignUpPage> {
             if (state is AuthenticationSuccess) {
               if (isClickedSignUpGoogle) {
                 Future.delayed(Duration(seconds: 1));
-                Navigator.pushReplacementNamed(
+                Navigator.pushNamed(
                   context,
                   ProfilePage.profilepage,
                   arguments: UserDetails(
@@ -299,11 +299,13 @@ class _SignUpPageState extends State<SignUpPage> {
                             ),
                           ),
                           onPressed: () async {
-                            
                             context
                                 .read<AuthenticationBloc>()
                                 .add(GoogleSignInRequestedEvent());
-                            
+
+                            setState(() {
+                              isClickedSignUpGoogle = true;
+                            });
                           },
                           icon: Image.asset(
                             "assets/images/google_icon.png",

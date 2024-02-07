@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:chat_app/features/data/entity/user.dart';
 import 'package:chat_app/features/domain/repository/authentication_repository.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -11,17 +10,14 @@ class AuthenticationRepositoryImplementation extends AuthenticationRepository {
 
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
-  User? user;
+   User? user;
     String receivedVerificationId = ''; 
 
 
   // signin with google 
   @override
-  Future<Either<User, String>> signInWithGoogle(UserDetails userDetails) async {
-    await _googleSignIn.signOut();
-      await FirebaseFirestore.instance.clearPersistence();
-      await FirebaseAuth.instance.signOut();
+  Future<Either<User, String>> signInWithGoogle() async {
+    final GoogleSignIn _googleSignIn = GoogleSignIn();
     final GoogleSignInAccount? googleSignInAccount =
         await _googleSignIn.signIn();
 
@@ -38,7 +34,8 @@ class AuthenticationRepositoryImplementation extends AuthenticationRepository {
         final UserCredential userCredential =
             await _auth.signInWithCredential(credential);
 
-        user = userCredential.user!;
+        user = userCredential.user;
+        print(user);
       } on FirebaseAuthException catch (e) {
         if (e.code == 'account-exists-with-different-credential') {
           return Right(e.code);
@@ -107,9 +104,6 @@ class AuthenticationRepositoryImplementation extends AuthenticationRepository {
   Future<bool> signout() async {
     try {
       print(user?.uid);
-      await _googleSignIn.signOut();
-      await FirebaseFirestore.instance.clearPersistence();
-      await FirebaseAuth.instance.signOut();
    
     } on Exception catch (e) {
       print(e.toString());

@@ -13,8 +13,8 @@ class AuthenticationUseCase {
 
   
 
-  Future<Either<User,String>> signInWithGoogle(UserDetails params) async {
-    return await authenticationRepository.signInWithGoogle(params);
+  Future<Either<User,String>> signInWithGoogle() async {
+    return await authenticationRepository.signInWithGoogle();
   }
    Future<bool> signout() async {
     return await authenticationRepository.signout();

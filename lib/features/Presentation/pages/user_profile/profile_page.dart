@@ -175,7 +175,7 @@ class _ProfilePageState extends State<ProfilePage>
             Center(child: CircularProgressIndicator());
           }
           if (state is ProfileLoadedState) {
-            initializeData();
+            
           }
           if (state is ProfileErrorState) {
             

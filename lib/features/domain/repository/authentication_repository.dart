@@ -6,7 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 abstract class AuthenticationRepository {
 
-Future<Either<User, String>> signInWithGoogle(UserDetails userDetails);
+Future<Either<User, String>> signInWithGoogle();
 
 Future<bool> signout();
 

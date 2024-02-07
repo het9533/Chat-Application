@@ -57,21 +57,13 @@ void _onAuthentticatedUser(AuthentticatedUserEvent event, Emitter<Authentication
       GoogleSignInRequestedEvent event, Emitter<AuthenticationState> emit,) async {
     emit(AuthenticationLoading());
     try {
+ 
+      final Either<User, String> userOption = await authenticationRepository.signInWithGoogle();
       final user = FirebaseAuth.instance.currentUser;
-      
-      final Either<User, String>  userOption = await authenticationRepository.signInWithGoogle(UserDetails(
-        firstName: user?.displayName,
-        lastName: user?.displayName,
-        email: user?.email,
-        imagepath: user?.photoURL,
-        number: user?.phoneNumber,
-      ));
-      final bool isUserExist = await firebaseFirestoreUseCase.checkIfDocExists(user!.uid);
-
+      print(user?.displayName);
+      var isUserExist = await firebaseFirestoreUseCase.checkIfDocExists(user!.uid);
       print(">>>>>>>>>>>>>>>>$isUserExist<<<<<<<<<<<<");
-
-      
-      userOption.fold((l) => emit(AuthenticationSuccess(l,isUserExist)), (r) => emit(AuthenticationFailure("Error signing in with Google")));
+      userOption.fold((l,) => emit(AuthenticationSuccess(l,isUserExist)), (r) => emit(AuthenticationFailure("Error signing in with Google")));
       // userOption.fold(
       //   (user) => emit(AuthenticationSuccess(user)),
       //    (error) => emit(AuthenticationFailure("Error signing in with Google")),
