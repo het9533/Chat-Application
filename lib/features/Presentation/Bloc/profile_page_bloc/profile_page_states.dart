@@ -1,5 +1,4 @@
 import 'package:chat_app/features/data/entity/user.dart';
-import 'package:chat_app/features/data/entity/user_session.dart';
 
 abstract class ProfilePageState {}
 class ProfilePageInitial extends ProfilePageState {}

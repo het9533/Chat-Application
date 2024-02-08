@@ -6,6 +6,7 @@ import 'package:chat_app/features/Presentation/Bloc/phone_authentication_bloc/ph
 import 'package:chat_app/features/Presentation/Bloc/phone_authentication_bloc/phone_authentication_events.dart';
 import 'package:chat_app/features/Presentation/Bloc/phone_authentication_bloc/phone_authentication_states.dart';
 import 'package:chat_app/features/Presentation/pages/auth_screens/login_screen.dart';
+import 'package:chat_app/features/Presentation/pages/chat_screens/home_page.dart';
 import 'package:chat_app/features/Presentation/pages/email_verification/email_verification_screen.dart';
 import 'package:chat_app/features/Presentation/pages/user_profile/profile_page.dart';
 import 'package:chat_app/features/Presentation/widgets/custom_phone_feild.dart';
@@ -67,7 +68,10 @@ class _SignUpPageState extends State<SignUpPage> {
             }
             if (state is AuthenticationSuccess) {
               if (isClickedSignUpGoogle) {
-                Future.delayed(Duration(seconds: 1));
+                if (state.isUserExist) {
+                  Navigator.pushNamed(context, ChatMainScreen.chatMainScreen);
+                }else{
+                  Future.delayed(Duration(seconds: 1));
                 Navigator.pushNamed(
                   context,
                   ProfilePage.profilepage,
@@ -79,6 +83,8 @@ class _SignUpPageState extends State<SignUpPage> {
                     number: state.user.phoneNumber,
                   ),
                 );
+                }
+                
               }
 
               if (!isClickedSignUpGoogle) {

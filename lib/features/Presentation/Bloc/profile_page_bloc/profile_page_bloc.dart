@@ -27,6 +27,7 @@ class ProfilePageBloc extends Bloc<ProfilePageEvents, ProfilePageState> {
           await firebaseFirestoreUseCase.getCurrentUserDetails(user!.uid);
       emit(ProfileLoadedState(
           userDetails: UserDetails(
+        userId: _userSession.userDetails!.userId ?? "",
         email: _userSession.userDetails!.email ?? "",
         firstName: _userSession.userDetails!.firstName ?? "",
         lastName: _userSession.userDetails!.lastName ?? "",
@@ -43,6 +44,7 @@ class ProfilePageBloc extends Bloc<ProfilePageEvents, ProfilePageState> {
       UpdateUserDetailsEvent event, Emitter<ProfilePageState> emit) async {
     try {
       await firebaseFirestoreUseCase.updateUser(UserDetails(
+          userId: event.userDetails.userId,
           email: event.userDetails.email,
           firstName: event.userDetails.firstName,
           lastName: event.userDetails.lastName,
@@ -52,6 +54,7 @@ class ProfilePageBloc extends Bloc<ProfilePageEvents, ProfilePageState> {
 
       emit(ProfileLoadedState(
           userDetails: UserDetails(
+            userId: event.userDetails.userId,
               email: event.userDetails.email,
               firstName: event.userDetails.firstName,
               lastName: event.userDetails.lastName,
@@ -94,6 +97,7 @@ class ProfilePageBloc extends Bloc<ProfilePageEvents, ProfilePageState> {
           await firebaseFirestoreUseCase.checkIfDocExists(user.uid);
       if (docExist) {
         firebaseFirestoreUseCase.updateUser(UserDetails(
+          userId: event.userDetails.userId,
             email: event.userDetails.email,
             firstName: event.userDetails.firstName,
             lastName: event.userDetails.lastName,
@@ -104,6 +108,7 @@ class ProfilePageBloc extends Bloc<ProfilePageEvents, ProfilePageState> {
 
       if (!docExist) {
         firebaseFirestoreUseCase.addUser(UserDetails(
+          userId: event.userDetails.userId,
             email: event.userDetails.email,
             firstName: event.userDetails.firstName,
             lastName: event.userDetails.lastName,
@@ -114,6 +119,7 @@ class ProfilePageBloc extends Bloc<ProfilePageEvents, ProfilePageState> {
 
       emit(ChangesSavedState(
           userDetails: _userSession.userDetails = UserDetails(
+            userId: event.userDetails.userId,
               email: event.userDetails.email,
               firstName: event.userDetails.firstName,
               lastName: event.userDetails.lastName,

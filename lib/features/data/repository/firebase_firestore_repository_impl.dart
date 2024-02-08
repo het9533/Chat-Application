@@ -3,6 +3,80 @@ import 'package:chat_app/features/domain/repository/firebase_firestore_repositor
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+// class FirebaseFirestoreRepositoryImplement extends FirebaseFirestoreRepository {
+//   FirebaseFirestore firestore = FirebaseFirestore.instance;
+//   CollectionReference users = FirebaseFirestore.instance.collection('users');
+
+//   Future<void> addUser(UserDetails userDetails) async {
+//     try {
+//       final user = FirebaseAuth.instance.currentUser!;
+//       final userID = user.uid;
+//       users
+//           .doc(userID)
+//           .set({
+//             // Add user data
+//             'firstName': "${userDetails.firstName}",
+//             'lastName': "${userDetails.lastName}",
+//             'email': userDetails.email,
+//             'phoneNumber': userDetails.number,
+//             'profilePhoto': userDetails.imagepath,
+//           })
+//           .then(
+//               (value) => print("User Added : ${users.doc(userID).toString()}"))
+//           .catchError((error) => print("Failed to add user: $error"));
+//     } catch (error) {
+//       print("Error adding user: $error");
+//     }
+//   }
+
+//   Future<void> updateUser(UserDetails userDetails) async {
+//     try {
+//       final user = FirebaseAuth.instance.currentUser!;
+//       final userID = user.uid;
+//       users
+//           .doc(userID)
+//           .update({
+//             'firstName': userDetails.firstName,
+//             'lastName': userDetails.lastName,
+//             'email': userDetails.email,
+//             'phoneNumber': userDetails.number,
+//             'profilePhoto': userDetails.imagepath,
+//           })
+//           .then(
+//               (value) => print("User Added : ${users.doc(userID).toString()}"))
+//           .catchError((error) => print("Failed to add user: $error"));
+//     } catch (error) {
+//       print("Error adding user: $error");
+//     }
+//   }
+
+//   Future<UserDetails> getCurrentUserDetails(String docID) {
+//     try {
+//       return users.doc(docID).get().then((value) {
+//         return UserDetails(
+//           email: value['email'],
+//           firstName: value['firstName'],
+//           lastName: value['lastName'],
+//           number: value['phoneNumber'],
+//           imagepath: value['profilePhoto'],
+//         );
+//       }).catchError((error) {
+//         return error;
+//       });
+//     } catch (error) {
+//       throw error;
+//     }
+//   }
+
+//   Future<bool> checkIfDocExists(String? docId) async {
+//     try {
+//       var doc = await users.doc(docId).get();
+//       return doc.exists;
+//     } catch (e) {
+//       throw e;
+//     }
+//   }
+// }
 class FirebaseFirestoreRepositoryImplement extends FirebaseFirestoreRepository {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   CollectionReference users = FirebaseFirestore.instance.collection('users');
@@ -13,14 +87,7 @@ class FirebaseFirestoreRepositoryImplement extends FirebaseFirestoreRepository {
       final userID = user.uid;
       users
           .doc(userID)
-          .set({
-            // Add user data
-            'First Name': "${userDetails.firstName}",
-            'Last Name': "${userDetails.lastName}",
-            'email': userDetails.email,
-            'PhoneNumber': userDetails.number,
-            'Profile Photo': userDetails.imagepath,
-          })
+          .set(userDetails.toJson()) // Using toJson method here
           .then(
               (value) => print("User Added : ${users.doc(userID).toString()}"))
           .catchError((error) => print("Failed to add user: $error"));
@@ -35,13 +102,7 @@ class FirebaseFirestoreRepositoryImplement extends FirebaseFirestoreRepository {
       final userID = user.uid;
       users
           .doc(userID)
-          .update({
-            'First Name': "${userDetails.firstName}",
-            'Last Name': "${userDetails.lastName}",
-            'email': userDetails.email,
-            'PhoneNumber': userDetails.number,
-            'Profile Photo': userDetails.imagepath,
-          })
+          .update(userDetails.toJson()) // Using toJson method here
           .then(
               (value) => print("User Added : ${users.doc(userID).toString()}"))
           .catchError((error) => print("Failed to add user: $error"));
@@ -50,16 +111,10 @@ class FirebaseFirestoreRepositoryImplement extends FirebaseFirestoreRepository {
     }
   }
 
-  Future<UserDetails> getCurrentUserDetails(String docID) {
+  Future<UserDetails> getCurrentUserDetails(String docID) async {
     try {
       return users.doc(docID).get().then((value) {
-        return UserDetails(
-          email: value['email'],
-          firstName: value['First Name'],
-          lastName: value['Last Name'],
-          number: value['PhoneNumber'],
-          imagepath: value['Profile Photo'],
-        );
+        return UserDetails.fromJson(value.data() as Map<String, dynamic>); // Using fromJson method here
       }).catchError((error) {
         return error;
       });

@@ -71,6 +71,7 @@ class _AddChatScreenState extends State<AddChatScreen> {
               delegate:
                   SliverChildBuilderDelegate(childCount: 7, (context, index) {
             return UserChatCard(
+              ontap: (){},
               image: _userSession.userDetails?.imagepath ?? "",
               username: _userSession.userDetails?.firstName ?? "",
             );

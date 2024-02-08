@@ -2,6 +2,7 @@ import 'package:chat_app/features/Presentation/pages/auth_screens/login_screen.d
 import 'package:chat_app/features/Presentation/pages/auth_screens/signup_page.dart';
 import 'package:chat_app/features/Presentation/pages/auth_screens/welcome_screen.dart';
 import 'package:chat_app/features/Presentation/pages/chat_screens/chat_home.dart';
+import 'package:chat_app/features/Presentation/pages/chat_screens/chat_screen.dart';
 import 'package:chat_app/features/Presentation/pages/chat_screens/home_page.dart';
 import 'package:chat_app/features/Presentation/pages/email_verification/account_success_screen.dart';
 import 'package:chat_app/features/Presentation/pages/email_verification/email_verification_screen.dart';
@@ -32,33 +33,35 @@ class AppNavigator {
         var args = settings.arguments as UserDetails;
 
         return MaterialPageRoute<UserDetails>(
-          builder: (context) => ProfilePage(
-              userDetails: args),
-              settings: settings
-      
-        );
+            builder: (context) => ProfilePage(userDetails: args),
+            settings: settings);
       case VerifyEmailScreen.verifyemailscreen:
         return MaterialPageRoute(
           builder: (context) => VerifyEmailScreen(
               firebaseFirestoreUseCase: sl<FirebaseFirestoreUseCase>()),
         );
 
-        case AccountCreatedSuccessScreen.accountCreatedSuccessScreen:
+      case AccountCreatedSuccessScreen.accountCreatedSuccessScreen:
         return MaterialPageRoute(
-          builder: (context) => AccountCreatedSuccessScreen(
-              ),
+          builder: (context) => AccountCreatedSuccessScreen(),
         );
-        case ChatHomePage.chatHomePage:
+      case ChatHomePage.chatHomePage:
         return MaterialPageRoute(
-          builder: (context) => ChatHomePage(
-              ),
+          builder: (context) => ChatHomePage(),
         );
-        case ChatMainScreen.chatMainScreen:
+      case ChatMainScreen.chatMainScreen:
         return MaterialPageRoute(
-          builder: (context) => ChatMainScreen(
-              ),
+          builder: (context) => ChatMainScreen(),
         );
-
+      case ChatScreen.chatScreen:
+        var args = settings.arguments as List<String>;
+        return MaterialPageRoute(
+            builder: (context) => ChatScreen(
+                  firstUserUid: args[0],
+                  secondUserUid: args[1],
+                  endUserImage: args[2],
+                ),
+            settings: settings);
 
       default:
         return MaterialPageRoute(

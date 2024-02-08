@@ -80,6 +80,7 @@ void _onAuthentticatedUser(AuthentticatedUserEvent event, Emitter<Authentication
         emit(AuthenticationLoading());
     try {
       final userOption = await authenticationRepository.signInWithEmail(UserDetails(
+        userId: event.user.userId,
         firstName: event.user.firstName, 
         lastName: event.user.lastName,
         email: event.user.email, number: event.user.number, password: event.user.password));
@@ -118,6 +119,7 @@ void _onAuthentticatedUser(AuthentticatedUserEvent event, Emitter<Authentication
    emit(AuthenticationLoading());
     try {
       final userOption = await authenticationRepository.createAccountWithEmail(UserDetails(
+        userId: event.user.userId,
         firstName: event.user.firstName,
         lastName: event.user.lastName,
          email: event.user.email, number: event.user.number, password: event.user.password));

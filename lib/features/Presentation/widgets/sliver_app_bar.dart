@@ -50,7 +50,7 @@ class _MySliverAppBarState extends State<MySliverAppBar>
 
   @override
   Widget build(BuildContext context) {
-    return SliverAppBar(
+    return AppBar(
         backgroundColor: ColorAssets.neomCream,
         automaticallyImplyLeading: false,
         leading: widget._userSession.userDetails?.imagepath != null

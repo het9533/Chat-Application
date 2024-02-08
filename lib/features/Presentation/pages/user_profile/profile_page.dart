@@ -10,6 +10,7 @@ import 'package:chat_app/features/Presentation/widgets/custom_text_form_field.da
 import 'package:chat_app/features/data/entity/user.dart';
 import 'package:chat_app/features/dependencyInjector/injector.dart';
 import 'package:chat_app/features/domain/usecase/firebase_firestore_usecase.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -390,7 +391,9 @@ class _ProfilePageState extends State<ProfilePage>
                     editMode = true;
                   });
                 } else {
+                  final user = FirebaseAuth.instance.currentUser;
                   context.read<ProfilePageBloc>().add(SaveChangesEvent(userDetails: UserDetails(
+            userId: user!= null ? user.uid : "",        
             email: emailnamecontroller.text,
             firstName: firstnamecontroller.text,
             lastName: lastnamecontroller.text,
