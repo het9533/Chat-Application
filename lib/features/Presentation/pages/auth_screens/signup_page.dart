@@ -272,7 +272,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                   RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10))),
                               backgroundColor: MaterialStateProperty.all(
-                                  ColorAssets.neomGold)),
+                                  ColorAssets.neomBlue)),
                           onPressed: () async {
                             if (_formKey.currentState?.validate() ?? false) {
                               // verify phone number
@@ -287,7 +287,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           child: Text(
                             "Sign Up",
                             style: TextStyle(
-                                color: ColorAssets.neomBlack2, fontSize: 15),
+                                color: Colors.white, fontSize: 16),
                           )),
                     ),
                     SizedBox(

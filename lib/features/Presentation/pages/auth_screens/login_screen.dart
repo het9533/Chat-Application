@@ -197,7 +197,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                       backgroundColor:
-                          MaterialStateProperty.all(ColorAssets.neomGold),
+                          MaterialStateProperty.all(ColorAssets.neomBlue),
                     ),
                     onPressed: () {
                       context.read<AuthenticationBloc>().add(
@@ -215,7 +215,7 @@ class _LoginPageState extends State<LoginPage> {
                     child: Text(
                       "Login",
                       style: TextStyle(
-                          color: ColorAssets.neomBlack2, fontSize: 15),
+                          color: Colors.white, fontSize: 16),
                     ),
                   ),
                 ),
