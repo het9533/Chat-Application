@@ -14,6 +14,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -84,6 +85,7 @@ class _ChatHomePageState extends State<ChatHomePage>
                         context,
                         ProfilePage.profilepage,
                         arguments: UserDetails(
+                          userName: _userSession.userDetails?.userName ?? "",
                           userId: _userSession.userDetails?.userId ?? "",
                           email: _userSession.userDetails?.email ?? "",
                           firstName: _userSession.userDetails?.firstName ?? "",
@@ -184,11 +186,10 @@ class _ChatHomePageState extends State<ChatHomePage>
                               );
                             },
                             image: document['imagepath'] ?? "",
-                            username: document['email'] ?? "",
+                            username: document['userName'] ?? "",
                           );
                         });
-                  })
-            
+                  }),
           );
       },
     );

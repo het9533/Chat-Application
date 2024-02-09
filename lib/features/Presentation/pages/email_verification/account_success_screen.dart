@@ -122,7 +122,7 @@ class _AccountCreatedSuccessScreenState
                         shape: MaterialStateProperty.all(RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10))),
                         backgroundColor:
-                            MaterialStateProperty.all(ColorAssets.neomGold)),
+                            MaterialStateProperty.all(ColorAssets.neomBlue)),
                     onPressed: () async {
                       context.read<AuthenticationBloc>().add(AuthentticatedUserEvent());
                       

@@ -131,4 +131,26 @@ class FirebaseFirestoreRepositoryImplement extends FirebaseFirestoreRepository {
       throw e;
     }
   }
+  Future<bool>doesUserNameUserExist(String currentUserName, String docId ) async {
+    try {
+
+// if the size of value is greater then 0 then that doc exist. 
+      var userNameUser = await users
+          .where('userName', isEqualTo: currentUserName)
+          .where(FieldPath.documentId, isNotEqualTo:docId)
+          .get()
+          .then((value) => value.size > 0 ? true : false);
+      
+      if(userNameUser){
+        return true;
+      }
+      return false;
+          
+    } catch (e) {
+      throw(e.toString());
+     
+    }
+  }
+
+
 }

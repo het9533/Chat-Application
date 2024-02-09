@@ -186,7 +186,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen>
                       alignment: Alignment.center,
                       duration: Duration(seconds: 1),
                       decoration: BoxDecoration(
-                          color: ColorAssets.neomGold,
+                          color: ColorAssets.neomBlue,
                           borderRadius:
                               BorderRadius.circular(isClicked ? 50 : 10)),
                       height: 50,

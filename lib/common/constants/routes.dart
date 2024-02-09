@@ -1,6 +1,7 @@
 import 'package:chat_app/features/Presentation/pages/auth_screens/login_screen.dart';
 import 'package:chat_app/features/Presentation/pages/auth_screens/signup_page.dart';
 import 'package:chat_app/features/Presentation/pages/auth_screens/welcome_screen.dart';
+import 'package:chat_app/features/Presentation/pages/chat_screens/add_chat_screen.dart';
 import 'package:chat_app/features/Presentation/pages/chat_screens/chat_home.dart';
 import 'package:chat_app/features/Presentation/pages/chat_screens/chat_screen.dart';
 import 'package:chat_app/features/Presentation/pages/chat_screens/home_page.dart';
@@ -62,6 +63,10 @@ class AppNavigator {
                   endUserImage: args[2],
                 ),
             settings: settings);
+          case AddChatScreen.addChatScreen:
+        return MaterialPageRoute(
+          builder: (context) => AddChatScreen(),
+        );
 
       default:
         return MaterialPageRoute(

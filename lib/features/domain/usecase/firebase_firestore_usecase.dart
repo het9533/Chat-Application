@@ -20,6 +20,9 @@ Future<bool> checkIfDocExists(String docId) async{
 Future<UserDetails> getCurrentUserDetails(String docID) {
   return firebaseFirestoreRepository.getCurrentUserDetails(docID);
 }
+Future<bool>doesUserNameUserExist(String currentUserName , String docID) async{
+  return await firebaseFirestoreRepository.doesUserNameUserExist(currentUserName, docID);
+}
 
 
 }

@@ -89,15 +89,15 @@ UserChatCard({super.key, required this.image, required this.username, required t
                 Align(
                   alignment: Alignment.bottomRight,
                   child: CircleAvatar(
-                    backgroundColor: ColorAssets.neomGold,
+                    backgroundColor: ColorAssets.neomBlue,
                     radius: 12,
                     child: Text(
                       '3',
                       style: TextStyle(
-                        color: Colors.black,
+                        color: Colors.white,
                         fontSize: 14,
                         fontFamily: 'Roboto',
-                        fontWeight: FontWeight.w300,
+                        fontWeight: FontWeight.bold,
                         height: 0,
                       ),
                     ),

@@ -4,6 +4,7 @@ part 'user.g.dart';
 
 @JsonSerializable()
 class UserDetails {
+  String? userName;
   String? userId;
   String? firstName;
   String? lastName;
@@ -13,8 +14,8 @@ class UserDetails {
   String? imagepath;
 
   UserDetails(
-      {
-      this.userId,  
+      {this.userName,
+      this.userId,
       this.firstName,
       this.lastName,
       this.email,
@@ -22,8 +23,8 @@ class UserDetails {
       this.password,
       this.imagepath});
 
-  factory UserDetails.fromJson(Map<String, dynamic> json) => _$UserDetailsFromJson(json);
+  factory UserDetails.fromJson(Map<String, dynamic> json) =>
+      _$UserDetailsFromJson(json);
 
-  Map<String,dynamic> toJson() => _$UserDetailsToJson(this);
-
+  Map<String, dynamic> toJson() => _$UserDetailsToJson(this);
 }

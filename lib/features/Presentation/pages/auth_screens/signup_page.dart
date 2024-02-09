@@ -76,6 +76,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   context,
                   ProfilePage.profilepage,
                   arguments: UserDetails(
+                    
                     firstName: state.user.displayName,
                     lastName: state.user.displayName,
                     email: state.user.email,
@@ -128,6 +129,7 @@ class _SignUpPageState extends State<SignUpPage> {
               if (state is PhoneAuthenticationSuccess) {
                 context.read<AuthenticationBloc>().add(
                     EmailSignUpRequestedEvent(UserDetails(
+                      
                         firstName: '',
                         lastName: '',
                         email: emailController.text,
@@ -176,6 +178,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     Column(
                       children: [
+                        
                         CustomTextFormField(
                           label: "Email Address",
                           hint: "Enter your email",
@@ -206,9 +209,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             FocusManager.instance.primaryFocus?.unfocus();
                           },
                         ),
-                        SizedBox(
-                          height: 16,
-                        ),
+              
                         SizedBox(height: 20),
                         CustomTextFormField(
                           label: "Password",
@@ -225,6 +226,8 @@ class _SignUpPageState extends State<SignUpPage> {
                             return null;
                           },
                         ),
+                        
+                        
                       ],
                     ),
                     SizedBox(height: 20),

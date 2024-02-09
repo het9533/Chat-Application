@@ -17,8 +17,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:lottie/lottie.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
@@ -40,6 +42,8 @@ class _ProfilePageState extends State<ProfilePage>
   TextEditingController lastnamecontroller = TextEditingController();
   TextEditingController emailnamecontroller = TextEditingController();
   TextEditingController phonenumbercontroller = TextEditingController();
+  TextEditingController userNameController = TextEditingController();
+
   firebase_storage.FirebaseStorage storage =
       firebase_storage.FirebaseStorage.instance;
 
@@ -55,6 +59,46 @@ class _ProfilePageState extends State<ProfilePage>
   void initState() {
     initializeData();
     super.initState();
+  }
+  Widget _dialog(BuildContext context) {
+    return AlertDialog(
+      elevation: 0.0,
+      backgroundColor: Colors.white,
+      title: Column(
+        children: [
+          Lottie.asset('assets/lottie/invalid.json',repeat: false),
+          SizedBox(height: 10,),
+          Text("Username already exists", style: GoogleFonts.roboto(
+            fontSize: 20,
+            fontWeight: FontWeight.w500
+          ),),
+        ],
+      ),
+      actions: <Widget>[
+        TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text("Okay"))
+      ],
+    );
+  }
+
+void _scaleDialog() {
+    showGeneralDialog(
+      context: context,
+      pageBuilder: (ctx, a1, a2) {
+        return Container();
+      },
+      transitionBuilder: (ctx, a1, a2, child) {
+        var curve = Curves.easeInOut.transform(a1.value);
+        return Transform.scale(
+          scale: curve,
+          child: _dialog(ctx),
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 300),
+    );
   }
 
   Future<void> pickImage(ImageSource source) async {
@@ -102,6 +146,7 @@ class _ProfilePageState extends State<ProfilePage>
   }
 
   void initializeData() async {
+    userNameController.text = userDetails.userName ?? "";
     firstnamecontroller.text = userDetails.firstName ?? "";
     emailnamecontroller.text = userDetails.email ?? "";
     lastnamecontroller.text = userDetails.lastName ?? "";
@@ -169,71 +214,70 @@ class _ProfilePageState extends State<ProfilePage>
       ),
       body: BlocListener<ProfilePageBloc, ProfilePageState>(
         listener: (context, state) {
-          if (state is ProfilePageInitial) {
-            
-          }
+          if (state is ProfilePageInitial) {}
           if (state is ProfileLoadingState) {
             Center(child: CircularProgressIndicator());
           }
-          if (state is ProfileLoadedState) {
-            
-          }
-          if (state is ProfileErrorState) {
-            
-          }
+          if (state is ProfileLoadedState) {}
+          if (state is ProfileErrorState) {}
           if (state is EditingModeEnabledState) {
             setState(() {
               editMode = state.editMode;
             });
           }
-          if(state is EditingModeDisabledState){
+          if (state is EditingModeDisabledState) {
             setState(() {
               editMode = state.editMode;
             });
           }
           if (state is ChangesSavedState) {
+            if (userNameController.text == '') {
+              userNameController.text = state.userDetails.userName!;
+            } else {
+              userNameController.text = userNameController.text;
+            }
             if (firstnamecontroller.text == '') {
-                    firstnamecontroller.text = state.userDetails.firstName!;
-                  } else {
-                    firstnamecontroller.text = firstnamecontroller.text;
-                  }
-                  if (lastnamecontroller.text == '') {
-                    lastnamecontroller.text = state.userDetails.lastName!;
-                  } else {
-                    lastnamecontroller.text = lastnamecontroller.text;
-                  }
-                  if (emailnamecontroller.text == '') {
-                    emailnamecontroller.text = state.userDetails.email!;
-                  } else {
-                    emailnamecontroller.text = emailnamecontroller.text;
-                  }
-                  if (phonenumbercontroller.text == '') {
-                    phonenumbercontroller.text = state.userDetails.number!;
-                  } else {
-                    phonenumbercontroller.text = phonenumbercontroller.text;
-                  }
-                  setState(() {
-                    editMode = false;
-                  });
-                  
+              firstnamecontroller.text = state.userDetails.firstName!;
+            } else {
+              firstnamecontroller.text = firstnamecontroller.text;
+            }
+            if (lastnamecontroller.text == '') {
+              lastnamecontroller.text = state.userDetails.lastName!;
+            } else {
+              lastnamecontroller.text = lastnamecontroller.text;
+            }
+            if (emailnamecontroller.text == '') {
+              emailnamecontroller.text = state.userDetails.email!;
+            } else {
+              emailnamecontroller.text = emailnamecontroller.text;
+            }
+            if (phonenumbercontroller.text == '') {
+              phonenumbercontroller.text = state.userDetails.number!;
+            } else {
+              phonenumbercontroller.text = phonenumbercontroller.text;
+            }
+            setState(() {
+              editMode = false;
+            });
+            if (state.doesUserNameUserExist) {
+              _scaleDialog();
+            }
           }
           if (state is ContinueButtonState) {
-             if (phonenumbercontroller.text == '') {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Phone number is required'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                    return;
-                  } else {
-                    Navigator.pushNamed(
-                        context,
-                        AccountCreatedSuccessScreen
-                            .accountCreatedSuccessScreen);
-                  }}
-                  
-                  },
+            if (phonenumbercontroller.text == '') {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Phone number is required'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+              return;
+            } else {
+              Navigator.pushNamed(context,
+                  AccountCreatedSuccessScreen.accountCreatedSuccessScreen);
+            }
+          }
+        },
         child: Column(
           children: [
             Expanded(
@@ -318,6 +362,13 @@ class _ProfilePageState extends State<ProfilePage>
                         child: Column(
                           children: [
                             CustomTextFormField(
+                              label: "UserName",
+                              hint: "name@123",
+                              controller: userNameController,
+                              enabled: editMode ? true : false,
+                            ),
+                            SizedBox(height: 16),
+                            CustomTextFormField(
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'This field is required';
@@ -383,7 +434,7 @@ class _ProfilePageState extends State<ProfilePage>
               ),
             ),
             RowBottomButtons(
-              FirstButtonText: editMode ? "Delete Account" : "Continue",
+              FirstButtonText: editMode ? "Delete Account" : "Finish",
               SecondButtonText: editMode ? "Save Changes" : "Edit Details",
               OnSecondButtonPressed: () async {
                 if (editMode == false) {
@@ -392,21 +443,22 @@ class _ProfilePageState extends State<ProfilePage>
                   });
                 } else {
                   final user = FirebaseAuth.instance.currentUser;
-                  context.read<ProfilePageBloc>().add(SaveChangesEvent(userDetails: UserDetails(
-            userId: user!= null ? user.uid : "",        
-            email: emailnamecontroller.text,
-            firstName: firstnamecontroller.text,
-            lastName: lastnamecontroller.text,
-            imagepath: userDetails.imagepath,
-            number: phonenumbercontroller.text,
-            password: userDetails.password)));
+                  context.read<ProfilePageBloc>().add(SaveChangesEvent(
+                      userDetails: UserDetails(
+                          userName: userNameController.text,
+                          userId: user != null ? user.uid : "",
+                          email: emailnamecontroller.text,
+                          firstName: firstnamecontroller.text,
+                          lastName: lastnamecontroller.text,
+                          imagepath: userDetails.imagepath,
+                          number: phonenumbercontroller.text,
+                          password: userDetails.password)));
                 }
               },
               OnFirstButtonPressed: () {
                 if (!editMode) {
-                 context.read<ProfilePageBloc>().add(ContinueButtonEvent());
-                  }
-                 else {
+                  context.read<ProfilePageBloc>().add(ContinueButtonEvent());
+                } else {
                   Navigator.pop(context);
                 }
               },

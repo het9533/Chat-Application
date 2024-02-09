@@ -27,6 +27,7 @@ class ProfilePageBloc extends Bloc<ProfilePageEvents, ProfilePageState> {
           await firebaseFirestoreUseCase.getCurrentUserDetails(user!.uid);
       emit(ProfileLoadedState(
           userDetails: UserDetails(
+        userName: _userSession.userDetails!.userName ?? "",
         userId: _userSession.userDetails!.userId ?? "",
         email: _userSession.userDetails!.email ?? "",
         firstName: _userSession.userDetails!.firstName ?? "",
@@ -44,6 +45,7 @@ class ProfilePageBloc extends Bloc<ProfilePageEvents, ProfilePageState> {
       UpdateUserDetailsEvent event, Emitter<ProfilePageState> emit) async {
     try {
       await firebaseFirestoreUseCase.updateUser(UserDetails(
+          userName: event.userDetails.userName,
           userId: event.userDetails.userId,
           email: event.userDetails.email,
           firstName: event.userDetails.firstName,
@@ -54,6 +56,7 @@ class ProfilePageBloc extends Bloc<ProfilePageEvents, ProfilePageState> {
 
       emit(ProfileLoadedState(
           userDetails: UserDetails(
+            userName: event.userDetails.userName,
             userId: event.userDetails.userId,
               email: event.userDetails.email,
               firstName: event.userDetails.firstName,
@@ -95,8 +98,12 @@ class ProfilePageBloc extends Bloc<ProfilePageEvents, ProfilePageState> {
       final _userSession = sl<UserSession>();
       final bool docExist =
           await firebaseFirestoreUseCase.checkIfDocExists(user.uid);
-      if (docExist) {
+      
+      final bool doesUserNameUserExist = await firebaseFirestoreUseCase.doesUserNameUserExist(event.userDetails.userName!,user.uid);
+      
+      if (docExist && !doesUserNameUserExist) {
         firebaseFirestoreUseCase.updateUser(UserDetails(
+          userName: event.userDetails.userName,
           userId: event.userDetails.userId,
             email: event.userDetails.email,
             firstName: event.userDetails.firstName,
@@ -106,9 +113,10 @@ class ProfilePageBloc extends Bloc<ProfilePageEvents, ProfilePageState> {
             password: event.userDetails.password));
       }
 
-      if (!docExist) {
+      if (!docExist && !doesUserNameUserExist) {
         firebaseFirestoreUseCase.addUser(UserDetails(
-          userId: event.userDetails.userId,
+          userName: event.userDetails.userName,
+            userId: event.userDetails.userId,
             email: event.userDetails.email,
             firstName: event.userDetails.firstName,
             lastName: event.userDetails.lastName,
@@ -116,16 +124,17 @@ class ProfilePageBloc extends Bloc<ProfilePageEvents, ProfilePageState> {
             number: event.userDetails.number,
             password: event.userDetails.password));
       }
-
+      
       emit(ChangesSavedState(
           userDetails: _userSession.userDetails = UserDetails(
+            userName: event.userDetails.userName,
             userId: event.userDetails.userId,
               email: event.userDetails.email,
               firstName: event.userDetails.firstName,
               lastName: event.userDetails.lastName,
               imagepath: event.userDetails.imagepath,
               number: event.userDetails.number,
-              password: event.userDetails.password)));
+              password: event.userDetails.password), doesUserNameUserExist));
     } catch (error) {
       emit(ProfileErrorState(error: error.toString()));
     }
