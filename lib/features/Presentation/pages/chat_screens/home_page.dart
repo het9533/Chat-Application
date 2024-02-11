@@ -3,8 +3,6 @@ import 'package:chat_app/features/Presentation/pages/chat_screens/add_chat_scree
 import 'package:chat_app/features/Presentation/pages/chat_screens/chat_home.dart';
 import 'package:chat_app/features/Presentation/pages/chat_screens/favourite.dart';
 import 'package:chat_app/features/Presentation/pages/chat_screens/settings.dart';
-import 'package:chat_app/features/data/entity/user_session.dart';
-import 'package:chat_app/features/dependencyInjector/injector.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -18,7 +16,6 @@ class ChatMainScreen extends StatefulWidget {
 }
 
 class _MyButtomNavBarState extends State<ChatMainScreen> {
-  final _userSession = sl<UserSession>();
 
   int myCurrentIndex = 0;
 
@@ -63,20 +60,58 @@ class _MyButtomNavBarState extends State<ChatMainScreen> {
             ]),
       ),
       body: pages[myCurrentIndex],
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: FloatingActionButton(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(50)
-        ),
-          elevation: 0.0,
-          backgroundColor: ColorAssets.neomBlue,
-          onPressed: () {
-            Navigator.pushNamed(context, AddChatScreen.addChatScreen);
-          },
-          child: Icon(
-            Icons.add,
-            color: Colors.white,
-          )),
+floatingActionButton: FloatingActionButton(
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(50)
+  ),
+  elevation: 0.0,
+  backgroundColor: ColorAssets.neomBlue,
+  onPressed: () {
+    showModalBottomSheet(
+      
+      backgroundColor: Colors.white,
+      elevation: 0.0,
+      context: context,
+      builder: (context) {
+        return Wrap(
+          children: <Widget>[
+            ListTile(
+              leading: Icon(Icons.chat),
+              title: Text('New Chat'),
+              subtitle: Text('Join with your Friend'),
+              onTap: () {
+                
+                Navigator.pushNamed(context, AddChatScreen.addChatScreen);
+              },
+            ),
+           
+            ListTile(
+              leading: Icon(Icons.group),
+              title: Text('New group'),
+              subtitle: Text('Join the Friends around you'),
+              onTap: () {
+                // Do something for 'New Community' option
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.cancel),
+              title: Text('Cancel'),
+              onTap: () {
+                Navigator.pop(context); // Close the bottom sheet
+              },
+            ),
+          ],
+        );
+      },
+    );
+  },
+  child: Icon(
+    Icons.add,
+    color: Colors.white,
+  ),
+),
+
+
     );
   }
 }

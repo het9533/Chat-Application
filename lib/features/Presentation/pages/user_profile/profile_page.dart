@@ -434,6 +434,8 @@ void _scaleDialog() {
               ),
             ),
             RowBottomButtons(
+              firstColorButton: Colors.white,
+              secondColorButton: ColorAssets.neomBlue,
               FirstButtonText: editMode ? "Delete Account" : "Finish",
               SecondButtonText: editMode ? "Save Changes" : "Edit Details",
               OnSecondButtonPressed: () async {

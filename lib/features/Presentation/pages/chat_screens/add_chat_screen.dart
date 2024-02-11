@@ -63,27 +63,7 @@ class _AddChatScreenState extends State<AddChatScreen> {
                       fontWeight: FontWeight.w500,
                     ))),
               ),
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    AppTextIconButton(
-                      icon: Icons.group,
-                      text: "New group",
-                    ),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    AppTextIconButton(
-                      icon: Icons.person_add,
-                      text: "New Contact",
-                    ),
-                  ],
-                ),
-              )
+             
             ],
           ),
           if (searchController.text.isEmpty)
@@ -118,6 +98,8 @@ class _AddChatScreenState extends State<AddChatScreen> {
                       final document = filteredUsers[index];
                       return UserChatCard(
                         ontap: () {
+                                  print(document['userId'].toString());
+
                           Navigator.pushNamed(
                             context,
                             ChatScreen.chatScreen,

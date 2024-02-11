@@ -14,7 +14,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -39,6 +38,22 @@ class _ChatHomePageState extends State<ChatHomePage>
   late AnimationController controller;
   late Animation<double> animation;
   final _userSession = sl<UserSession>();
+  late TabController _tabController;
+  final TextEditingController searchController = TextEditingController();
+
+
+  final _selectedColor = ColorAssets.neomBlue;
+  final _unselectedColor = Color(0xff5f6368);
+  final _tabs = [
+    Tab(text: 'Personal'),
+    Tab(text: 'Group'),
+  ];
+
+  final _iconTabs = [
+    Tab(icon: Icon(Icons.person)),
+    Tab(icon: Icon(Icons.group)),
+  ];
+
 
   @override
   void dispose() {
@@ -48,6 +63,8 @@ class _ChatHomePageState extends State<ChatHomePage>
 
   @override
   void initState() {
+    _tabController = TabController(length: 2, vsync: this);
+
     controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
@@ -67,15 +84,15 @@ class _ChatHomePageState extends State<ChatHomePage>
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ProfilePageBloc, ProfilePageState>(
-        buildWhen: (previous, current) {
-          if (current is ChangesSavedState) {
-            return true;
-          } else {
-            return false;
-          }
-        },
-        builder: (context, state) {
-          return Scaffold(
+      buildWhen: (previous, current) {
+        if (current is ChangesSavedState) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
           appBar: AppBar(
               backgroundColor: ColorAssets.neomCream,
               automaticallyImplyLeading: false,
@@ -106,8 +123,8 @@ class _ChatHomePageState extends State<ChatHomePage>
                     )
                   : Container(
                       margin: EdgeInsets.only(left: 20),
-                      decoration:
-                          BoxDecoration(color: Colors.grey, shape: BoxShape.circle),
+                      decoration: BoxDecoration(
+                          color: Colors.grey, shape: BoxShape.circle),
                     ),
               title: Text(
                 "Chat",
@@ -122,7 +139,7 @@ class _ChatHomePageState extends State<ChatHomePage>
                 //       margin: EdgeInsets.only(right: 20),
                 //       child: SvgPicture.asset("assets/icons/add_square.svg")),
                 // ],
-    
+
                 PopupMenuButton<int>(
                     surfaceTintColor: Colors.white,
                     // color: Colors.white,
@@ -155,42 +172,99 @@ class _ChatHomePageState extends State<ChatHomePage>
                           PopupMenuItem<int>(value: 1, child: Text('Settings')),
                         ])
               ]),
-          body:  StreamBuilder(
-                  stream:
-                      FirebaseFirestore.instance.collection('users').snapshots(),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                    if (snapshot.hasError) {
-                      return Center(
-                        child: Text("error"),
-                      );
-                    }
-                    return ListView.builder(
-                        itemCount: snapshot.data?.docs.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          DocumentSnapshot document = snapshot.data!.docs[index];
-    
-                          return UserChatCard(
-                            ontap: () {
-                              Navigator.pushNamed(context, ChatScreen.chatScreen,
-                            arguments: [
-                              _userSession.userDetails!.userId.toString(),
-                              document['firstName'].toString(),
-                              document['imagepath'].toString(),
-                            ]
-                              
+          body: Column(
+            children: [
+
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              height: kToolbarHeight - 8.0,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.black.withOpacity(0.6),
+                  width: 0.3
+                ),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: TabBar(
+                indicatorSize: TabBarIndicatorSize.tab,
+                controller: _tabController,
+                indicator: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: _selectedColor),
+                labelColor: Colors.white,
+                unselectedLabelColor: Colors.black,
+                tabs: _iconTabs,
+              ),
+            ),
+                          Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10,vertical: 5),
+                child: SearchBar(
+                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12))),
+                    controller: searchController,
+                    onChanged: (value) {
+                      setState(() {});
+                    },
+                    backgroundColor: MaterialStateProperty.all(Colors.white),
+                    elevation: MaterialStateProperty.all(0.0),
+                    padding: MaterialStateProperty.all(
+                        EdgeInsets.symmetric(horizontal: 10)),
+                    leading: Icon(Icons.search),
+                    hintText: "Search",
+                    hintStyle: MaterialStateProperty.all(GoogleFonts.roboto(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ))),
+              ),
+              // stream builder
+              Expanded(
+                child: StreamBuilder(
+                    stream: FirebaseFirestore.instance
+                        .collection('users')
+                        .where(FieldPath.documentId, isNotEqualTo: user!.uid)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                      if (snapshot.hasError) {
+                        return Center(
+                          child: Text("error"),
+                        );
+                      }
+                      return Container(
+                      
+                        child: ListView.builder(
+                            itemCount: snapshot.data?.docs.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              DocumentSnapshot document =
+                                  snapshot.data!.docs[index];
+                              return UserChatCard(
+                                ontap: () {
+                                  print(document['userId'].toString());
+                                  Navigator.pushNamed(
+                                      context, ChatScreen.chatScreen,
+                                      arguments: [
+                                        _userSession.userDetails!.userId
+                                            .toString(),
+                                        document['firstName'].toString(),
+                                        document['imagepath'].toString(),
+                                      ]);
+                                },
+                                image: document['imagepath'] ?? "",
+                                username: document['userName'] ?? "",
                               );
-                            },
-                            image: document['imagepath'] ?? "",
-                            username: document['userName'] ?? "",
-                          );
-                        });
-                  }),
-          );
+                            }),
+                      );
+                    }),
+              ),
+            ],
+          ),
+        );
       },
     );
   }

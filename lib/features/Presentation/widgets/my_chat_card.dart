@@ -16,7 +16,7 @@ UserChatCard({super.key, required this.image, required this.username, required t
     return GestureDetector(
       onTap: ontap,
       child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         padding: EdgeInsets.all(10),
         width: double.infinity,
         height: 70,

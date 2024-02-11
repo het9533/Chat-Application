@@ -7,6 +7,8 @@ class RowBottomButtons extends StatelessWidget {
   final String SecondButtonText;
   final Function()? OnFirstButtonPressed;
   final Function()? OnSecondButtonPressed;
+  final  Color? firstColorButton; 
+  final Color? secondColorButton;
 
 
 
@@ -17,7 +19,7 @@ class RowBottomButtons extends StatelessWidget {
     this.OnSecondButtonPressed,
     
     
-    super.key,
+    super.key, this.firstColorButton, this.secondColorButton,
   });
   
 
@@ -39,7 +41,7 @@ class RowBottomButtons extends StatelessWidget {
                   onPressed: OnFirstButtonPressed,
                   style: ButtonStyle(
                     elevation: MaterialStateProperty.all(0),
-                    backgroundColor: MaterialStateProperty.all(Colors.white),
+                    backgroundColor: MaterialStateProperty.all(firstColorButton),
                     side: MaterialStateProperty.all(BorderSide(
                       color: Color(0xffDDDDDD)
                     )),
@@ -70,7 +72,7 @@ class RowBottomButtons extends StatelessWidget {
               
                     shape: MaterialStateProperty.all(RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10))),
-                    backgroundColor: MaterialStateProperty.all(ColorAssets.neomBlack2),
+                    backgroundColor: MaterialStateProperty.all(secondColorButton),
                   ),
                   onPressed:OnSecondButtonPressed,
                   child: Text(
