@@ -38,21 +38,11 @@ class _ChatHomePageState extends State<ChatHomePage>
   late AnimationController controller;
   late Animation<double> animation;
   final _userSession = sl<UserSession>();
-  late TabController _tabController;
   final TextEditingController searchController = TextEditingController();
 
 
-  final _selectedColor = ColorAssets.neomBlue;
-  final _unselectedColor = Color(0xff5f6368);
-  final _tabs = [
-    Tab(text: 'Personal'),
-    Tab(text: 'Group'),
-  ];
+  
 
-  final _iconTabs = [
-    Tab(icon: Icon(Icons.person)),
-    Tab(icon: Icon(Icons.group)),
-  ];
 
 
   @override
@@ -63,7 +53,6 @@ class _ChatHomePageState extends State<ChatHomePage>
 
   @override
   void initState() {
-    _tabController = TabController(length: 2, vsync: this);
 
     controller = AnimationController(
       vsync: this,
@@ -175,29 +164,6 @@ class _ChatHomePageState extends State<ChatHomePage>
           body: Column(
             children: [
 
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              height: kToolbarHeight - 8.0,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.black.withOpacity(0.6),
-                  width: 0.3
-                ),
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: TabBar(
-                indicatorSize: TabBarIndicatorSize.tab,
-                controller: _tabController,
-                indicator: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: _selectedColor),
-                labelColor: Colors.white,
-                unselectedLabelColor: Colors.black,
-                tabs: _iconTabs,
-              ),
-            ),
                           Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10,vertical: 5),
                 child: SearchBar(

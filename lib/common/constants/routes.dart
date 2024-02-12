@@ -55,12 +55,11 @@ class AppNavigator {
           builder: (context) => ChatMainScreen(),
         );
       case ChatScreen.chatScreen:
-        var args = settings.arguments as List<String>;
+        var args = settings.arguments as List<dynamic>;
         return MaterialPageRoute(
             builder: (context) => ChatScreen(
                   firstUserUid: args[0],
-                  secondUserUid: args[1],
-                  endUserImage: args[2],
+                  userMap: args[1],
                 ),
             settings: settings);
           case AddChatScreen.addChatScreen:

@@ -3,10 +3,13 @@ import 'package:chat_app/features/Presentation/Bloc/phone_authentication_bloc/ph
 import 'package:chat_app/features/Presentation/Bloc/profile_page_bloc/profile_page_bloc.dart';
 import 'package:chat_app/features/data/entity/user_session.dart';
 import 'package:chat_app/features/data/repository/authentication_repository_impl.dart';
+import 'package:chat_app/features/data/repository/chat_features_repository_impl.dart';
 import 'package:chat_app/features/data/repository/firebase_firestore_repository_impl.dart';
 import 'package:chat_app/features/domain/repository/authentication_repository.dart';
+import 'package:chat_app/features/domain/repository/chat_features_repository.dart';
 import 'package:chat_app/features/domain/repository/firebase_firestore_repository.dart';
 import 'package:chat_app/features/domain/usecase/authentication_usecase.dart';
+import 'package:chat_app/features/domain/usecase/chat_features_usercase.dart';
 import 'package:chat_app/features/domain/usecase/firebase_firestore_usecase.dart';
 import 'package:get_it/get_it.dart';
 
@@ -24,21 +27,29 @@ Future<void> setup() async {
   sl.registerLazySingleton<AuthenticationUseCase>(
       () => AuthenticationUseCase(sl()));
 
-       sl.registerFactory<FirebaseFirestoreRepository>(
+  sl.registerFactory<FirebaseFirestoreRepository>(
       () => FirebaseFirestoreRepositoryImplement());
 
   sl.registerLazySingleton<FirebaseFirestoreUseCase>(
       () => FirebaseFirestoreUseCase(firebaseFirestoreRepository: sl()));
 
+  sl.registerFactory<ChatFeaturesRepository>(
+      () => ChatFeaturesRepositoryImplementation());
+      
+  sl.registerLazySingleton<ChatFeaturesUseCase>(() => ChatFeaturesUseCase(chatFeaturesRepository: sl()));
+
   // model
   sl.registerSingleton(UserSession());
+
   /// Use-Cases For All the APIs resting in Data Layer
   // sl.registerLazySingleton(() => LoginUseCase(sl()));
 
   /// Blocs for State-Management
-  sl.registerSingleton(AuthenticationBloc(authenticationRepository: sl<AuthenticationRepository>(), firebaseFirestoreUseCase: sl<FirebaseFirestoreUseCase>()));
-    sl.registerSingleton(PhoneAuthenticationBloc(authenticationRepository: sl()));
-    sl.registerSingleton(ProfilePageBloc(sl<FirebaseFirestoreUseCase>()));
+  sl.registerSingleton(AuthenticationBloc(
+      authenticationRepository: sl<AuthenticationRepository>(),
+      firebaseFirestoreUseCase: sl<FirebaseFirestoreUseCase>()));
+  sl.registerSingleton(PhoneAuthenticationBloc(authenticationRepository: sl()));
+  sl.registerSingleton(ProfilePageBloc(sl<FirebaseFirestoreUseCase>()));
   // sl.registerFactory(() => ClipboardBloc(sl(), sl()));
   // sl.registerLazySingleton(() => ChatBotBloc(sl()));
 

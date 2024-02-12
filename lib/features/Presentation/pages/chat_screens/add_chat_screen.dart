@@ -1,4 +1,3 @@
-import 'package:chat_app/features/Presentation/widgets/custom_row_icon_text.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -27,6 +26,16 @@ class _AddChatScreenState extends State<AddChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Map<String, dynamic> userMap = {
+      'email': "",
+      'firstName': "",
+      'imagepath': "",
+      'lastName': "",
+      'number': "",
+      'userId': "",
+      'userName': "",
+    };
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: ColorAssets.neomCream,
@@ -44,7 +53,7 @@ class _AddChatScreenState extends State<AddChatScreen> {
           Column(
             children: [
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 15),
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 child: SearchBar(
                     shape: MaterialStateProperty.all(RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12))),
@@ -63,7 +72,6 @@ class _AddChatScreenState extends State<AddChatScreen> {
                       fontWeight: FontWeight.w500,
                     ))),
               ),
-             
             ],
           ),
           if (searchController.text.isEmpty)
@@ -84,29 +92,41 @@ class _AddChatScreenState extends State<AddChatScreen> {
                       child: Text("Error"),
                     );
                   }
-              
                   final filteredUsers = snapshot.data!.docs.where((document) {
                     final userName =
                         document['userName'].toString().toLowerCase();
                     final searchKey = searchController.text.toLowerCase();
-                    return userName.contains(searchKey);
+                    // Exclude the current user
+                    return userName.contains(searchKey) &&
+                        userName != _userSession.userDetails?.userName;
                   }).toList();
-              
+
                   return ListView.builder(
                     itemCount: filteredUsers.length,
                     itemBuilder: (context, index) {
                       final document = filteredUsers[index];
                       return UserChatCard(
                         ontap: () {
-                                  print(document['userId'].toString());
-
+                          print(document['userId'].toString());
+                          userMap.update('email', (value) => document['email']);
+                          userMap.update(
+                              'firstName', (value) => document['firstName']);
+                          userMap.update(
+                              'lastName', (value) => document['lastName']);
+                          userMap.update(
+                              'imagepath', (value) => document['imagepath']);
+                          userMap.update(
+                              'number', (value) => document['number']);
+                          userMap.update(
+                              'userId', (value) => document['userId']);
+                          userMap.update(
+                              'userName', (value) => document['userName']);
                           Navigator.pushNamed(
                             context,
                             ChatScreen.chatScreen,
                             arguments: [
                               _userSession.userDetails!.userId.toString(),
-                              document['firstName'].toString(),
-                              document['imagepath'].toString(),
+                              userMap
                             ],
                           );
                         },

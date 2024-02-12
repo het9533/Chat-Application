@@ -8,9 +8,6 @@ part 'message_model.g.dart';
 
 @JsonSerializable()
 class Message{
-
-
-
 String? messageId;
 String? content;
 List? seenby;
@@ -23,7 +20,7 @@ DateTime? timeStamp;
    factory Message.fromJson(Map<String, dynamic> json) =>
       _$MessageFromJson(json);
 
-  Map<dynamic, dynamic> toJson() => _$MessageToJson(this); 
+  Map<String, dynamic> toJson() => _$MessageToJson(this); 
 
 
 }
