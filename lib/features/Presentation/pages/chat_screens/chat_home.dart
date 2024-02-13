@@ -188,8 +188,8 @@ class _ChatHomePageState extends State<ChatHomePage>
               Expanded(
                 child: StreamBuilder(
                     stream: FirebaseFirestore.instance
-                        .collection('users')
-                        .where(FieldPath.documentId, isNotEqualTo: user!.uid)
+                        .collection('chats')
+                        .where('users', arrayContains: user!.uid)
                         .snapshots(),
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
@@ -209,20 +209,25 @@ class _ChatHomePageState extends State<ChatHomePage>
                             itemBuilder: (BuildContext context, int index) {
                               DocumentSnapshot document =
                                   snapshot.data!.docs[index];
+
+                                  List otherUserId = document['users'];
+                                  otherUserId.remove(user!.uid);
+                                
+                                UserDetails anotherUser = UserDetails.fromJson(document['usersInfo'][otherUserId.first]);
                               return UserChatCard(
                                 ontap: () {
-                                  print(document['userId'].toString());
+                                  
                                   Navigator.pushNamed(
                                       context, ChatScreen.chatScreen,
                                       arguments: [
-                                        _userSession.userDetails!.userId
-                                            .toString(),
-                                        document['firstName'].toString(),
-                                        document['imagepath'].toString(),
+                                        _userSession.userDetails,
+                                        anotherUser
+                                        
                                       ]);
                                 },
-                                image: document['imagepath'] ?? "",
-                                username: document['userName'] ?? "",
+                                image: document['usersInfo'][otherUserId.first]['imagepath'] ?? "",
+                                username: document['usersInfo'][otherUserId.first]['userName']?? "",
+                                lastMessage: document['lastMessage']['content'],
                               );
                             }),
                       );

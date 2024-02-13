@@ -196,7 +196,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen>
                           : Text(
                               "Continue",
                               style: TextStyle(
-                                  color: ColorAssets.neomBlack2, fontSize: 15),
+                                  color: ColorAssets.neomWhite, fontSize: 15),
                             ),
                     ),
                   ),

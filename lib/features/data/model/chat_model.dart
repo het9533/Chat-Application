@@ -1,3 +1,4 @@
+import 'package:chat_app/features/data/entity/user.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'chat_model.g.dart';
@@ -7,7 +8,7 @@ enum ChatType {
   group,  
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Chat {
   String? chatId;
   DateTime? createdAt;
@@ -15,10 +16,11 @@ class Chat {
   String? groupName;
   Map<String, dynamic>? lastMessage;
   List? users;
-  ChatType? type; // Use ChatType instead of Enum
+  ChatType? type;
+  Map<String,UserDetails>? usersInfo;
 
   Chat({
-   
+    this.usersInfo,
     this.chatId,
     this.createdAt,
     this.groupImage,

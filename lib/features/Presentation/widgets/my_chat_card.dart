@@ -8,8 +8,10 @@ class UserChatCard extends StatelessWidget {
  final String username;
  
   final VoidCallback ontap;
+  
+  final String lastMessage;
 
-UserChatCard({super.key, required this.image, required this.username, required this.ontap});
+UserChatCard({super.key, required this.image, required this.username, required this.ontap, required this.lastMessage});
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +54,7 @@ UserChatCard({super.key, required this.image, required this.username, required t
                     height: 8,
                   ),
                   Text(
-                    'Yes it’s perfect for me, that...',
+                    lastMessage,
                     style: TextStyle(
                       color: Colors.grey,
                       fontSize: 14,

@@ -32,7 +32,7 @@ class ChatFeaturesRepositoryImplementation extends ChatFeaturesRepository {
       throw Exception('Failed to send message');
     }
   }
-
+    
   @override
   Stream<List<Message>> getMessages(String chatId) {
     try {

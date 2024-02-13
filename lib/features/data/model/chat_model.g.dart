@@ -7,6 +7,9 @@ part of 'chat_model.dart';
 // **************************************************************************
 
 Chat _$ChatFromJson(Map<String, dynamic> json) => Chat(
+      usersInfo: (json['usersInfo'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, UserDetails.fromJson(e as Map<String, dynamic>)),
+      ),
       chatId: json['chatId'] as String?,
       createdAt: json['createdAt'] == null
           ? null
@@ -26,6 +29,7 @@ Map<String, dynamic> _$ChatToJson(Chat instance) => <String, dynamic>{
       'lastMessage': instance.lastMessage,
       'users': instance.users,
       'type': _$ChatTypeEnumMap[instance.type],
+      'usersInfo': instance.usersInfo?.map((k, e) => MapEntry(k, e.toJson())),
     };
 
 const _$ChatTypeEnumMap = {

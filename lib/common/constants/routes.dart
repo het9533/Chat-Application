@@ -58,8 +58,8 @@ class AppNavigator {
         var args = settings.arguments as List<dynamic>;
         return MaterialPageRoute(
             builder: (context) => ChatScreen(
-                  firstUserUid: args[0],
-                  userMap: args[1],
+                  userDetails: args[0],
+                  chatUserDetails: args[1],
                 ),
             settings: settings);
           case AddChatScreen.addChatScreen:

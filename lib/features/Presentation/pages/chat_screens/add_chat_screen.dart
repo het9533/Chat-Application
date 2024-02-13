@@ -1,3 +1,5 @@
+
+import 'package:chat_app/features/data/entity/user.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -26,16 +28,6 @@ class _AddChatScreenState extends State<AddChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Map<String, dynamic> userMap = {
-      'email': "",
-      'firstName': "",
-      'imagepath': "",
-      'lastName': "",
-      'number': "",
-      'userId': "",
-      'userName': "",
-    };
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: ColorAssets.neomCream,
@@ -107,31 +99,20 @@ class _AddChatScreenState extends State<AddChatScreen> {
                       final document = filteredUsers[index];
                       return UserChatCard(
                         ontap: () {
-                          print(document['userId'].toString());
-                          userMap.update('email', (value) => document['email']);
-                          userMap.update(
-                              'firstName', (value) => document['firstName']);
-                          userMap.update(
-                              'lastName', (value) => document['lastName']);
-                          userMap.update(
-                              'imagepath', (value) => document['imagepath']);
-                          userMap.update(
-                              'number', (value) => document['number']);
-                          userMap.update(
-                              'userId', (value) => document['userId']);
-                          userMap.update(
-                              'userName', (value) => document['userName']);
                           Navigator.pushNamed(
                             context,
                             ChatScreen.chatScreen,
                             arguments: [
-                              _userSession.userDetails!.userId.toString(),
-                              userMap
+                              _userSession.userDetails,
+                              UserDetails.fromJson(
+                                  document.data() as Map<String, dynamic>)
+                                
                             ],
                           );
                         },
                         image: document['imagepath'] ?? "",
                         username: document['userName'] ?? "",
+                        lastMessage: '',
                       );
                     },
                   );
