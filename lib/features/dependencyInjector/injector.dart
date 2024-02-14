@@ -1,4 +1,5 @@
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_bloc.dart';
+import 'package:chat_app/features/Presentation/Bloc/chat_bloc/chat_bloc.dart';
 import 'package:chat_app/features/Presentation/Bloc/phone_authentication_bloc/phone_authentication_bloc.dart';
 import 'package:chat_app/features/Presentation/Bloc/profile_page_bloc/profile_page_bloc.dart';
 import 'package:chat_app/features/data/entity/user_session.dart';
@@ -35,8 +36,9 @@ Future<void> setup() async {
 
   sl.registerFactory<ChatFeaturesRepository>(
       () => ChatFeaturesRepositoryImplementation());
-      
-  sl.registerLazySingleton<ChatFeaturesUseCase>(() => ChatFeaturesUseCase(chatFeaturesRepository: sl()));
+
+  sl.registerLazySingleton<ChatFeaturesUseCase>(
+      () => ChatFeaturesUseCase(chatFeaturesRepository: sl()));
 
   // model
   sl.registerSingleton(UserSession());
@@ -50,6 +52,12 @@ Future<void> setup() async {
       firebaseFirestoreUseCase: sl<FirebaseFirestoreUseCase>()));
   sl.registerSingleton(PhoneAuthenticationBloc(authenticationRepository: sl()));
   sl.registerSingleton(ProfilePageBloc(sl<FirebaseFirestoreUseCase>()));
+
+  sl.registerSingleton(ChatBloc(
+    chatFeaturesUseCase: sl<ChatFeaturesUseCase>(),
+    userSession: sl<UserSession>(),
+  ));
+  
   // sl.registerFactory(() => ClipboardBloc(sl(), sl()));
   // sl.registerLazySingleton(() => ChatBotBloc(sl()));
 

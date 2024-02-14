@@ -807,9 +807,9 @@
     },
     {
       "name": "sqflite",
-      "rootUri": "file:///Users/mind/.pub-cache/hosted/pub.dev/sqflite-2.3.2",
+      "rootUri": "file:///Users/mind/.pub-cache/hosted/pub.dev/sqflite-2.0.1",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "2.12"
     },
     {
       "name": "sqflite_common",
@@ -944,7 +944,7 @@
       "languageVersion": "3.2"
     }
   ],
-  "generated": "2024-02-13T13:23:05.579816Z",
+  "generated": "2024-02-14T06:56:33.339372Z",
   "generator": "pub",
   "generatorVersion": "3.2.3"
 }

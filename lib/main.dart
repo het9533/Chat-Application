@@ -1,6 +1,7 @@
 // main.dart
 import 'package:chat_app/common/constants/color_constants.dart';
 import 'package:chat_app/features/Presentation/Bloc/authbloc/authentication_bloc.dart';
+import 'package:chat_app/features/Presentation/Bloc/chat_bloc/chat_bloc.dart';
 import 'package:chat_app/features/Presentation/Bloc/phone_authentication_bloc/phone_authentication_bloc.dart';
 import 'package:chat_app/features/Presentation/Bloc/profile_page_bloc/profile_page_bloc.dart';
 import 'package:chat_app/features/Presentation/pages/auth_screens/welcome_screen.dart';
@@ -33,13 +34,16 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<AuthenticationBloc>(
-          create: (BuildContext context) => sl(),
+          create: (BuildContext context) => sl<AuthenticationBloc>(),
         ),
         BlocProvider<PhoneAuthenticationBloc>(
-          create: (BuildContext context) => sl(),
+          create: (BuildContext context) => sl<PhoneAuthenticationBloc>(),
         ),
         BlocProvider<ProfilePageBloc>(
-          create: (BuildContext context) => sl(),
+          create: (BuildContext context) => sl<ProfilePageBloc>(),
+        ),
+        BlocProvider<ChatBloc>(
+          create: (BuildContext context) => sl<ChatBloc>(),
         ),
       ],
       child: MaterialApp(
