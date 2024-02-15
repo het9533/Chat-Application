@@ -17,14 +17,22 @@ UserDetails _$UserDetailsFromJson(Map<String, dynamic> json) => UserDetails(
       imagepath: json['imagepath'] as String?,
     );
 
-Map<String, dynamic> _$UserDetailsToJson(UserDetails instance) =>
-    <String, dynamic>{
-      'userName': instance.userName,
-      'userId': instance.userId,
-      'firstName': instance.firstName,
-      'lastName': instance.lastName,
-      'email': instance.email,
-      'number': instance.number,
-      'password': instance.password,
-      'imagepath': instance.imagepath,
-    };
+Map<String, dynamic> _$UserDetailsToJson(UserDetails instance) {
+  final val = <String, dynamic>{};
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('userName', instance.userName);
+  writeNotNull('userId', instance.userId);
+  writeNotNull('firstName', instance.firstName);
+  writeNotNull('lastName', instance.lastName);
+  writeNotNull('email', instance.email);
+  writeNotNull('number', instance.number);
+  writeNotNull('password', instance.password);
+  writeNotNull('imagepath', instance.imagepath);
+  return val;
+}

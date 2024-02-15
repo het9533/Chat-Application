@@ -1,3 +1,4 @@
+
 import 'package:chat_app/features/Presentation/Bloc/chat_bloc/chat_bloc.dart';
 import 'package:chat_app/features/Presentation/Bloc/chat_bloc/chat_event.dart';
 import 'package:chat_app/features/Presentation/Bloc/chat_bloc/chat_state.dart';
@@ -12,6 +13,7 @@ import 'package:chat_app/features/data/model/chat_model.dart';
 import 'package:chat_app/features/data/model/message_model.dart';
 import 'package:chat_app/features/dependencyInjector/injector.dart';
 import 'package:chat_app/features/domain/usecase/chat_features_usercase.dart';
+import 'package:intl/intl.dart';
 
 class ChatScreen extends StatefulWidget {
   final UserDetails userDetails;
@@ -28,17 +30,19 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final ChatFeaturesUseCase chatFeaturesUseCase = sl<ChatFeaturesUseCase>();
   final TextEditingController _messageController = TextEditingController();
-  List<QueryDocumentSnapshot<Map<String, dynamic>>> messages = [];
+  List<Message> messages = [];
   late String chatId;
   bool isEditMessage = false;
   bool isMessageSelected = false;
   bool showEmojiKeyboard = false;
   final FocusNode focusNode = FocusNode();
+  late ChatBloc chatBloc;
 
   @override
   void initState() {
     chatId = chatFeaturesUseCase.chatRoomId(
         widget.userDetails.userId!, widget.chatUserDetails.userId!);
+        chatBloc = context.read<ChatBloc>();
     focusNode.addListener(() {
       if (focusNode.hasFocus) {
         showEmojiKeyboard = false;
@@ -46,8 +50,13 @@ class _ChatScreenState extends State<ChatScreen> {
       setState(() {});
     });
 
-    context.read<ChatBloc>().add(LoadChatEvent(chatId: chatId));
+    chatBloc.add(LoadChatEvent(chatId: chatId));
     super.initState();
+  }
+  @override
+  void dispose() {
+    chatBloc.streamSubscription?.cancel();
+    super.dispose();
   }
 
   @override
@@ -108,7 +117,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 if (state is ChatErrorState) {}
                 if (state is MessageLoadedState) {}
                 if (state is MessageUpdatedState) {
-                  messages = state.docs;
+                  messages = state.docs
+                      .map((e) => Message.fromJson(e.data()))
+                      .toList();
                 }
               }, buildWhen: (previous, current) {
                 return current is MessageUpdatedState;
@@ -124,11 +135,16 @@ class _ChatScreenState extends State<ChatScreen> {
                   reverse: true,
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
+                    String timestampString = messages[index].timeStamp.toString(); // Assuming 'timeStamp' is a string representing a timestamp
+                    DateTime timestamp = DateTime.parse(timestampString);
+                    String formattedTime =
+                        DateFormat('HH:mm').format(timestamp);
+
                     return Align(
-                      alignment: messages[index]['sender'] ==
+                      alignment: messages[index].sender ==
                               widget.userDetails.userId!
-                          ? Alignment.centerRight
-                          : Alignment.centerLeft,
+                          ? Alignment.topRight
+                          : Alignment.topLeft,
                       child: InkWell(
                         onLongPress: () {
                           setState(() {
@@ -136,28 +152,67 @@ class _ChatScreenState extends State<ChatScreen> {
                           });
                         },
                         child: Container(
+                          constraints: BoxConstraints(minWidth: 100),
                           padding: EdgeInsets.symmetric(
-                              vertical: 8.0, horizontal: 16.0),
-                          margin: EdgeInsets.symmetric(
-                              vertical: 5, horizontal: 10),
+                              vertical: 8.0, horizontal: 10.0),
+                          margin:
+                              EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(15),
                                 bottomLeft: Radius.circular(15),
                                 topRight: Radius.circular(15)),
-                            color: messages[index]['sender'] ==
+                            color: messages[index].sender ==
                                     widget.userDetails.userId!
                                 ? ColorAssets.neomBlue
                                 : Colors.grey.shade300,
                           ),
-                          child: Text(
-                            messages[index]['content']!,
-                            style: GoogleFonts.roboto(
-                                color: messages[index]['sender'] ==
-                                        widget.userDetails.userId!
-                                    ? Colors.white
-                                    : Colors.black,
-                                fontSize: 16),
+                          child: IntrinsicWidth(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  messages[index].content!,
+                                  style: GoogleFonts.roboto(
+                                      color: messages[index].sender ==
+                                              widget.userDetails.userId!
+                                          ? Colors.white
+                                          : Colors.black,
+                                      fontSize: 16),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        formattedTime,
+                                        style: GoogleFonts.roboto(
+                                            color: messages[index].sender ==
+                                                    widget.userDetails.userId!
+                                                ? Colors.white
+                                                : Colors.black,
+                                            fontSize: 12),
+                                      ),
+                                      SizedBox(width: 5),
+                                      messages[index].sender ==
+                                              widget.userDetails.userId!
+                                          ? Icon(
+                                              Icons.done_all,
+                                              color:   (messages[index].seenby!.contains(widget.chatUserDetails.userId)) ? Colors.white : Colors.black ,
+                                              size: 15,
+                                            )
+                                          : Container(),
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -238,6 +293,7 @@ class _ChatScreenState extends State<ChatScreen> {
                             .id;
 
                         final chat = Chat(
+                          readby: widget.chatUserDetails.userId,
                           chatId: chatId,
                           createdAt: DateTime.now(),
                           groupImage: widget.chatUserDetails.imagepath!,
@@ -245,7 +301,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           lastMessage: {
                             'content': _messageController.text,
                             'sender': widget.userDetails.userId!,
-                            'timeStamp': Timestamp.now().toString(),
+                            'timeStamp': DateTime.now(),
                           },
                           usersInfo: {
                             widget.userDetails.userId!: widget.userDetails,
@@ -259,6 +315,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           ],
                         );
                         final messageObj = Message(
+                          seenby: [],
                           messageId: mId,
                           content: _messageController.text,
                           timeStamp: DateTime.now(),
@@ -273,15 +330,14 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               ),
               ValueListenableBuilder(
-                valueListenable: ValueNotifier(showEmojiKeyboard),
+                valueListenable: ValueNotifier(0),
                 builder: (BuildContext context, dynamic value, Widget? child) {
                   return Visibility(
                     visible: showEmojiKeyboard,
                     child: EmojiKeyboard(
                       emotionController: _messageController,
-                      emojiKeyboardHeight: 400,
+                      emojiKeyboardHeight: 350,
                       darkMode: true,
-                      showEmojiKeyboard: showEmojiKeyboard,
                     ),
                   );
                 },

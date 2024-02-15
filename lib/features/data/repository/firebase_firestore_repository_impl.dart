@@ -151,6 +151,25 @@ class FirebaseFirestoreRepositoryImplement extends FirebaseFirestoreRepository {
      
     }
   }
+  Future<bool>doesUserEmailExist(String email ) async {
+    try {
+
+// if the size of value is greater then 0 then that doc exist. 
+      var userNameUser = await users
+          .where('email', isEqualTo: email)
+          .get()
+          .then((value) => value.size > 0 ? true : false);
+      
+      if(userNameUser){
+        return true;
+      }
+      return false;
+          
+    } catch (e) {
+      throw(e.toString());
+     
+    }
+  }
 
 
 }

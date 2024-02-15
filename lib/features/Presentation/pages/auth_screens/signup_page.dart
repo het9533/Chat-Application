@@ -9,7 +9,6 @@ import 'package:chat_app/features/Presentation/pages/auth_screens/login_screen.d
 import 'package:chat_app/features/Presentation/pages/chat_screens/home_page.dart';
 import 'package:chat_app/features/Presentation/pages/email_verification/email_verification_screen.dart';
 import 'package:chat_app/features/Presentation/pages/user_profile/profile_page.dart';
-import 'package:chat_app/features/Presentation/widgets/custom_phone_feild.dart';
 import 'package:chat_app/features/Presentation/widgets/custom_text_fields.dart';
 import 'package:chat_app/features/Presentation/widgets/horizontal_or_line.dart';
 import 'package:chat_app/features/Presentation/widgets/verify_otp_dialouge.dart';
@@ -18,6 +17,9 @@ import 'package:chat_app/features/domain/usecase/firebase_firestore_usecase.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:lottie/lottie.dart';
 
 class SignUpPage extends StatefulWidget {
   static const signuppage = 'signuppage';
@@ -46,6 +48,7 @@ class _SignUpPageState extends State<SignUpPage> {
   var otpFieldVisibility = false;
   var receivedID = '';
   bool islogin = false;
+  bool isvalidphoneNumber = true;
   FirebaseAuth auth = FirebaseAuth.instance;
 
   String userNumber = '';
@@ -54,7 +57,45 @@ class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
 
   _SignUpPageState({required this.firebaseFirestoreUseCase});
-
+Widget _dialog(BuildContext context) {
+    return AlertDialog(
+      elevation: 0.0,
+      backgroundColor: Colors.white,
+      title: Column(
+        children: [
+          Lottie.asset('assets/lottie/invalid.json',repeat: false),
+          SizedBox(height: 10,),
+          Text("user already exists please Login", style: GoogleFonts.roboto(
+            fontSize: 15,
+            fontWeight: FontWeight.w500
+          ),),
+        ],
+      ),
+      actions: <Widget>[
+        TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text("Okay"))
+      ],
+    );
+  }
+  void _scaleDialog() {
+    showGeneralDialog(
+      context: context,
+      pageBuilder: (ctx, a1, a2) {
+        return Container();
+      },
+      transitionBuilder: (ctx, a1, a2, child) {
+        var curve = Curves.easeInOut.transform(a1.value);
+        return Transform.scale(
+          scale: curve,
+          child: _dialog(ctx),
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 300),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,22 +111,20 @@ class _SignUpPageState extends State<SignUpPage> {
               if (isClickedSignUpGoogle) {
                 if (state.isUserExist) {
                   Navigator.pushNamed(context, ChatMainScreen.chatMainScreen);
-                }else{
+                } else {
                   Future.delayed(Duration(seconds: 1));
-                Navigator.pushNamed(
-                  context,
-                  ProfilePage.profilepage,
-                  arguments: UserDetails(
-                    
-                    firstName: state.user.displayName,
-                    lastName: state.user.displayName,
-                    email: state.user.email,
-                    imagepath: state.user.photoURL,
-                    number: state.user.phoneNumber,
-                  ),
-                );
+                  Navigator.pushNamed(
+                    context,
+                    ProfilePage.profilepage,
+                    arguments: UserDetails(
+                      firstName: state.user.displayName,
+                      lastName: state.user.displayName,
+                      email: state.user.email,
+                      imagepath: state.user.photoURL,
+                      number: state.user.phoneNumber,
+                    ),
+                  );
                 }
-                
               }
 
               if (!isClickedSignUpGoogle) {
@@ -129,7 +168,6 @@ class _SignUpPageState extends State<SignUpPage> {
               if (state is PhoneAuthenticationSuccess) {
                 context.read<AuthenticationBloc>().add(
                     EmailSignUpRequestedEvent(UserDetails(
-                      
                         firstName: '',
                         lastName: '',
                         email: emailController.text,
@@ -178,7 +216,6 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     Column(
                       children: [
-                        
                         CustomTextFormField(
                           label: "Email Address",
                           hint: "Enter your email",
@@ -197,19 +234,94 @@ class _SignUpPageState extends State<SignUpPage> {
                           },
                         ),
                         SizedBox(height: 20),
-                        CustomPhoneFeild(
-                          isEnabled: otpVerified,
-                          label: "Mobile Number",
-                          hint: "Enter your mobile number",
-                          controller: phoneController,
-                          onChanged: (val) {
-                            userNumber = val.completeNumber;
-                          },
-                          onsubmitted: (String) {
-                            FocusManager.instance.primaryFocus?.unfocus();
-                          },
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Mobile Number",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            Container(
+                              child: IntlPhoneField(
+                                controller: phoneController,
+                                readOnly: otpVerified,
+                                keyboardType: TextInputType.phone,
+                                autovalidateMode:
+                                    AutovalidateMode.onUserInteraction,
+                                onSubmitted: (String) {
+                                  FocusManager.instance.primaryFocus?.unfocus();
+                                },
+                                onChanged: (val) {
+                                  userNumber = val.completeNumber;
+                                },
+                                initialCountryCode: 'IN',
+                                initialValue: '+91',
+                                decoration: InputDecoration(
+                                  enabled: otpVerified,
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(10)),
+                                    borderSide: BorderSide(
+                                        color: Colors.black, width: 1),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(10)),
+                                    borderSide: BorderSide(
+                                        color: Colors.black, width: 1),
+                                  ),
+                                  disabledBorder: OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(10)),
+                                    borderSide: BorderSide(
+                                        color: Colors.black, width: 1),
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(10)),
+                                    borderSide: BorderSide(
+                                        color: Colors.black, width: 1),
+                                  ),
+                                  hintText: "Enter your mobile number",
+                                  contentPadding: EdgeInsets.only(
+                                      left: 10, right: 10, top: 10, bottom: 10),
+                                  hintStyle: TextStyle(
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                validator: (value) {
+                                  if (!RegExp(r'^(?:[+0]9)?[0-9]{6,14}$')
+                                      .hasMatch(value!.completeNumber)) {
+                                    setState(() {
+                                      isvalidphoneNumber = false;
+                                    });
+                                    return 'Please enter Number';
+                                  }
+                                  if (value.completeNumber.isEmpty ||
+                                      !value.isValidNumber()) {
+                                    setState(() {
+                                      isvalidphoneNumber = false;
+                                    });
+                                    return 'Phone number is required';
+                                  }
+                                  if (!value.isValidNumber()) {
+                                    setState(() {
+                                      isvalidphoneNumber = false;
+                                    });
+                                    return 'Please enter a valid phone number';
+                                  }
+                                  setState(() {
+                                    isvalidphoneNumber = true;
+                                  });
+                                  return null;
+                                },
+                              ),
+                            ),
+                          ],
                         ),
-              
                         SizedBox(height: 20),
                         CustomTextFormField(
                           label: "Password",
@@ -226,8 +338,6 @@ class _SignUpPageState extends State<SignUpPage> {
                             return null;
                           },
                         ),
-                        
-                        
                       ],
                     ),
                     SizedBox(height: 20),
@@ -274,11 +384,18 @@ class _SignUpPageState extends State<SignUpPage> {
                               backgroundColor: MaterialStateProperty.all(
                                   ColorAssets.neomBlue)),
                           onPressed: () async {
-                            if (_formKey.currentState?.validate() ?? false) {
+                          
+                            if ((_formKey.currentState?.validate() ?? false) &&
+                                isvalidphoneNumber) {
                               // verify phone number
-                              context
+                              final bool userExist = await firebaseFirestoreUseCase.doesUserEmailExist(emailController.text);
+                              if (userExist) {
+                                _scaleDialog();
+                              }else{
+                                context
                                   .read<PhoneAuthenticationBloc>()
                                   .add(VerifyPhoneNumberEvent(userNumber));
+                              }
 
                               // verify otp
                             }
@@ -286,8 +403,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           },
                           child: Text(
                             "Sign Up",
-                            style: TextStyle(
-                                color: Colors.white, fontSize: 16),
+                            style: TextStyle(color: Colors.white, fontSize: 16),
                           )),
                     ),
                     SizedBox(

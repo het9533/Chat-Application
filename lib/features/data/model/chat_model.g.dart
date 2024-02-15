@@ -7,6 +7,7 @@ part of 'chat_model.dart';
 // **************************************************************************
 
 Chat _$ChatFromJson(Map<String, dynamic> json) => Chat(
+      readby: json['readby'] as String?,
       usersInfo: (json['usersInfo'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(k, UserDetails.fromJson(e as Map<String, dynamic>)),
       ),
@@ -21,16 +22,27 @@ Chat _$ChatFromJson(Map<String, dynamic> json) => Chat(
       users: json['users'] as List<dynamic>?,
     );
 
-Map<String, dynamic> _$ChatToJson(Chat instance) => <String, dynamic>{
-      'chatId': instance.chatId,
-      'createdAt': instance.createdAt?.toIso8601String(),
-      'groupImage': instance.groupImage,
-      'groupName': instance.groupName,
-      'lastMessage': instance.lastMessage,
-      'users': instance.users,
-      'type': _$ChatTypeEnumMap[instance.type],
-      'usersInfo': instance.usersInfo?.map((k, e) => MapEntry(k, e.toJson())),
-    };
+Map<String, dynamic> _$ChatToJson(Chat instance) {
+  final val = <String, dynamic>{};
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('chatId', instance.chatId);
+  writeNotNull('createdAt', instance.createdAt?.toIso8601String());
+  writeNotNull('groupImage', instance.groupImage);
+  writeNotNull('groupName', instance.groupName);
+  writeNotNull('lastMessage', instance.lastMessage);
+  writeNotNull('users', instance.users);
+  writeNotNull('type', _$ChatTypeEnumMap[instance.type]);
+  writeNotNull(
+      'usersInfo', instance.usersInfo?.map((k, e) => MapEntry(k, e.toJson())));
+  writeNotNull('readby', instance.readby);
+  return val;
+}
 
 const _$ChatTypeEnumMap = {
   ChatType.private: 'private',

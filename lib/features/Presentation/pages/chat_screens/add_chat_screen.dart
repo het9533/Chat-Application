@@ -30,6 +30,7 @@ class _AddChatScreenState extends State<AddChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+      
         backgroundColor: ColorAssets.neomCream,
         title: Text(
           "New Conversation",

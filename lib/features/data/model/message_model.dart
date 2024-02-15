@@ -1,5 +1,3 @@
-
-
 import 'package:json_annotation/json_annotation.dart';
 
 
@@ -10,7 +8,7 @@ part 'message_model.g.dart';
 class Message{
 String? messageId;
 String? content;
-List? seenby;
+List<String>? seenby;
 String? sender;
 DateTime? timeStamp;
 

@@ -6,8 +6,8 @@ import 'package:chat_app/features/domain/repository/chat_features_repository.dar
 class ChatFeaturesRepositoryImplementation extends ChatFeaturesRepository {
   @override
   String chatRoomId(String user1, String user2) {
-    if (user1[0].toLowerCase().codeUnits[0] >
-        user2[0].toLowerCase().codeUnits[0]) {
+    if (user1.hashCode<=
+        user2.hashCode) {
       return "$user1$user2";
     } else {
       return "$user2$user1";
@@ -25,8 +25,8 @@ class ChatFeaturesRepositoryImplementation extends ChatFeaturesRepository {
       await FirebaseFirestore.instance
           .collection('chats')
           .doc(chatId)
-          .collection('messages')
-          .add(message.toJson());
+          .collection('messages').doc(message.messageId).set(message.toJson());
+          
     } catch (e) {
       print('Error sending message: $e');
       throw Exception('Failed to send message');

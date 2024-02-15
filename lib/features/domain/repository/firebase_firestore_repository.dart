@@ -6,4 +6,5 @@ abstract class FirebaseFirestoreRepository{
   Future<bool> checkIfDocExists(String docId);
   Future<UserDetails> getCurrentUserDetails(String docID);
   Future<bool>doesUserNameUserExist(String currentUserName, String docID);
+  Future<bool>doesUserEmailExist(String email );
 }

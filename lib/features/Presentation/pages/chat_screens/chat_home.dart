@@ -1,6 +1,7 @@
 import 'package:chat_app/common/constants/color_constants.dart';
 import 'package:chat_app/features/Presentation/Bloc/profile_page_bloc/profile_page_bloc.dart';
 import 'package:chat_app/features/Presentation/Bloc/profile_page_bloc/profile_page_states.dart';
+import 'package:chat_app/features/Presentation/pages/auth_screens/welcome_screen.dart';
 import 'package:chat_app/features/Presentation/pages/chat_screens/chat_screen.dart';
 import 'package:chat_app/features/Presentation/pages/user_profile/profile_page.dart';
 import 'package:chat_app/features/Presentation/widgets/my_chat_card.dart';
@@ -40,11 +41,6 @@ class _ChatHomePageState extends State<ChatHomePage>
   final _userSession = sl<UserSession>();
   final TextEditingController searchController = TextEditingController();
 
-
-  
-
-
-
   @override
   void dispose() {
     controller.dispose();
@@ -53,7 +49,6 @@ class _ChatHomePageState extends State<ChatHomePage>
 
   @override
   void initState() {
-
     controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
@@ -124,10 +119,7 @@ class _ChatHomePageState extends State<ChatHomePage>
               ),
               centerTitle: true,
               actions: [
-                //   Container(
-                //       margin: EdgeInsets.only(right: 20),
-                //       child: SvgPicture.asset("assets/icons/add_square.svg")),
-                // ],
+
 
                 PopupMenuButton<int>(
                     surfaceTintColor: Colors.white,
@@ -151,9 +143,12 @@ class _ChatHomePageState extends State<ChatHomePage>
                     },
                     onSelected: (item) async {
                       if (item == 0) {
+                        Future.delayed(Duration(seconds: 1));
                         _googleSignIn.signOut();
                         FirebaseFirestore.instance.clearPersistence();
                         FirebaseAuth.instance.signOut();
+                        Navigator.pushNamed(
+                            context, WelcomeScreen.welcomescreen);
                       } else {}
                     },
                     itemBuilder: (context) => [
@@ -163,9 +158,8 @@ class _ChatHomePageState extends State<ChatHomePage>
               ]),
           body: Column(
             children: [
-
-                          Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10,vertical: 5),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 child: SearchBar(
                     shape: MaterialStateProperty.all(RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12))),
@@ -203,30 +197,32 @@ class _ChatHomePageState extends State<ChatHomePage>
                         );
                       }
                       return Container(
-                      
                         child: ListView.builder(
                             itemCount: snapshot.data?.docs.length,
                             itemBuilder: (BuildContext context, int index) {
                               DocumentSnapshot document =
                                   snapshot.data!.docs[index];
 
-                                  List otherUserId = document['users'];
-                                  otherUserId.remove(user!.uid);
-                                
-                                UserDetails anotherUser = UserDetails.fromJson(document['usersInfo'][otherUserId.first]);
+                              List otherUserId = document['users'];
+                              otherUserId.remove(user!.uid);
+
+                              UserDetails anotherUser = UserDetails.fromJson(
+                                  document['usersInfo'][otherUserId.first]);
                               return UserChatCard(
                                 ontap: () {
-                                  
                                   Navigator.pushNamed(
                                       context, ChatScreen.chatScreen,
                                       arguments: [
                                         _userSession.userDetails,
                                         anotherUser
-                                        
                                       ]);
                                 },
-                                image: document['usersInfo'][otherUserId.first]['imagepath'] ?? "",
-                                username: document['usersInfo'][otherUserId.first]['userName']?? "",
+                                image: document['usersInfo'][otherUserId.first]
+                                        ['imagepath'] ??
+                                    "",
+                                username: document['usersInfo']
+                                        [otherUserId.first]['userName'] ??
+                                    "",
                                 lastMessage: document['lastMessage']['content'],
                               );
                             }),

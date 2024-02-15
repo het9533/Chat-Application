@@ -18,8 +18,10 @@ class Chat {
   List? users;
   ChatType? type;
   Map<String,UserDetails>? usersInfo;
+  String? readby;
 
   Chat({
+    this.readby,
     this.usersInfo,
     this.chatId,
     this.createdAt,
