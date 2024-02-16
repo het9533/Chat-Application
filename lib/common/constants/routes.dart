@@ -4,6 +4,7 @@ import 'package:chat_app/features/Presentation/pages/auth_screens/welcome_screen
 import 'package:chat_app/features/Presentation/pages/chat_screens/add_chat_screen.dart';
 import 'package:chat_app/features/Presentation/pages/chat_screens/chat_home.dart';
 import 'package:chat_app/features/Presentation/pages/chat_screens/chat_screen.dart';
+import 'package:chat_app/features/Presentation/pages/chat_screens/edit_message_screen.dart';
 import 'package:chat_app/features/Presentation/pages/chat_screens/home_page.dart';
 import 'package:chat_app/features/Presentation/pages/email_verification/account_success_screen.dart';
 import 'package:chat_app/features/Presentation/pages/email_verification/email_verification_screen.dart';
@@ -62,10 +63,21 @@ class AppNavigator {
                   chatUserDetails: args[1],
                 ),
             settings: settings);
-          case AddChatScreen.addChatScreen:
+      case AddChatScreen.addChatScreen:
         return MaterialPageRoute(
           builder: (context) => AddChatScreen(),
         );
+      case EditMessageScreen.editMessageScreen:
+        var args = settings.arguments as List<dynamic>;
+        return MaterialPageRoute(
+            builder: (context) => EditMessageScreen(
+                  newMessage: args[0],
+                  chatId: args[1],
+                  messageId: args[2],
+                  message: args[3],
+                  timeStampMessage: args[4],
+                ),
+            settings: settings);
 
       default:
         return MaterialPageRoute(

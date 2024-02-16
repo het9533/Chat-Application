@@ -8,11 +8,11 @@ part 'message_model.g.dart';
 class Message{
 String? messageId;
 String? content;
-List<String>? seenby;
+List<String>? unseenby;
 String? sender;
 DateTime? timeStamp;
 
-  Message({ this.messageId,this.content,this.seenby,this.sender,this.timeStamp});
+  Message({ this.messageId,this.content,this.unseenby,this.sender,this.timeStamp});
 
 
    factory Message.fromJson(Map<String, dynamic> json) =>

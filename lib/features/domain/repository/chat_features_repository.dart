@@ -11,5 +11,5 @@ abstract class ChatFeaturesRepository {
   Future<void> updateMessage(
       String chatId, String messageId, String newMessage);
   
-  Future<void> deleteMessage(String chatId, String messageId);
+  Future<void> deleteMessage(String chatId, List<String> messageId);
 }

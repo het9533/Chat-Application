@@ -1,4 +1,3 @@
-
 import 'package:chat_app/features/data/entity/user.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -30,7 +29,6 @@ class _AddChatScreenState extends State<AddChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-      
         backgroundColor: ColorAssets.neomCream,
         title: Text(
           "New Conversation",
@@ -98,7 +96,10 @@ class _AddChatScreenState extends State<AddChatScreen> {
                     itemCount: filteredUsers.length,
                     itemBuilder: (context, index) {
                       final document = filteredUsers[index];
+                      
                       return UserChatCard(
+                        unseenCount:
+                            '5',
                         ontap: () {
                           Navigator.pushNamed(
                             context,
@@ -107,7 +108,6 @@ class _AddChatScreenState extends State<AddChatScreen> {
                               _userSession.userDetails,
                               UserDetails.fromJson(
                                   document.data() as Map<String, dynamic>)
-                                
                             ],
                           );
                         },

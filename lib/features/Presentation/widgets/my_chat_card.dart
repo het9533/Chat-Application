@@ -10,8 +10,10 @@ class UserChatCard extends StatelessWidget {
   final VoidCallback ontap;
   
   final String lastMessage;
+  
+  final String unseenCount;
 
-UserChatCard({super.key, required this.image, required this.username, required this.ontap, required this.lastMessage});
+UserChatCard({super.key, required this.image, required this.username, required this.ontap, required this.lastMessage, required this.unseenCount});
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +96,7 @@ UserChatCard({super.key, required this.image, required this.username, required t
                     backgroundColor: ColorAssets.neomBlue,
                     radius: 12,
                     child: Text(
-                      '3',
+                      unseenCount,
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 14,

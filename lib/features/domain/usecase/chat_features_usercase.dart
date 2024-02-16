@@ -25,7 +25,7 @@ class ChatFeaturesUseCase {
         chatId, messageId, newMessage);
   }
 
-  Future<void> deleteMessage(String chatId, String messageId) async {
+  Future<void> deleteMessage(String chatId, List<String> messageId) async {
     return await chatFeaturesRepository.deleteMessage(chatId, messageId);
   }
 }

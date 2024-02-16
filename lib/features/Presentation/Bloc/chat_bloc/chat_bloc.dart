@@ -1,27 +1,33 @@
 import 'dart:async';
-
 import 'package:chat_app/features/Presentation/Bloc/chat_bloc/chat_event.dart';
 import 'package:chat_app/features/Presentation/Bloc/chat_bloc/chat_state.dart';
 import 'package:chat_app/features/data/entity/user_session.dart';
 import 'package:chat_app/features/data/model/message_model.dart';
 import 'package:chat_app/features/domain/usecase/chat_features_usercase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
   ChatFeaturesUseCase chatFeaturesUseCase;
   UserSession userSession;
   StreamSubscription? streamSubscription;
+  StreamSubscription? streamSubscription1;
+   List<StreamSubscription?>? countSubscriptions;
+
+
   ChatBloc({required this.chatFeaturesUseCase, required this.userSession})
-      : super(InitialChatState()) {
+    : super(InitialChatState()) {
     on<InitialChatEvent>(_initalChat);
     on<AddChatEvent>(_addChat);
-    on<LoadChatEvent>(_loadChat);
+    on<LoadMessageEvent>(_loadMessage);
     on<DeleteChatEvent>(_deleteChat);
     on<AddMessageEvent>(_addMessage);
     on<UpdateMessageEvent>(_updateMessage);
     on<DeleteMessageEvent>(_deleteMessage);
+    on<EditedMessageEvent>(_editMessage);
+    on<LoadChatEvent>(_loadChat);
+    on<UpdateUnreadCountEvent>(_updateUnreadCount);
+
   }
 
   void _initalChat(InitialChatEvent event, Emitter<ChatState> emit) async {
@@ -44,7 +50,53 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
   void _loadChat(LoadChatEvent event, Emitter<ChatState> emit) async {
     emit(InitialChatState());
+
     try {
+        streamSubscription1 = FirebaseFirestore.instance
+            .collection('chats')
+            .orderBy('lastMessage.timeStamp', descending: true)
+            .snapshots()
+            .listen(
+          (event) {
+         
+            
+
+        countSubscriptions?.forEach((element) => element?.cancel());
+
+        countSubscriptions = List.filled(event.docs.length, null);
+        for (int i = 0; i < event.docs.length; i++) {
+
+
+          countSubscriptions![i] = FirebaseFirestore.instance
+              .collection('chats')
+              .doc(event.docs[i].id)
+              .collection('messages')
+              .where('unSeenBy', arrayContains: userSession.userDetails!.userId)
+              .snapshots()
+              .listen((ev) {
+            userSession.unReadCount ??= {event.docs[i].id:ev.docs.length};
+            userSession.unReadCount?.addAll({event.docs[i].id:ev.docs.length});
+            add(UpdateUnreadCountEvent());
+          });
+          
+        }
+        
+      },
+    );
+          
+        
+    } catch (e) {
+      emit(ChatErrorState(error: e.toString()));
+    }
+  
+  
+  }
+  void _loadMessage(LoadMessageEvent event, Emitter<ChatState> emit) async {
+    emit(InitialChatState());
+    try {
+      if(streamSubscription!=null){
+        streamSubscription?.cancel();
+      }
       final chatId = event.chatId;
       streamSubscription =  FirebaseFirestore.instance
           .collection('chats')
@@ -54,30 +106,46 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           .snapshots()
           .listen((event) {
         print(event.docs);
-        final user = FirebaseAuth.instance.currentUser;
 
-       final List<Message> messages =
-            event.docs.map((e) => Message.fromJson(e.data())).toList();
+        List<Message> messages = [];
+       messages = event.docs.map((e) => Message.fromJson(e.data())).toList();
+            
 
         int i = 0;
-        while (user!.uid != messages[i].sender &&
-            !(messages[i].seenby!.contains(user.uid))) {
+        while (userSession.userDetails!.userId != messages[i].sender &&
+            (messages[i].unseenby!.contains(userSession.userDetails!.userId))) {
+              messages[i].unseenby?.remove(userSession.userDetails!.userId);
           FirebaseFirestore.instance
               .collection('chats')
               .doc(chatId)
               .collection('messages')
               .doc( messages[i].messageId)
-              .update({'seenby': [user.uid,...?messages[i].seenby]});
+              .update({'unseenby': messages[i].unseenby});
           i++;
         }
+      
+       
+      
+    
 
-        add(UpdateMessageEvent(docs: event.docs));
-
+        
+        add(UpdateMessageEvent(docs: messages));
       });
     } catch (error) {
       emit(ChatErrorState(error: error.toString()));
     }
   }
+
+  void _editMessage(EditedMessageEvent event , Emitter<ChatState> emit) async{
+    try {
+
+      await chatFeaturesUseCase.updateMessage(event.chatId, event.messageId, event.newMessage);
+      emit(EditedMessageState());
+    } catch (e) {
+      emit(ChatErrorState(error: e.toString()));
+    }
+  }
+
 
   void _addMessage(AddMessageEvent event, Emitter<ChatState> emit) async {
     emit(InitialChatState());
@@ -101,7 +169,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   void _updateMessage(UpdateMessageEvent event, Emitter<ChatState> emit) async {
     emit(InitialChatState());
     try {
-      emit(MessageUpdatedState(docs: event.docs));
+         List<Message> messages = event.docs.map((e) => Message.fromJson(e.toJson())).toList();
+
+      emit(MessageUpdatedState(docs: messages));
     } catch (error) {
       emit(ChatErrorState(error: error.toString()));
     }
@@ -109,8 +179,23 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
   void _deleteMessage(DeleteMessageEvent event, Emitter<ChatState> emit) async {
     emit(InitialChatState());
-    try {} catch (error) {
+    try {
+      await chatFeaturesUseCase.deleteMessage(event.chatId, event.MessageId);
+    emit(DeletedMessageState());
+    } catch (error) {
       emit(ChatErrorState(error: error.toString()));
     }
   }
+
+    void _updateUnreadCount(UpdateUnreadCountEvent event, Emitter<ChatState> emit) async {
+    emit(InitialChatState());
+    
+    try {
+      emit(UpdateUnreadCountState());
+    } catch (e) {
+      emit(ChatErrorState(error: e.toString()));
+    }
+    
+    
+    }
 }

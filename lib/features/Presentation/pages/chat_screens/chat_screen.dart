@@ -1,7 +1,7 @@
-
 import 'package:chat_app/features/Presentation/Bloc/chat_bloc/chat_bloc.dart';
 import 'package:chat_app/features/Presentation/Bloc/chat_bloc/chat_event.dart';
 import 'package:chat_app/features/Presentation/Bloc/chat_bloc/chat_state.dart';
+import 'package:chat_app/features/Presentation/pages/chat_screens/edit_message_screen.dart';
 import 'package:chat_app/features/data/entity/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:emoji_keyboard_flutter/emoji_keyboard_flutter.dart';
@@ -37,12 +37,15 @@ class _ChatScreenState extends State<ChatScreen> {
   bool showEmojiKeyboard = false;
   final FocusNode focusNode = FocusNode();
   late ChatBloc chatBloc;
+  List<String> selectedMessage = [];
+  bool selectionMode = false;
+  String? messageTimeStamp;
 
   @override
   void initState() {
     chatId = chatFeaturesUseCase.chatRoomId(
         widget.userDetails.userId!, widget.chatUserDetails.userId!);
-        chatBloc = context.read<ChatBloc>();
+    chatBloc = context.read<ChatBloc>();
     focusNode.addListener(() {
       if (focusNode.hasFocus) {
         showEmojiKeyboard = false;
@@ -50,11 +53,13 @@ class _ChatScreenState extends State<ChatScreen> {
       setState(() {});
     });
 
-    chatBloc.add(LoadChatEvent(chatId: chatId));
+    chatBloc.add(LoadMessageEvent(chatId: chatId));
     super.initState();
   }
+
   @override
   void dispose() {
+   
     chatBloc.streamSubscription?.cancel();
     super.dispose();
   }
@@ -68,7 +73,8 @@ class _ChatScreenState extends State<ChatScreen> {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.only(top: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 child: Row(
                   children: [
                     IconButton(
@@ -102,6 +108,68 @@ class _ChatScreenState extends State<ChatScreen> {
                           fontSize: 20,
                           fontWeight: FontWeight.w500),
                     ),
+                    Spacer(),
+                    !selectionMode
+                        ? PopupMenuButton(
+                            elevation: 0.0,
+                            color: Colors.white,
+                            itemBuilder: (context) {
+                              return [
+                                PopupMenuItem(child: Text('Report')),
+                                PopupMenuItem(child: Text('Block')),
+                                PopupMenuItem(child: Text('Clear Chat')),
+                                PopupMenuItem(child: Text('Search')),
+                                PopupMenuItem(
+                                    child: Text('Media,links,and docs'))
+                              ];
+                            },
+                          )
+                        : Row(
+                            children: [
+                              if (selectedMessage.length == 1 &&
+                                  messages
+                                          .firstWhere((element) =>
+                                              element.messageId ==
+                                              selectedMessage[0])
+                                          .sender ==
+                                      widget.userDetails.userId)
+                                IconButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                          context,
+                                          PageRouteBuilder(
+                                            barrierColor: Colors.transparent,
+                                            opaque: false,
+                                            pageBuilder: (context, animation,
+                                                secondaryAnimation) {
+                                              return EditMessageScreen(
+                                                message: messages,
+                                                  timeStampMessage: messageTimeStamp!,
+                                                  chatId: chatId,
+                                                  messageId:
+                                                      selectedMessage.first,
+                                                  newMessage: messages
+                                                      .firstWhere((element) =>
+                                                          element.messageId ==
+                                                          selectedMessage[0])
+                                                      .content!);
+                                            },
+                                          ));
+
+                                      setState(() {});
+                                    },
+                                    icon: Icon(Icons.edit))
+                              else
+                                Container(),
+                              IconButton(
+                                  onPressed: () {
+                                    chatBloc.add(DeleteMessageEvent(
+                                        selectedMessage,
+                                        chatId: chatId));
+                                  },
+                                  icon: Icon(Icons.delete))
+                            ],
+                          )
                   ],
                 ),
               ),
@@ -110,19 +178,17 @@ class _ChatScreenState extends State<ChatScreen> {
                       listener: (context, state) {
                 if (state is InitialChatState) {}
                 if (state is ChatLoadedState) {}
-                if (state is ChatAddedState) {
-                  context.read<ChatBloc>().add(LoadChatEvent(chatId: chatId));
-                }
+
                 if (state is ChatUpdatedState) {}
                 if (state is ChatErrorState) {}
                 if (state is MessageLoadedState) {}
                 if (state is MessageUpdatedState) {
                   messages = state.docs
-                      .map((e) => Message.fromJson(e.data()))
+                      .map((e) => Message.fromJson(e.toJson()))
                       .toList();
                 }
               }, buildWhen: (previous, current) {
-                return current is MessageUpdatedState;
+                return current is MessageUpdatedState || current is ChatAddedState || current is ChatErrorState || current is ChatLoadedState || current is ChatUpdatedState || current is DeletedMessageState || current is EditedMessageState || current is InitialChatState;
               }, builder: (context, state) {
                 if (state is InitialChatState) {}
                 if (state is ChatLoadedState) {}
@@ -135,22 +201,47 @@ class _ChatScreenState extends State<ChatScreen> {
                   reverse: true,
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
-                    String timestampString = messages[index].timeStamp.toString(); // Assuming 'timeStamp' is a string representing a timestamp
+                    String timestampString =
+                        messages[index].timeStamp.toString();
                     DateTime timestamp = DateTime.parse(timestampString);
                     String formattedTime =
                         DateFormat('HH:mm').format(timestamp);
-
-                    return Align(
-                      alignment: messages[index].sender ==
-                              widget.userDetails.userId!
-                          ? Alignment.topRight
-                          : Alignment.topLeft,
-                      child: InkWell(
-                        onLongPress: () {
+                      messageTimeStamp = formattedTime;
+                    return InkWell(
+                      onLongPress: () {
+                        selectedMessage.add(messages[index].messageId!);
+                        print(selectedMessage);
+                        setState(() {
+                          selectionMode = true;
+                        });
+                      },
+                      onTap: () {
+                        if (selectionMode) {
+                          if (selectedMessage
+                              .contains(messages[index].messageId)) {
+                            selectedMessage.remove(messages[index].messageId);
+                            setState(() {});
+                          } else {
+                            selectedMessage.add(messages[index].messageId!);
+                            setState(() {});
+                          }
+                        }
+                        if (selectedMessage.isEmpty) {
                           setState(() {
-                            isMessageSelected = true;
+                            selectionMode = false;
                           });
-                        },
+                        }
+                      },
+                      child: Container(
+                        margin: EdgeInsets.symmetric(vertical: 3),
+                        alignment:
+                            messages[index].sender == widget.userDetails.userId!
+                                ? Alignment.topRight
+                                : Alignment.topLeft,
+                        color:
+                            selectedMessage.contains(messages[index].messageId!)
+                                ? ColorAssets.neomBlue.withOpacity(0.15)
+                                : Colors.transparent,
                         child: Container(
                           constraints: BoxConstraints(minWidth: 100),
                           padding: EdgeInsets.symmetric(
@@ -204,7 +295,13 @@ class _ChatScreenState extends State<ChatScreen> {
                                               widget.userDetails.userId!
                                           ? Icon(
                                               Icons.done_all,
-                                              color:   (messages[index].seenby!.contains(widget.chatUserDetails.userId)) ? Colors.white : Colors.black ,
+                                              color: !(messages[index]
+                                                      .unseenby!
+                                                      .contains(widget
+                                                          .chatUserDetails
+                                                          .userId!))
+                                                  ? Colors.white
+                                                  : Colors.black,
                                               size: 15,
                                             )
                                           : Container(),
@@ -293,7 +390,6 @@ class _ChatScreenState extends State<ChatScreen> {
                             .id;
 
                         final chat = Chat(
-                          readby: widget.chatUserDetails.userId,
                           chatId: chatId,
                           createdAt: DateTime.now(),
                           groupImage: widget.chatUserDetails.imagepath!,
@@ -315,7 +411,8 @@ class _ChatScreenState extends State<ChatScreen> {
                           ],
                         );
                         final messageObj = Message(
-                          seenby: [],
+                          unseenby: [widget.userDetails.userId!,
+                            widget.chatUserDetails.userId!],
                           messageId: mId,
                           content: _messageController.text,
                           timeStamp: DateTime.now(),

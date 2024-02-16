@@ -9,8 +9,9 @@ part of 'message_model.dart';
 Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       messageId: json['messageId'] as String?,
       content: json['content'] as String?,
-      seenby:
-          (json['seenby'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      unseenby: (json['unseenby'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
       sender: json['sender'] as String?,
       timeStamp: json['timeStamp'] == null
           ? null
@@ -28,7 +29,7 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
 
   writeNotNull('messageId', instance.messageId);
   writeNotNull('content', instance.content);
-  writeNotNull('seenby', instance.seenby);
+  writeNotNull('unseenby', instance.unseenby);
   writeNotNull('sender', instance.sender);
   writeNotNull('timeStamp', instance.timeStamp?.toIso8601String());
   return val;

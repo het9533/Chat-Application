@@ -12,6 +12,7 @@ class UserDetails {
   String? number;
   String? password;
   String? imagepath;
+  
 
   UserDetails(
       {this.userName,

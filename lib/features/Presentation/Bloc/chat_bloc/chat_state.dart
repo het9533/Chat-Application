@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:chat_app/features/data/model/message_model.dart';
 
 abstract class ChatState {}
 
@@ -6,11 +6,13 @@ class InitialChatState extends ChatState {}
 
 class ChatAddedState extends ChatState{}
 
-
-
 class ChatLoadedState extends ChatState {
   List chatList;
   ChatLoadedState({required this.chatList});
+}
+
+class EditedMessageState extends ChatState{
+
 }
 
 class ChatUpdatedState extends ChatState {
@@ -29,7 +31,7 @@ class MessageLoadedState extends ChatState {
 }
 
 class MessageUpdatedState extends ChatState {
-  final List<QueryDocumentSnapshot<Map<String, dynamic>>> docs;
+  final List<Message> docs;
   MessageUpdatedState({required this.docs});
 }
 
@@ -37,3 +39,8 @@ class MessageErrorState extends ChatState {
   String error;
   MessageErrorState({required this.error});
 }
+
+class DeletedMessageState extends ChatState{
+  
+}
+class UpdateUnreadCountState extends ChatState{}

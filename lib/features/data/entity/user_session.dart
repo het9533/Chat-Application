@@ -5,5 +5,6 @@ class UserSession{
 
 UserDetails? userDetails;
 Chat? chat;
+Map<String, int>? unReadCount;
 
 }

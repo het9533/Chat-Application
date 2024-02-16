@@ -1,4 +1,7 @@
 import 'package:chat_app/common/constants/color_constants.dart';
+import 'package:chat_app/features/Presentation/Bloc/chat_bloc/chat_bloc.dart';
+import 'package:chat_app/features/Presentation/Bloc/chat_bloc/chat_event.dart';
+import 'package:chat_app/features/Presentation/Bloc/chat_bloc/chat_state.dart';
 import 'package:chat_app/features/Presentation/Bloc/profile_page_bloc/profile_page_bloc.dart';
 import 'package:chat_app/features/Presentation/Bloc/profile_page_bloc/profile_page_states.dart';
 import 'package:chat_app/features/Presentation/pages/auth_screens/welcome_screen.dart';
@@ -7,6 +10,7 @@ import 'package:chat_app/features/Presentation/pages/user_profile/profile_page.d
 import 'package:chat_app/features/Presentation/widgets/my_chat_card.dart';
 import 'package:chat_app/features/data/entity/user.dart';
 import 'package:chat_app/features/data/entity/user_session.dart';
+import 'package:chat_app/features/data/model/chat_model.dart';
 import 'package:chat_app/features/dependencyInjector/injector.dart';
 import 'package:chat_app/features/domain/usecase/authentication_usecase.dart';
 import 'package:chat_app/features/domain/usecase/firebase_firestore_usecase.dart';
@@ -35,6 +39,7 @@ class _ChatHomePageState extends State<ChatHomePage>
   AuthenticationUseCase authenticationUseCase = sl<AuthenticationUseCase>();
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   bool isPopUpMenuOn = false;
+  List<Chat> chats =[];
 
   late AnimationController controller;
   late Animation<double> animation;
@@ -57,6 +62,7 @@ class _ChatHomePageState extends State<ChatHomePage>
     animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
     getdata();
     super.initState();
+    context.read<ChatBloc>().add(LoadChatEvent());
   }
 
   void getdata() async {
@@ -119,8 +125,6 @@ class _ChatHomePageState extends State<ChatHomePage>
               ),
               centerTitle: true,
               actions: [
-
-
                 PopupMenuButton<int>(
                     surfaceTintColor: Colors.white,
                     // color: Colors.white,
@@ -156,80 +160,99 @@ class _ChatHomePageState extends State<ChatHomePage>
                           PopupMenuItem<int>(value: 1, child: Text('Settings')),
                         ])
               ]),
-          body: Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                child: SearchBar(
-                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12))),
-                    controller: searchController,
-                    onChanged: (value) {
-                      setState(() {});
-                    },
-                    backgroundColor: MaterialStateProperty.all(Colors.white),
-                    elevation: MaterialStateProperty.all(0.0),
-                    padding: MaterialStateProperty.all(
-                        EdgeInsets.symmetric(horizontal: 10)),
-                    leading: Icon(Icons.search),
-                    hintText: "Search",
-                    hintStyle: MaterialStateProperty.all(GoogleFonts.roboto(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ))),
-              ),
-              // stream builder
-              Expanded(
-                child: StreamBuilder(
-                    stream: FirebaseFirestore.instance
-                        .collection('chats')
-                        .where('users', arrayContains: user!.uid)
-                        .snapshots(),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
-                        return Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      }
-                      if (snapshot.hasError) {
-                        return Center(
-                          child: Text("error"),
-                        );
-                      }
-                      return Container(
-                        child: ListView.builder(
-                            itemCount: snapshot.data?.docs.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              DocumentSnapshot document =
-                                  snapshot.data!.docs[index];
+          body: BlocConsumer<ChatBloc, ChatState>(
+            buildWhen: (previous, current) {
+              return current is LoadChatEvent ||  current is UpdateUnreadCountEvent;
+            },
+            listener: (context, state) {
+              
+            },
+            builder: (context, state) {
+              return Column(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    child: SearchBar(
+                        shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12))),
+                        controller: searchController,
+                        onChanged: (value) {
+                          setState(() {});
+                        },
+                        backgroundColor:
+                            MaterialStateProperty.all(Colors.white),
+                        elevation: MaterialStateProperty.all(0.0),
+                        padding: MaterialStateProperty.all(
+                            EdgeInsets.symmetric(horizontal: 10)),
+                        leading: Icon(Icons.search),
+                        hintText: "Search",
+                        hintStyle: MaterialStateProperty.all(GoogleFonts.roboto(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                        ))),
+                  ),
+                  // stream builder
+                  Expanded(
+                    child: StreamBuilder(
+                        stream: FirebaseFirestore.instance
+                            .collection('chats')
+                            .where('users', arrayContains: user!.uid)
+                            .snapshots(),
 
-                              List otherUserId = document['users'];
-                              otherUserId.remove(user!.uid);
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+                          if (snapshot.hasError) {
+                            return Center(
+                              child: Text("error"),
+                            );
+                          }
+                          return Container(
+                            child: ListView.builder(
+                                itemCount: snapshot.data?.docs.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  DocumentSnapshot document =
+                                      snapshot.data!.docs[index];
 
-                              UserDetails anotherUser = UserDetails.fromJson(
-                                  document['usersInfo'][otherUserId.first]);
-                              return UserChatCard(
-                                ontap: () {
-                                  Navigator.pushNamed(
-                                      context, ChatScreen.chatScreen,
-                                      arguments: [
-                                        _userSession.userDetails,
-                                        anotherUser
-                                      ]);
-                                },
-                                image: document['usersInfo'][otherUserId.first]
-                                        ['imagepath'] ??
-                                    "",
-                                username: document['usersInfo']
-                                        [otherUserId.first]['userName'] ??
-                                    "",
-                                lastMessage: document['lastMessage']['content'],
-                              );
-                            }),
-                      );
-                    }),
-              ),
-            ],
+                                  List otherUserId = document['users'];
+                                  otherUserId.remove(user!.uid);
+
+                                  UserDetails anotherUser =
+                                      UserDetails.fromJson(document['usersInfo']
+                                          [otherUserId.first]);
+
+                                  return UserChatCard(
+                                    unseenCount: _userSession.unReadCount != null &&
+                                              _userSession.unReadCount?[
+                                                      document['chatId']] !=
+                                                  0 ? _userSession.unReadCount![document['chatId']].toString() : '0',
+                                    ontap: () {
+                                      Navigator.pushNamed(
+                                          context, ChatScreen.chatScreen,
+                                          arguments: [
+                                            _userSession.userDetails,
+                                            anotherUser
+                                          ]);
+                                    },
+                                    image: document['usersInfo']
+                                            [otherUserId.first]['imagepath'] ??
+                                        "",
+                                    username: document['usersInfo']
+                                            [otherUserId.first]['userName'] ??
+                                        "",
+                                    lastMessage: document['lastMessage']
+                                        ['content'],
+                                  );
+                                }),
+                          );
+                        }),
+                  ),
+                ],
+              );
+            },
           ),
         );
       },

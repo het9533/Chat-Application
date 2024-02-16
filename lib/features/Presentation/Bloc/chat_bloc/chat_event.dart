@@ -1,6 +1,5 @@
 import 'package:chat_app/features/data/model/chat_model.dart';
 import 'package:chat_app/features/data/model/message_model.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 abstract class ChatEvent {}
 
@@ -13,9 +12,13 @@ class AddChatEvent extends ChatEvent {
   AddChatEvent({ required this.chatId, required this.chat, required this.message});
 }
 
-class LoadChatEvent extends ChatEvent {
+
+
+
+
+class LoadMessageEvent extends ChatEvent {
   final String chatId;
-  LoadChatEvent({required this.chatId});
+  LoadMessageEvent({required this.chatId});
 }
 
 class DeleteChatEvent extends ChatEvent {}
@@ -27,11 +30,33 @@ class AddMessageEvent extends ChatEvent {
   AddMessageEvent({required this.chat,required this.message, required this.chatId});
 }
 
-class LoadMessageEvent extends ChatEvent {}
+
+
+class EditedMessageEvent extends ChatEvent{
+  final String chatId ;
+  final String messageId;
+  final String newMessage;
+
+  EditedMessageEvent({required this.chatId, required this.messageId, required this.newMessage});
+
+
+}
+class LoadChatEvent extends ChatEvent{
+
+}
 
 class UpdateMessageEvent extends ChatEvent {
-  final List<QueryDocumentSnapshot<Map<String, dynamic>>> docs;
+  final List<Message> docs;
   UpdateMessageEvent({required this.docs});
 }
 
-class DeleteMessageEvent extends ChatEvent {}
+class DeleteMessageEvent extends ChatEvent {
+  final String chatId;
+  final List<String> MessageId;
+
+  DeleteMessageEvent(this.MessageId, {required this.chatId});
+
+}
+class UpdateUnreadCountEvent extends ChatEvent{
+
+}
