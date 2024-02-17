@@ -19,7 +19,8 @@ Chat _$ChatFromJson(Map<String, dynamic> json) => Chat(
       groupName: json['groupName'] as String?,
       lastMessage: json['lastMessage'] as Map<String, dynamic>?,
       type: $enumDecodeNullable(_$ChatTypeEnumMap, json['type']),
-      users: json['users'] as List<dynamic>?,
+      users:
+          (json['users'] as List<dynamic>?)?.map((e) => e as String).toList(),
     );
 
 Map<String, dynamic> _$ChatToJson(Chat instance) {

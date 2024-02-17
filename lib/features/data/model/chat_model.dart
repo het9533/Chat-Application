@@ -15,7 +15,7 @@ class Chat {
   String? groupImage;
   String? groupName;
   Map<String, dynamic>? lastMessage;
-  List? users;
+  List<String>? users;
   ChatType? type;
   Map<String,UserDetails>? usersInfo;
   String? readby;

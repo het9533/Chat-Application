@@ -407,7 +407,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           type: ChatType.private,
                           users: [
                             widget.userDetails.userId!,
-                            widget.chatUserDetails.userId
+                            widget.chatUserDetails.userId!
                           ],
                         );
                         final messageObj = Message(

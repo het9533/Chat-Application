@@ -16,8 +16,7 @@ class EditedMessageState extends ChatState{
 }
 
 class ChatUpdatedState extends ChatState {
-  List chatList;
-  ChatUpdatedState({required this.chatList});
+  
 }
 
 class ChatErrorState extends ChatState {

@@ -60,3 +60,4 @@ class DeleteMessageEvent extends ChatEvent {
 class UpdateUnreadCountEvent extends ChatEvent{
 
 }
+class UpdatedChatEvent extends ChatEvent {}
