@@ -109,7 +109,6 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen>
             appBar: AppBar(
               automaticallyImplyLeading: false,
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              actions: [IconButton(onPressed: () {}, icon: Icon(Icons.close))],
             ),
             body: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -165,7 +164,8 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen>
                   ),
                   InkWell(
                     onTap: () async {
-                      setState(() {
+                      if (isEmailVerified) {
+                        setState(() {
                         isClicked = true;
                       });
                       await Future.delayed(Duration(seconds: 1));
@@ -177,10 +177,10 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen>
                               curve: Curves.fastOutSlowIn,
                               alignment: Alignment.center,
                               type: PageTransitionType.scale));
-
                       setState(() {
                         isClicked = false;
                       });
+                      }
                     },
                     child: AnimatedContainer(
                       alignment: Alignment.center,

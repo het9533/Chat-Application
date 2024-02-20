@@ -9,6 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ProfilePageBloc extends Bloc<ProfilePageEvents, ProfilePageState> {
+      final _userSession = sl<UserSession>();
   final FirebaseFirestoreUseCase firebaseFirestoreUseCase;
   ProfilePageBloc(this.firebaseFirestoreUseCase) : super(ProfilePageInitial()) {
     on<FetchUserDetailsEvent>(_fetchUserDetails);
@@ -95,12 +96,11 @@ class ProfilePageBloc extends Bloc<ProfilePageEvents, ProfilePageState> {
       SaveChangesEvent event, Emitter<ProfilePageState> emit) async {
     try {
       final user = FirebaseAuth.instance.currentUser!;
-      final _userSession = sl<UserSession>();
+  
       final bool docExist =
           await firebaseFirestoreUseCase.checkIfDocExists(user.uid);
       
-      final bool doesUserNameUserExist = await firebaseFirestoreUseCase.doesUserNameUserExist(event.userDetails.userName!,user.uid);
-      
+      final bool doesUserNameUserExist = _userSession.userDetails!.userName != null ? await firebaseFirestoreUseCase.doesUserNameUserExist(event.userDetails.userName!,event.userDetails.userId!) : false;
       if (docExist && !doesUserNameUserExist) {
         firebaseFirestoreUseCase.updateUser(UserDetails(
           userName: event.userDetails.userName,
@@ -124,9 +124,7 @@ class ProfilePageBloc extends Bloc<ProfilePageEvents, ProfilePageState> {
             number: event.userDetails.number,
             password: event.userDetails.password));
       }
-      
-      emit(ChangesSavedState(
-          userDetails: _userSession.userDetails = UserDetails(
+      _userSession.userDetails = UserDetails(
             userName: event.userDetails.userName,
             userId: event.userDetails.userId,
               email: event.userDetails.email,
@@ -134,7 +132,9 @@ class ProfilePageBloc extends Bloc<ProfilePageEvents, ProfilePageState> {
               lastName: event.userDetails.lastName,
               imagepath: event.userDetails.imagepath,
               number: event.userDetails.number,
-              password: event.userDetails.password), doesUserNameUserExist));
+              password: event.userDetails.password);
+      emit(ChangesSavedState(
+          userDetails: _userSession.userDetails!, doesUserNameUserExist));
     } catch (error) {
       emit(ProfileErrorState(error: error.toString()));
     }

@@ -9,7 +9,6 @@ import 'package:chat_app/features/Presentation/pages/chat_screens/home_page.dart
 import 'package:chat_app/features/Presentation/pages/email_verification/account_success_screen.dart';
 import 'package:chat_app/features/Presentation/pages/email_verification/email_verification_screen.dart';
 import 'package:chat_app/features/Presentation/pages/user_profile/profile_page.dart';
-import 'package:chat_app/features/data/entity/user.dart';
 import 'package:chat_app/features/dependencyInjector/injector.dart';
 import 'package:chat_app/features/domain/usecase/firebase_firestore_usecase.dart';
 import 'package:flutter/material.dart';
@@ -32,11 +31,7 @@ class AppNavigator {
               firebaseFirestoreUseCase: sl<FirebaseFirestoreUseCase>()),
         );
       case ProfilePage.profilepage:
-        var args = settings.arguments as UserDetails;
-
-        return MaterialPageRoute<UserDetails>(
-            builder: (context) => ProfilePage(userDetails: args),
-            settings: settings);
+        return MaterialPageRoute(builder: (context) => ProfilePage());
       case VerifyEmailScreen.verifyemailscreen:
         return MaterialPageRoute(
           builder: (context) => VerifyEmailScreen(

@@ -89,7 +89,7 @@ class _AddChatScreenState extends State<AddChatScreen> {
                     final searchKey = searchController.text.toLowerCase();
                     // Exclude the current user
                     return userName.contains(searchKey) &&
-                        userName != _userSession.userDetails?.userName;
+                        (userName != _userSession.userDetails?.userName?.toLowerCase());
                   }).toList();
 
                   return ListView.builder(

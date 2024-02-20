@@ -44,3 +44,4 @@ class DeletedMessageState extends ChatState{
   
 }
 class UpdateUnreadCountState extends ChatState{}
+class UpdatedChatState extends ChatState {}

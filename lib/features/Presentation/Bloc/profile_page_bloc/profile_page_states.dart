@@ -34,7 +34,6 @@ class EditingModeDisabledState extends ProfilePageState {
 class ChangesSavedState extends ProfilePageState {
   final UserDetails userDetails;
   final bool doesUserNameUserExist;
-
   ChangesSavedState(this.doesUserNameUserExist, {required this.userDetails});
 }
 

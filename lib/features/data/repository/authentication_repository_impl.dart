@@ -4,6 +4,7 @@ import 'package:chat_app/features/data/entity/user.dart';
 import 'package:chat_app/features/domain/repository/authentication_repository.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthenticationRepositoryImplementation extends AuthenticationRepository {
@@ -61,7 +62,7 @@ class AuthenticationRepositoryImplementation extends AuthenticationRepository {
       final finalCredential = await _auth.currentUser!.linkWithCredential(credential);
       user = finalCredential.user;
 
-    } on FirebaseAuthException catch (e) {
+    } on  FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         return const Right("Weak-Password");
         // print('The password provided is too weak.');
@@ -69,7 +70,16 @@ class AuthenticationRepositoryImplementation extends AuthenticationRepository {
         return const Right("The account already exists for that email.");
         // print('The account already exists for that email.');
       }
-    } catch (e) {
+      else if(e.code == 'PROVIDER_ALREADY_LINKED'){
+        return Right("The Number or Email is already linked with another account");
+      }
+    }  on PlatformException catch(e){
+        if (e.code == 'PROVIDER_ALREADY_LINKED'){
+          return Right('The Number or Email is already linked with another account');
+        }
+    }
+    
+     on Exception catch(e) {
       return Right(e.toString());
       // print(e);
     }

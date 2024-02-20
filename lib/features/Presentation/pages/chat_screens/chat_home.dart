@@ -1,3 +1,8 @@
+import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chat_app/common/constants/color_constants.dart';
 import 'package:chat_app/features/Presentation/Bloc/chat_bloc/chat_bloc.dart';
 import 'package:chat_app/features/Presentation/Bloc/chat_bloc/chat_event.dart';
@@ -10,21 +15,14 @@ import 'package:chat_app/features/Presentation/pages/user_profile/profile_page.d
 import 'package:chat_app/features/Presentation/widgets/my_chat_card.dart';
 import 'package:chat_app/features/data/entity/user.dart';
 import 'package:chat_app/features/data/entity/user_session.dart';
-import 'package:chat_app/features/data/model/chat_model.dart';
 import 'package:chat_app/features/dependencyInjector/injector.dart';
 import 'package:chat_app/features/domain/usecase/authentication_usecase.dart';
 import 'package:chat_app/features/domain/usecase/firebase_firestore_usecase.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 class ChatHomePage extends StatefulWidget {
   static const chatHomePage = 'ChatHomePage';
-  ChatHomePage({super.key});
+  ChatHomePage({Key? key}) : super(key: key);
 
   @override
   State<ChatHomePage> createState() => _ChatHomePageState();
@@ -39,30 +37,27 @@ class _ChatHomePageState extends State<ChatHomePage>
   AuthenticationUseCase authenticationUseCase = sl<AuthenticationUseCase>();
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   bool isPopUpMenuOn = false;
-  List<Chat> chats =[];
 
-  late AnimationController controller;
-  late Animation<double> animation;
   final _userSession = sl<UserSession>();
   final TextEditingController searchController = TextEditingController();
+  bool _isLoading = false; // Local variable to track loading state
 
   @override
   void dispose() {
-    controller.dispose();
+    _chatBloc.chatstreamSubscription?.cancel();
+    _chatBloc.countSubscriptions?.forEach((element) => element?.cancel());
+
     super.dispose();
   }
 
+  late ChatBloc _chatBloc;
+
   @override
   void initState() {
-    controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
-
-    animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
-    getdata();
     super.initState();
-    context.read<ChatBloc>().add(LoadChatEvent());
+    getdata();
+    _chatBloc = context.read<ChatBloc>();
+    _chatBloc.add(LoadChatEvent());
   }
 
   void getdata() async {
@@ -84,172 +79,195 @@ class _ChatHomePageState extends State<ChatHomePage>
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
-              backgroundColor: ColorAssets.neomCream,
-              automaticallyImplyLeading: false,
-              leading: _userSession.userDetails?.imagepath != null
-                  ? GestureDetector(
-                      onTap: () => Navigator.pushNamed(
-                        context,
-                        ProfilePage.profilepage,
-                        arguments: UserDetails(
-                          userName: _userSession.userDetails?.userName ?? "",
-                          userId: _userSession.userDetails?.userId ?? "",
-                          email: _userSession.userDetails?.email ?? "",
-                          firstName: _userSession.userDetails?.firstName ?? "",
-                          imagepath: _userSession.userDetails?.imagepath ?? "",
-                          lastName: _userSession.userDetails?.lastName ?? "",
-                          number: _userSession.userDetails?.number ?? "",
-                        ),
-                      ),
-                      child: Container(
-                        margin: EdgeInsets.only(left: 20),
-                        decoration: BoxDecoration(
-                            image: DecorationImage(
-                                image: NetworkImage(
-                                    _userSession.userDetails!.imagepath ?? ""),
-                                fit: BoxFit.cover),
-                            shape: BoxShape.circle),
-                      ),
-                    )
-                  : Container(
+            backgroundColor: ColorAssets.neomCream,
+            automaticallyImplyLeading: false,
+            leading: _userSession.userDetails?.imagepath != null
+                ? GestureDetector(
+                    onTap: () => Navigator.pushNamed(
+                      context,
+                      ProfilePage.profilepage,
+                    ),
+                    child: Container(
                       margin: EdgeInsets.only(left: 20),
                       decoration: BoxDecoration(
-                          color: Colors.grey, shape: BoxShape.circle),
+                          image: DecorationImage(
+                              image: NetworkImage(
+                                  _userSession.userDetails!.imagepath ?? ""),
+                              fit: BoxFit.cover),
+                          shape: BoxShape.circle),
                     ),
-              title: Text(
-                "Chat",
-                style: GoogleFonts.roboto(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                ),
+                  )
+                : Container(
+                    margin: EdgeInsets.only(left: 20),
+                    decoration: BoxDecoration(
+                        color: Colors.grey, shape: BoxShape.circle),
+                  ),
+            title: Text(
+              "Chat",
+              style: GoogleFonts.roboto(
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
               ),
-              centerTitle: true,
-              actions: [
-                PopupMenuButton<int>(
-                    surfaceTintColor: Colors.white,
-                    // color: Colors.white,
-                    icon: AnimatedIcon(
-                        icon: AnimatedIcons.menu_close, progress: animation),
-                    offset: Offset(0, 10),
-                    // elevation: 0.0,
-                    position: PopupMenuPosition.under,
-                    onOpened: () {
-                      setState(() {
-                        isPopUpMenuOn = true;
-                        controller.forward();
-                      });
-                    },
-                    onCanceled: () {
-                      setState(() {
-                        isPopUpMenuOn = false;
-                        controller.reverse();
-                      });
-                    },
-                    onSelected: (item) async {
-                      if (item == 0) {
-                        Future.delayed(Duration(seconds: 1));
-                        _googleSignIn.signOut();
-                        FirebaseFirestore.instance.clearPersistence();
-                        FirebaseAuth.instance.signOut();
-                        Navigator.pushNamed(
-                            context, WelcomeScreen.welcomescreen);
-                      } else {}
-                    },
-                    itemBuilder: (context) => [
-                          PopupMenuItem<int>(value: 0, child: Text('Logout')),
-                          PopupMenuItem<int>(value: 1, child: Text('Settings')),
-                        ])
-              ]),
+            ),
+            centerTitle: true,
+            actions: [
+              PopupMenuButton<int>(
+                surfaceTintColor: Colors.white,
+                icon: Icon(Icons.more_vert),
+                offset: Offset(0, 10),
+                position: PopupMenuPosition.under,
+                onOpened: () {
+                  setState(() {
+                    isPopUpMenuOn = true;
+                  });
+                },
+                onCanceled: () {
+                  setState(() {
+                    isPopUpMenuOn = false;
+                  });
+                },
+                onSelected: (item) async {
+                  if (item == 0) {
+                     _googleSignIn.signOut();
+
+                    // Clear Firestore persistence
+                     FirebaseFirestore.instance.clearPersistence();
+
+                    // Sign out from FirebaseAuth
+                     FirebaseAuth.instance.signOut();
+
+                    // Navigate to the welcome screen after sign-out
+                    Navigator.pushReplacementNamed(
+                        context, WelcomeScreen.welcomescreen);
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem<int>(value: 0, child: Text('Logout')),
+                  PopupMenuItem<int>(value: 1, child: Text('Settings')),
+                ],
+              )
+            ],
+          ),
           body: BlocConsumer<ChatBloc, ChatState>(
-            buildWhen: (previous, current) {
-              return current is LoadChatEvent ||  current is UpdateUnreadCountEvent;
-            },
             listener: (context, state) {
-              
+              if (state is ChatUpdatedState) {}
+            },
+            buildWhen: (previous, current) {
+              return current is ChatUpdatedState ||
+                  current is InitialChatState ||
+                  current is ChatErrorState ||
+                  current is UpdateUnreadCountState ||
+                  current is LoadChatEvent;
             },
             builder: (context, state) {
+              if (state is InitialChatState) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              } else if (state is ChatErrorState) {
+                return Center(
+                  child: Text(state.error),
+                );
+              }
               return Column(
                 children: [
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     child: SearchBar(
-                        shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12))),
-                        controller: searchController,
-                        onChanged: (value) {
-                          setState(() {});
-                        },
-                        backgroundColor:
-                            MaterialStateProperty.all(Colors.white),
-                        elevation: MaterialStateProperty.all(0.0),
-                        padding: MaterialStateProperty.all(
-                            EdgeInsets.symmetric(horizontal: 10)),
-                        leading: Icon(Icons.search),
-                        hintText: "Search",
-                        hintStyle: MaterialStateProperty.all(GoogleFonts.roboto(
+                      shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      )),
+                      controller: searchController,
+                      onChanged: (value) {
+                        setState(() {});
+                      },
+                      backgroundColor: MaterialStateProperty.all(Colors.white),
+                      elevation: MaterialStateProperty.all(0.0),
+                      padding: MaterialStateProperty.all(
+                        EdgeInsets.symmetric(horizontal: 10),
+                      ),
+                      leading: Icon(Icons.search),
+                      hintText: "Search",
+                      hintStyle: MaterialStateProperty.all(
+                        GoogleFonts.roboto(
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
-                        ))),
+                        ),
+                      ),
+                    ),
                   ),
-                  // stream builder
-                  Expanded(
-                    child: StreamBuilder(
-                        stream: FirebaseFirestore.instance
-                            .collection('chats')
-                            .where('users', arrayContains: user!.uid)
-                            .snapshots(),
+                  _userSession.chats!.isEmpty
+                      ? Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/images/noChat.png',
+                                height: 300,
+                              ),
+                              SizedBox(
+                                height: 20,
+                              ),
+                              Text(
+                                "Tap + for new chat",
+                                style: GoogleFonts.roboto(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              SizedBox(
+                                height: 100,
+                              )
+                            ],
+                          ),
+                        )
+                      : Expanded(
+                          child: ListView.builder(
+                            itemCount: _userSession.chats?.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              List<String> otherUserId =
+                                  _userSession.chats![index].users!;
+                              otherUserId.remove(user!.uid);
 
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-                          if (snapshot.hasError) {
-                            return Center(
-                              child: Text("error"),
-                            );
-                          }
-                          return Container(
-                            child: ListView.builder(
-                                itemCount: snapshot.data?.docs.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  DocumentSnapshot document =
-                                      snapshot.data!.docs[index];
+                              UserDetails anotherUser = _userSession
+                                  .chats![index].usersInfo![otherUserId.first]!;
 
-                                  List otherUserId = document['users'];
-                                  otherUserId.remove(user!.uid);
-
-                                  UserDetails anotherUser =
-                                      UserDetails.fromJson(document['usersInfo']
-                                          [otherUserId.first]);
-
-                                  return UserChatCard(
-                                    unseenCount: _userSession.unReadCount != null &&
-                                              _userSession.unReadCount?[
-                                                      document['chatId']] !=
-                                                  0 ? _userSession.unReadCount![document['chatId']].toString() : '0',
-                                    ontap: () {
-                                      Navigator.pushNamed(
-                                          context, ChatScreen.chatScreen,
+                              return _userSession.chats![index].lastMessage !=
+                                      null
+                                  ? UserChatCard(
+                                      unseenCount: _userSession.unReadCount[
+                                                      _userSession.chats![index]
+                                                          .chatId] !=
+                                                  0 &&
+                                              _userSession.chats![index]
+                                                      .lastMessage!['sender'] !=
+                                                  _userSession
+                                                      .userDetails?.userId
+                                          ? _userSession.unReadCount[
+                                                  _userSession
+                                                      .chats![index].chatId]
+                                              .toString()
+                                          : '',
+                                      ontap: () {
+                                        Navigator.pushNamed(
+                                          context,
+                                          ChatScreen.chatScreen,
                                           arguments: [
                                             _userSession.userDetails,
                                             anotherUser
-                                          ]);
-                                    },
-                                    image: document['usersInfo']
-                                            [otherUserId.first]['imagepath'] ??
-                                        "",
-                                    username: document['usersInfo']
-                                            [otherUserId.first]['userName'] ??
-                                        "",
-                                    lastMessage: document['lastMessage']
-                                        ['content'],
-                                  );
-                                }),
-                          );
-                        }),
-                  ),
+                                          ],
+                                        );
+                                      },
+                                      image: anotherUser.imagepath ?? "",
+                                      username: anotherUser.userName ?? "",
+                                      lastMessage: _userSession.chats![index]
+                                              .lastMessage!['content'] ??
+                                          '',
+                                    )
+                                  : Container();
+                            },
+                          ),
+                        ),
                 ],
               );
             },
@@ -257,5 +275,33 @@ class _ChatHomePageState extends State<ChatHomePage>
         );
       },
     );
+  }
+
+  Future<void> signOut() async {
+    try {
+      setState(() {
+        // Set a loading state while signing out
+        _isLoading = true;
+      });
+
+      // Sign out from Google SignIn
+      await _googleSignIn.signOut();
+
+      // Clear Firestore persistence
+      await FirebaseFirestore.instance.clearPersistence();
+
+      // Sign out from FirebaseAuth
+      await FirebaseAuth.instance.signOut();
+
+      // Navigate to the welcome screen after sign-out
+      Navigator.pushReplacementNamed(context, WelcomeScreen.welcomescreen);
+    } catch (e) {
+      print("Error signing out: $e");
+    } finally {
+      setState(() {
+        // Reset loading state after sign-out attempt
+        _isLoading = false;
+      });
+    }
   }
 }

@@ -90,7 +90,7 @@ UserChatCard({super.key, required this.image, required this.username, required t
                 SizedBox(
                   height: 10,
                 ),
-                Align(
+                if(unseenCount != '') Align(
                   alignment: Alignment.bottomRight,
                   child: CircleAvatar(
                     backgroundColor: ColorAssets.neomBlue,

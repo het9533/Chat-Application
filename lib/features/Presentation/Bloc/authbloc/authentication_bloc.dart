@@ -24,6 +24,7 @@ class AuthenticationBloc
 
   Future<void> _onAuthenticationStarted(
       AuthenticationStartedEvent event, Emitter<AuthenticationState> emit) async {
+        emit(AuthenticationLoading());
     try {
       Either<User, String> userOption =
           await authenticationRepository.getCurrentUser();
@@ -33,9 +34,9 @@ class AuthenticationBloc
         (user) => emit(AuthenticationSuccess(user,isUserExist)),
         (r) => emit(AuthenticationFailure(r.toString())),
       );
-    } catch (error) {
-      emit(AuthenticationFailure(error.toString()));
-    }
+    }  on FirebaseAuthException catch(e) {
+          emit(AuthenticationFailure(e.message ?? ""));
+        }
   }
 void _onAuthentticatedUser(AuthentticatedUserEvent event, Emitter<AuthenticationState> emit) async{
     emit(AuthenticationLoading());
@@ -48,9 +49,9 @@ void _onAuthentticatedUser(AuthentticatedUserEvent event, Emitter<Authentication
         (user) => emit(AuthenticationSuccess(user,isUserExist)),
          (error) => emit(AuthenticationFailure("Error signing in with Google")),
       );
-    } catch (error) {
-      emit(AuthenticationFailure(error.toString()));
-    }
+    }  on FirebaseAuthException catch(e) {
+          emit(AuthenticationFailure(e.message ?? ""));
+        }
 }
 
   void  _onGoogleSignInRequested(
@@ -69,9 +70,9 @@ void _onAuthentticatedUser(AuthentticatedUserEvent event, Emitter<Authentication
       //    (error) => emit(AuthenticationFailure("Error signing in with Google")),
       // );
       
-    }on Exception catch (error) {
-      emit(AuthenticationFailure(error.toString()));
-    }
+    }on FirebaseAuthException  catch(e) {
+          emit(AuthenticationFailure(e.message ?? ""));
+        }
   }
   
 
@@ -86,15 +87,16 @@ void _onAuthentticatedUser(AuthentticatedUserEvent event, Emitter<Authentication
         lastName: event.user.lastName,
         email: event.user.email, number: event.user.number, password: event.user.password));
       final user = FirebaseAuth.instance.currentUser;
-        final bool isUserExist = await firebaseFirestoreUseCase.checkIfDocExists(user!.uid);
+        final bool isUserExist =  user!=null ? await firebaseFirestoreUseCase.checkIfDocExists(user.uid) : false;
       userOption.fold(
         (user) => emit(AuthenticationSuccess(user,isUserExist)),
          (error) => emit(AuthenticationFailure("Error signing in with Google")),
       );
-    } catch (error) {
-      emit(AuthenticationFailure(error.toString()));
-    }
-  
+    }  on FirebaseAuthException catch(e) {
+      print(e.message);
+          emit(AuthenticationFailure(e.message ?? ""));
+        }
+
   }
 
   // void _onOTPSignInRequested(
@@ -131,22 +133,23 @@ void _onAuthentticatedUser(AuthentticatedUserEvent event, Emitter<Authentication
         (user) => emit(AuthenticationSuccess(user,isUserExist)),
          (error) => emit(AuthenticationFailure("Error signing in with Google")),
       );
-    } catch (error) {
-      emit(AuthenticationFailure(error.toString()));
-    }
+    }  on FirebaseAuthException catch(e) {
+          emit(AuthenticationFailure(e.message ?? "error"));
+        }
   
   }
 
   void _onLogoutRequested(
       LogoutRequestedEvent event, Emitter<AuthenticationState> emit) async {
+                emit(AuthenticationLoading());
     try {
       final success = await authenticationRepository.signout();
     
           if (success) {
             emit(AuthenticationInitial());
           }
-        } on Exception catch(e) {
-          emit(AuthenticationFailure(e.toString()));
+        } on FirebaseAuthException catch(e) {
+          emit(AuthenticationFailure(e.message ?? ""));
         }
     
   }

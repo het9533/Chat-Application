@@ -13,8 +13,6 @@ class UpdateUserDetailsEvent extends ProfilePageEvents {
   UpdateUserDetailsEvent({required this.userDetails});
 }
 
-
-
 class ToggleEditModeEvent extends ProfilePageEvents {
   final bool editMode;
 
@@ -24,7 +22,6 @@ class ContinueButtonEvent extends ProfilePageEvents{}
 
 class SaveChangesEvent extends ProfilePageEvents {
    final UserDetails userDetails;
-
   SaveChangesEvent({required this.userDetails});
 }
 

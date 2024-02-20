@@ -40,7 +40,7 @@ class CustomTextFormField extends StatelessWidget {
               .primaryTextTheme
               .bodyMedium
               ?.copyWith(
-                color: Color(0xff777777),
+                color: Colors.black,
                 fontWeight: FontWeight.w500),
           decoration:InputDecoration(
             
@@ -57,8 +57,8 @@ class CustomTextFormField extends StatelessWidget {
               borderRadius:
                     BorderRadius.all(Radius.circular(10)),
               borderSide: BorderSide(
-                color: ColorAssets.klightgrey,
-                width: 2
+                color: ColorAssets.neomBlue,
+                width: 1.5
               ),
               
             ),
@@ -66,8 +66,8 @@ class CustomTextFormField extends StatelessWidget {
               borderRadius:
                     BorderRadius.all(Radius.circular(10)),
               borderSide: BorderSide(
-                color: ColorAssets.klightgrey,
-                width: 2
+                color: ColorAssets.neomBlue,
+                width: 1.5
               ),
               
             ),
@@ -82,7 +82,7 @@ class CustomTextFormField extends StatelessWidget {
             ),
             hintText: hint,
             fillColor: ColorAssets.klightgrey,
-            filled: !enabled,
+            filled: enabled,
             hintStyle: Theme.of(context)
               .primaryTextTheme
               .bodyMedium

@@ -135,6 +135,11 @@ class _ChatScreenState extends State<ChatScreen> {
                                       widget.userDetails.userId)
                                 IconButton(
                                     onPressed: () {
+                                      final String editMessage = selectedMessage[0];
+                                      selectedMessage.clear();
+                                      setState(() {
+                                        
+                                      });
                                       Navigator.push(
                                           context,
                                           PageRouteBuilder(
@@ -147,16 +152,16 @@ class _ChatScreenState extends State<ChatScreen> {
                                                   timeStampMessage: messageTimeStamp!,
                                                   chatId: chatId,
                                                   messageId:
-                                                      selectedMessage.first,
+                                                      editMessage,
                                                   newMessage: messages
                                                       .firstWhere((element) =>
                                                           element.messageId ==
-                                                          selectedMessage[0])
+                                                          editMessage)
                                                       .content!);
                                             },
                                           ));
 
-                                      setState(() {});
+                            
                                     },
                                     icon: Icon(Icons.edit))
                               else
@@ -196,7 +201,12 @@ class _ChatScreenState extends State<ChatScreen> {
                 if (state is ChatUpdatedState) {}
                 if (state is ChatErrorState) {}
                 if (state is MessageLoadedState) {}
-                if (state is MessageUpdatedState) {}
+                if (state is MessageUpdatedState) {
+                  
+                }
+                if (state is EditedMessageState) {
+                  
+                }
                 return ListView.builder(
                   reverse: true,
                   itemCount: messages.length,
@@ -407,7 +417,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           type: ChatType.private,
                           users: [
                             widget.userDetails.userId!,
-                            widget.chatUserDetails.userId
+                            widget.chatUserDetails.userId!
                           ],
                         );
                         final messageObj = Message(

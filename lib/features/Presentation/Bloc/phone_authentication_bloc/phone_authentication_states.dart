@@ -10,6 +10,5 @@ class PhoneAuthenticationSuccess extends PhoneAuthenticationState {}
 
 class PhoneAuthenticationFailure extends PhoneAuthenticationState {
   final String error;
-
   PhoneAuthenticationFailure(this.error);
 }

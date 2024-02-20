@@ -42,7 +42,6 @@ class EditedMessageEvent extends ChatEvent{
 
 }
 class LoadChatEvent extends ChatEvent{
-
 }
 
 class UpdateMessageEvent extends ChatEvent {
@@ -60,3 +59,4 @@ class DeleteMessageEvent extends ChatEvent {
 class UpdateUnreadCountEvent extends ChatEvent{
 
 }
+class UpdatedChatEvent extends ChatEvent{}

@@ -3,14 +3,15 @@ import 'package:chat_app/common/constants/color_constants.dart';
 import 'package:chat_app/features/Presentation/Bloc/profile_page_bloc/profile_page_bloc.dart';
 import 'package:chat_app/features/Presentation/Bloc/profile_page_bloc/profile_page_events.dart';
 import 'package:chat_app/features/Presentation/Bloc/profile_page_bloc/profile_page_states.dart';
+import 'package:chat_app/features/Presentation/pages/chat_screens/home_page.dart';
 import 'package:chat_app/features/Presentation/pages/email_verification/account_success_screen.dart';
 import 'package:chat_app/features/Presentation/widgets/booking_button.dart';
 import 'package:chat_app/features/Presentation/widgets/customCircle_page.dart';
-import 'package:chat_app/features/Presentation/widgets/custom_text_form_field.dart';
+import 'package:chat_app/features/Presentation/widgets/custom_text_fields.dart';
 import 'package:chat_app/features/data/entity/user.dart';
+import 'package:chat_app/features/data/entity/user_session.dart';
 import 'package:chat_app/features/dependencyInjector/injector.dart';
 import 'package:chat_app/features/domain/usecase/firebase_firestore_usecase.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -26,75 +27,77 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 class ProfilePage extends StatefulWidget {
   static const profilepage = 'profilepage';
-  final UserDetails userDetails;
 
-  const ProfilePage({Key? key, required this.userDetails}) : super(key: key);
+  const ProfilePage({Key? key}) : super(key: key);
 
   @override
-  State<ProfilePage> createState() =>
-      _ProfilePageState(userDetails: userDetails);
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage>
     with SingleTickerProviderStateMixin {
-  bool editMode = false;
+  bool editMode = true;
   TextEditingController firstnamecontroller = TextEditingController();
   TextEditingController lastnamecontroller = TextEditingController();
   TextEditingController emailnamecontroller = TextEditingController();
   TextEditingController phonenumbercontroller = TextEditingController();
   TextEditingController userNameController = TextEditingController();
-
   firebase_storage.FirebaseStorage storage =
       firebase_storage.FirebaseStorage.instance;
-
-  final UserDetails userDetails;
-  Uint8List? myImagePath;
   String? myImageName;
+  Uint8List? myImagePath;
+  final UserSession _userSession = sl<UserSession>();
   final FirebaseFirestoreUseCase firebaseFirestoreUseCase =
       sl<FirebaseFirestoreUseCase>();
-
-  _ProfilePageState({required this.userDetails});
+  final _formKey = GlobalKey<FormState>();
+  final String defaultNetworkImage =
+      'https://img.freepik.com/free-photo/3d-illustration-boy-with-camera-his-hand_1142-36694.jpg?w=740&t=st=1708339994~exp=1708340594~hmac=f6cb1c250478ec9e716e1dad64912b805dff54a8792436a8bfbd213939b773a8';
+  _ProfilePageState();
 
   @override
   void initState() {
     initializeData();
     super.initState();
   }
-  Widget _dialog(BuildContext context) {
+
+  Widget _dialog(context) {
     return AlertDialog(
       elevation: 0.0,
       backgroundColor: Colors.white,
       title: Column(
         children: [
-          Lottie.asset('assets/lottie/invalid.json',repeat: false),
-          SizedBox(height: 10,),
-          Text("Username already exists", style: GoogleFonts.roboto(
-            fontSize: 20,
-            fontWeight: FontWeight.w500
-          ),),
+          Lottie.asset('assets/lottie/invalid.json', repeat: false),
+          SizedBox(
+            height: 10,
+          ),
+          Text(
+            "Username already exists",
+            style:
+                GoogleFonts.roboto(fontSize: 20, fontWeight: FontWeight.w500),
+          ),
         ],
       ),
       actions: <Widget>[
         TextButton(
             onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.pop(context);
             },
             child: const Text("Okay"))
       ],
     );
   }
 
-void _scaleDialog() {
+  void _scaleDialog(BuildContext context) {
     showGeneralDialog(
       context: context,
-      pageBuilder: (ctx, a1, a2) {
+      pageBuilder: (context, a1, a2) {
         return Container();
       },
-      transitionBuilder: (ctx, a1, a2, child) {
+      transitionBuilder: (context, a1, a2, child) {
         var curve = Curves.easeInOut.transform(a1.value);
         return Transform.scale(
           scale: curve,
-          child: _dialog(ctx),
+          child: _dialog(context),
         );
       },
       transitionDuration: const Duration(milliseconds: 300),
@@ -119,7 +122,7 @@ void _scaleDialog() {
     final file = File("${directory.path}/images/${imagePath.name}");
     await file.create(recursive: true);
     await file.writeAsBytes(await imagePath.readAsBytes());
-    userDetails.imagepath = await imageUploadToFirebase(file);
+    _userSession.userDetails?.imagepath = await imageUploadToFirebase(file);
     myImagePath = await imagePath.readAsBytes();
     myImageName = imagePath.name;
 
@@ -129,8 +132,9 @@ void _scaleDialog() {
   Future<String> imageUploadToFirebase(File image) async {
     FirebaseStorage storage = FirebaseStorage.instance;
 
-    final StorageReference =
-        storage.ref().child("UserProfile/user_${userDetails.email}");
+    final StorageReference = storage
+        .ref()
+        .child("UserProfile/user_${_userSession.userDetails?.email}");
 
     final file = StorageReference.putFile(image);
 
@@ -146,13 +150,17 @@ void _scaleDialog() {
   }
 
   void initializeData() async {
-    userNameController.text = userDetails.userName ?? "";
-    firstnamecontroller.text = userDetails.firstName ?? "";
-    emailnamecontroller.text = userDetails.email ?? "";
-    lastnamecontroller.text = userDetails.lastName ?? "";
-    phonenumbercontroller.text = userDetails.number ?? "";
-    http.Response response =
-        await http.get(Uri.parse(userDetails.imagepath ?? ""));
+    userNameController.text = _userSession.userDetails?.userName ?? "";
+    firstnamecontroller.text = _userSession.userDetails?.firstName ?? "";
+    emailnamecontroller.text = _userSession.userDetails?.email ?? "";
+    lastnamecontroller.text = _userSession.userDetails?.lastName ?? "";
+    if (_userSession.userDetails?.number == 'XXXXXXXXXX') {
+      phonenumbercontroller.text = '';
+    } else {
+      phonenumbercontroller.text = _userSession.userDetails?.number ?? "";
+    }
+    http.Response response = await http.get(
+        Uri.parse(_userSession.userDetails?.imagepath ?? defaultNetworkImage));
     myImagePath = response.bodyBytes;
 
     setState(() {});
@@ -231,26 +239,6 @@ void _scaleDialog() {
             });
           }
           if (state is ChangesSavedState) {
-            if (userNameController.text == '') {
-              userNameController.text = state.userDetails.userName!;
-            } else {
-              userNameController.text = userNameController.text;
-            }
-            if (firstnamecontroller.text == '') {
-              firstnamecontroller.text = state.userDetails.firstName!;
-            } else {
-              firstnamecontroller.text = firstnamecontroller.text;
-            }
-            if (lastnamecontroller.text == '') {
-              lastnamecontroller.text = state.userDetails.lastName!;
-            } else {
-              lastnamecontroller.text = lastnamecontroller.text;
-            }
-            if (emailnamecontroller.text == '') {
-              emailnamecontroller.text = state.userDetails.email!;
-            } else {
-              emailnamecontroller.text = emailnamecontroller.text;
-            }
             if (phonenumbercontroller.text == '') {
               phonenumbercontroller.text = state.userDetails.number!;
             } else {
@@ -260,7 +248,7 @@ void _scaleDialog() {
               editMode = false;
             });
             if (state.doesUserNameUserExist) {
-              _scaleDialog();
+              _scaleDialog(context);
             }
           }
           if (state is ContinueButtonState) {
@@ -359,59 +347,74 @@ void _scaleDialog() {
                         height: 30,
                       ),
                       Form(
+                        key: _formKey,
                         child: Column(
                           children: [
                             CustomTextFormField(
-                              label: "UserName",
-                              hint: "name@123",
-                              controller: userNameController,
                               enabled: editMode ? true : false,
-                            ),
-                            SizedBox(height: 16),
-                            CustomTextFormField(
+                              label: "Username",
+                              hint: "Username",
+                              controller: userNameController,
+                              // Add First Name validator
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'This field is required';
+                                  return 'Please enter your Username';
                                 }
+
                                 return null;
                               },
-                              label: "First name",
+                            ),
+                            SizedBox(height: 20),
+                            CustomTextFormField(
+                              enabled: editMode ? true : false,
+                              label: "First Name",
                               hint: "First Name",
                               controller: firstnamecontroller,
-                              enabled: editMode ? true : false,
-                            ),
-                            SizedBox(
-                              height: 16,
-                            ),
-                            CustomTextFormField(
+                              // Add First Name validator
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'This field is required';
+                                  return 'Please enter your First Name';
                                 }
+
                                 return null;
                               },
-                              label: "Last name",
+                            ),
+                            SizedBox(height: 20),
+                            CustomTextFormField(
+                              enabled: editMode ? true : false,
+                              label: "Last Name",
                               hint: "Last Name",
                               controller: lastnamecontroller,
-                              enabled: editMode ? true : false,
-                            ),
-                            SizedBox(
-                              height: 16,
-                            ),
-                            CustomTextFormField(
+                              // Add email validator
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'This field is required';
+                                  return 'Please enter your Last Name';
+                                }
+
+                                return null;
+                              },
+                            ),
+                            SizedBox(height: 20),
+                            CustomTextFormField(
+                              enabled: false,
+                              label: "Email Address",
+                              hint: "Email",
+                              controller: emailnamecontroller,
+                              // Add email validator
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your Email';
+                                }
+                                if (!RegExp(
+                                        r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$')
+                                    .hasMatch(value)) {
+                                  return 'Please enter a valid email address';
                                 }
                                 return null;
                               },
-                              label: "Email",
-                              hint: 'Email',
-                              controller: emailnamecontroller,
-                              enabled: false,
                             ),
                             SizedBox(
-                              height: 16,
+                              height: 20,
                             ),
                             CustomTextFormField(
                               validator: (value) {
@@ -423,11 +426,17 @@ void _scaleDialog() {
                               label: "Phone Number",
                               hint: 'XXXXXXXXXX',
                               controller: phonenumbercontroller,
-                              enabled: editMode ? true : false,
+                              enabled: editMode
+                                  ? (phonenumbercontroller.text != "" ||
+                                          phonenumbercontroller.text !=
+                                              'XXXXXXXXXX')
+                                      ? true
+                                      : false
+                                  : false,
                             )
                           ],
                         ),
-                      ),
+                      )
                     ],
                   ),
                 ),
@@ -436,7 +445,7 @@ void _scaleDialog() {
             RowBottomButtons(
               firstColorButton: Colors.white,
               secondColorButton: ColorAssets.neomBlue,
-              FirstButtonText: editMode ? "Delete Account" : "Finish",
+              FirstButtonText: editMode ? "Cancel" : "Done",
               SecondButtonText: editMode ? "Save Changes" : "Edit Details",
               OnSecondButtonPressed: () async {
                 if (editMode == false) {
@@ -444,22 +453,28 @@ void _scaleDialog() {
                     editMode = true;
                   });
                 } else {
-                  final user = FirebaseAuth.instance.currentUser;
-                  context.read<ProfilePageBloc>().add(SaveChangesEvent(
-                      userDetails: UserDetails(
-                          userName: userNameController.text,
-                          userId: user != null ? user.uid : "",
-                          email: emailnamecontroller.text,
-                          firstName: firstnamecontroller.text,
-                          lastName: lastnamecontroller.text,
-                          imagepath: userDetails.imagepath,
-                          number: phonenumbercontroller.text,
-                          password: userDetails.password)));
+                  if ((_formKey.currentState?.validate() ?? false)) {
+                    _userSession.userDetails = UserDetails(
+                        userName: userNameController.text,
+                        userId: _userSession.userDetails?.userId,
+                        email: emailnamecontroller.text,
+                        firstName: firstnamecontroller.text,
+                        lastName: lastnamecontroller.text,
+                        imagepath: _userSession.userDetails?.imagepath ??
+                            defaultNetworkImage,
+                        number: phonenumbercontroller.text,
+                        password: _userSession.userDetails?.password);
+
+                    context.read<ProfilePageBloc>().add(SaveChangesEvent(
+                        userDetails: _userSession.userDetails!));
+                  } else {}
                 }
               },
               OnFirstButtonPressed: () {
                 if (!editMode) {
-                  context.read<ProfilePageBloc>().add(ContinueButtonEvent());
+                
+                    Navigator.pushNamed(context, ChatMainScreen.chatMainScreen);
+                 
                 } else {
                   Navigator.pop(context);
                 }

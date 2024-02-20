@@ -55,7 +55,7 @@ Future<void> setup() async {
 
   sl.registerSingleton(ChatBloc(
     chatFeaturesUseCase: sl<ChatFeaturesUseCase>(),
-    userSession: sl<UserSession>(),
+    
   ));
   
   // sl.registerFactory(() => ClipboardBloc(sl(), sl()));

@@ -20,81 +20,84 @@ class verifyOtpDialouge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-          contentPadding: EdgeInsets.only(
-            left: 24.0,
-            top: 10,
-            right: 24.0,
-            bottom: 10.0,
-          ),
-          title: Text(
-            'Verify Your Phone Number ',
-            style: TextStyle(
-              fontSize: 18,
+    return Container(
+      child: AlertDialog(
+                
+            contentPadding: EdgeInsets.only(
+              left: 24.0,
+              top: 10,
+              right: 24.0,
+              bottom: 10.0,
             ),
-          ),
-          content: Text('${userNumber}'),
-          actions: [
-            TextFormField(
-              controller: otpController,
-              decoration: InputDecoration(
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                        Radius.circular(10)),
-                    borderSide: BorderSide(
-                        color:
-                            ColorAssets.neomBlack,
-                        width: 1),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                        Radius.circular(10)),
-                    borderSide: BorderSide(
-                        color:
-                            ColorAssets.neomBlack,
-                        width: 1),
-                  ),
-                  disabledBorder:
-                      OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                        Radius.circular(10)),
-                    borderSide: BorderSide(
-                        color:
-                            ColorAssets.neomBlack,
-                        width: 1),
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                        Radius.circular(10)),
-                    borderSide: BorderSide(
-                        color:
-                            ColorAssets.neomBlack,
-                        width: 1),
-                  ),
-                  contentPadding: EdgeInsets.only(
-                      left: 20,
-                      right: 20,
-                      top: 0,
-                      bottom: 0),
-                  hintText: 'OTP',
-                  hintStyle: TextStyle(
-                    color: Colors.grey,
-                  )),
+            title: Text(
+              'Verify Your Phone Number ',
+              style: TextStyle(
+                fontSize: 18,
+              ),
             ),
-            Row(
-              children: [
-                TextButton(
-                  onPressed: onCancelPressed,
-                  child: Text('CANCEL'),
-                ),
-                TextButton(
-                  onPressed: onAcceptPressed,
-                  child: Text('ACCEPT'),
-                ),
-              ],
-            )
-          ],
-        );
+            content: Text('${userNumber}'),
+            actions: [
+              TextFormField(
+                controller: otpController,
+                decoration: InputDecoration(
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(
+                          Radius.circular(10)),
+                      borderSide: BorderSide(
+                          color:
+                              ColorAssets.neomBlack,
+                          width: 1),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(
+                          Radius.circular(10)),
+                      borderSide: BorderSide(
+                          color:
+                              ColorAssets.neomBlack,
+                          width: 1),
+                    ),
+                    disabledBorder:
+                        OutlineInputBorder(
+                      borderRadius: BorderRadius.all(
+                          Radius.circular(10)),
+                      borderSide: BorderSide(
+                          color:
+                              ColorAssets.neomBlack,
+                          width: 1),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(
+                          Radius.circular(10)),
+                      borderSide: BorderSide(
+                          color:
+                              ColorAssets.neomBlack,
+                          width: 1),
+                    ),
+                    contentPadding: EdgeInsets.only(
+                        left: 20,
+                        right: 20,
+                        top: 0,
+                        bottom: 0),
+                    hintText: 'OTP',
+                    hintStyle: TextStyle(
+                      color: Colors.grey,
+                    )),
+              ),
+              Row(
+                children: [
+                  TextButton(
+                    onPressed: onCancelPressed,
+                    child: Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: onAcceptPressed,
+                    child: Text('Submit'),
+                  ),
+                ],
+              )
+            ],
+          ),
+    );
   }
 }
 

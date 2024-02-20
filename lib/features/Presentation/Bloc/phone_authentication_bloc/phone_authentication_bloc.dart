@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:chat_app/features/domain/repository/authentication_repository.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'phone_authentication_events.dart';
 import 'phone_authentication_states.dart';
 
@@ -21,8 +22,8 @@ class PhoneAuthenticationBloc
       await authenticationRepository.verifyPhoneNumber(event.phoneNumber);
 
       emit(PhoneNumberVerifiedState());
-    } catch (e) {
-      emit(PhoneAuthenticationFailure('Failed to verify phone number'));
+    } on FirebaseException catch (e) {
+      emit(PhoneAuthenticationFailure(e.message??''));
     }
   }
 
@@ -36,8 +37,8 @@ class PhoneAuthenticationBloc
       );
 
       emit(PhoneAuthenticationSuccess());
-    } catch (e) {
-      emit(PhoneAuthenticationFailure('Failed to verify OTP code'));
+    } on FirebaseException catch (e) {
+      emit(PhoneAuthenticationFailure(e.message??''));
     }
   }
 }
