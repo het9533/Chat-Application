@@ -454,7 +454,9 @@ class _ProfilePageState extends State<ProfilePage>
                   });
                 } else {
                   if ((_formKey.currentState?.validate() ?? false)) {
-                    _userSession.userDetails = UserDetails(
+                    if (_userSession.userDetails?.signUpType == SignUpType.google) {
+                      _userSession.userDetails = UserDetails(
+                        signUpType: SignUpType.google,
                         userName: userNameController.text,
                         userId: _userSession.userDetails?.userId,
                         email: emailnamecontroller.text,
@@ -464,6 +466,19 @@ class _ProfilePageState extends State<ProfilePage>
                             defaultNetworkImage,
                         number: phonenumbercontroller.text,
                         password: _userSession.userDetails?.password);
+                    }else{
+                       _userSession.userDetails = UserDetails(
+                        signUpType: SignUpType.email,
+                        userName: userNameController.text,
+                        userId: _userSession.userDetails?.userId,
+                        email: emailnamecontroller.text,
+                        firstName: firstnamecontroller.text,
+                        lastName: lastnamecontroller.text,
+                        imagepath: _userSession.userDetails?.imagepath ??
+                            defaultNetworkImage,
+                        number: phonenumbercontroller.text,
+                        password: _userSession.userDetails?.password);
+                    }
 
                     context.read<ProfilePageBloc>().add(SaveChangesEvent(
                         userDetails: _userSession.userDetails!));

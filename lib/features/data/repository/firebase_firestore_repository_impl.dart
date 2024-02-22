@@ -137,7 +137,7 @@ class FirebaseFirestoreRepositoryImplement extends FirebaseFirestoreRepository {
 // if the size of value is greater then 0 then that doc exist. 
       var userNameUser = await users
           .where('userName', isEqualTo: currentUserName.toLowerCase())
-          .where(FieldPath.documentId, isNotEqualTo:docId)
+         
           .get()
           .then((value) => value.size > 0 ? true : false);
       

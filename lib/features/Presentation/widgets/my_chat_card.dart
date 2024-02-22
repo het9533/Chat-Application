@@ -1,19 +1,30 @@
-
 import 'package:chat_app/common/constants/color_constants.dart';
 import 'package:flutter/material.dart';
 
 class UserChatCard extends StatelessWidget {
   final String image;
-  
- final String username;
- 
-  final VoidCallback ontap;
-  
-  final String lastMessage;
-  
-  final String unseenCount;
 
-UserChatCard({super.key, required this.image, required this.username, required this.ontap, required this.lastMessage, required this.unseenCount});
+  final String username;
+
+  final VoidCallback ontap;
+
+  final String lastMessage;
+
+  final String unseenCount;
+  final String lastMessageTime;
+  final bool colorCondition;
+  final bool showIconCase;
+
+  UserChatCard(
+      {super.key,
+      required this.image,
+      required this.username,
+      required this.ontap,
+      required this.lastMessage,
+      required this.unseenCount,
+      required this.lastMessageTime,
+      this.showIconCase = false,
+      this.colorCondition = false});
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +44,8 @@ UserChatCard({super.key, required this.image, required this.username, required t
                 width: 40,
                 decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    image: DecorationImage(image: NetworkImage(image), fit: BoxFit.cover))),
+                    image: DecorationImage(
+                        image: NetworkImage(image), fit: BoxFit.cover))),
             SizedBox(
               width: 10,
             ),
@@ -43,9 +55,9 @@ UserChatCard({super.key, required this.image, required this.username, required t
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                        username,
+                    username,
                     style: TextStyle(
-                      color: Color(0xFF13100D),
+                      color: colorCondition ? Colors.pink : Color(0xFF13100D),
                       fontSize: 14,
                       fontFamily: 'Roboto',
                       fontWeight: FontWeight.w700,
@@ -55,16 +67,27 @@ UserChatCard({super.key, required this.image, required this.username, required t
                   SizedBox(
                     height: 8,
                   ),
-                  Text(
-                    lastMessage,
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 14,
-                      fontFamily: 'Roboto',
-                      fontWeight: FontWeight.w300,
-                      height: 0,
+                  if (lastMessage != '')
+                    Row(
+                      children: [
+                       showIconCase ?  Icon(
+                          Icons.done_all,
+                          size: 15,
+                          color: colorCondition ? Colors.red : Colors.black,
+                        ) : Container(),
+                        SizedBox(width: 5),
+                        Text(
+                          lastMessage,
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 14,
+                            fontFamily: 'Roboto',
+                            fontWeight: FontWeight.w500,
+                            height: 0,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
                 ],
               ),
             ),
@@ -77,12 +100,12 @@ UserChatCard({super.key, required this.image, required this.username, required t
                 Align(
                   alignment: Alignment.topRight,
                   child: Text(
-                    '4:30 pm',
+                    lastMessageTime,
                     style: TextStyle(
                       color: Color(0xFF13100D),
                       fontSize: 14,
                       fontFamily: 'Roboto',
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.normal,
                       height: 0,
                     ),
                   ),
@@ -90,23 +113,24 @@ UserChatCard({super.key, required this.image, required this.username, required t
                 SizedBox(
                   height: 10,
                 ),
-                if(unseenCount != '') Align(
-                  alignment: Alignment.bottomRight,
-                  child: CircleAvatar(
-                    backgroundColor: ColorAssets.neomBlue,
-                    radius: 12,
-                    child: Text(
-                      unseenCount,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontFamily: 'Roboto',
-                        fontWeight: FontWeight.bold,
-                        height: 0,
+                if (unseenCount != '')
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: CircleAvatar(
+                      backgroundColor: ColorAssets.neomBlue,
+                      radius: 12,
+                      child: Text(
+                        unseenCount,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontFamily: 'Roboto',
+                          fontWeight: FontWeight.bold,
+                          height: 0,
+                        ),
                       ),
                     ),
                   ),
-                ),
               ],
             ),
           ],

@@ -34,6 +34,7 @@ class _LoginPageState extends State<LoginPage> {
 
   final FirebaseFirestoreUseCase firebaseFirestoreUseCase =
       sl<FirebaseFirestoreUseCase>();
+  final _formKey = GlobalKey<FormState>();
 
   Future<bool> checkUserExist() async {
     final user = FirebaseAuth.instance.currentUser!;
@@ -60,6 +61,7 @@ class _LoginPageState extends State<LoginPage> {
                 } else {
                   Navigator.pushNamed(context, ProfilePage.profilepage,
                       arguments: UserDetails(
+                        signUpType: SignUpType.google,
                         email: state.user.email,
                         firstName: state.user.displayName,
                         imagepath: state.user.photoURL,
@@ -103,11 +105,13 @@ class _LoginPageState extends State<LoginPage> {
                   height: 50,
                 ),
                 Form(
+                  key: _formKey,
                   child: Column(
                     children: [
                       CustomTextFormField(
+                        enabled: true,
                         label: "Email Address",
-                        hint: "Enter your email",
+                        hint: "Email",
                         controller: emailController,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -123,8 +127,9 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       SizedBox(height: 20),
                       CustomTextFormField(
+                        enabled: true,
                         label: "Password",
-                        hint: "Enter your password",
+                        hint: "password",
                         controller: passwordController,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -200,22 +205,22 @@ class _LoginPageState extends State<LoginPage> {
                           MaterialStateProperty.all(ColorAssets.neomBlue),
                     ),
                     onPressed: () {
-                      context.read<AuthenticationBloc>().add(
+                      if (_formKey.currentState?.validate() ?? false){
+                         context.read<AuthenticationBloc>().add(
                           EmailSignInRequestedEvent(UserDetails(
-                              firstName: '',
-                              lastName: '',
+                              signUpType: SignUpType.email,
                               email: emailController.text,
-                              number: '',
                               password: passwordController.text)));
 
                       setState(() {
                         isLoginWithGoogle = false;
                       });
+                      }
+                     
                     },
                     child: Text(
                       "Login",
-                      style: TextStyle(
-                          color: Colors.white, fontSize: 16),
+                      style: TextStyle(color: Colors.white, fontSize: 16),
                     ),
                   ),
                 ),
@@ -251,7 +256,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     label: Text("Login With Google"),
                   ),
-
                 ),
               ],
             ),

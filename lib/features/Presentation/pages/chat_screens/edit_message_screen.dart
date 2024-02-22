@@ -18,7 +18,9 @@ class EditMessageScreen extends StatefulWidget {
     super.key,
     required this.newMessage,
     required this.chatId,
-    required this.messageId, required this.timeStampMessage, required this.message,
+    required this.messageId,
+    required this.timeStampMessage,
+    required this.message,
   });
 
   static const editMessageScreen = 'editMessageScreen';
@@ -32,10 +34,7 @@ class _EditMessageScreenState extends State<EditMessageScreen> {
   bool showEmojiKeyboard = false;
   final FocusNode focusNode = FocusNode();
   late ChatBloc chatBloc;
-  List<Message> message =[];
-  
-  
-  
+  List<Message> message = [];
 
   @override
   void initState() {
@@ -105,8 +104,9 @@ class _EditMessageScreenState extends State<EditMessageScreen> {
                       reverse: true,
                       itemCount: 1,
                       itemBuilder: (context, index) {
-                   
-                        return InkWell(
+                        return Container(
+                           alignment: Alignment.topRight,
+                          color: Colors.transparent,
                           child: Container(
                             constraints: BoxConstraints(minWidth: 100),
                             padding: EdgeInsets.symmetric(
@@ -144,8 +144,7 @@ class _EditMessageScreenState extends State<EditMessageScreen> {
                                               color: Colors.white,
                                               fontSize: 12),
                                         ),
-                                        SizedBox(width: 5),
-                                        Icon(Icons.done_all,color: Colors.white,size: 15,)
+                                      
                                       ],
                                     ),
                                   )

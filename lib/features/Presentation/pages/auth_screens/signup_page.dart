@@ -18,6 +18,7 @@ import 'package:chat_app/features/data/entity/user.dart';
 import 'package:chat_app/features/data/entity/user_session.dart';
 import 'package:chat_app/features/dependencyInjector/injector.dart';
 import 'package:chat_app/features/domain/usecase/firebase_firestore_usecase.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -113,7 +114,6 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-
   Widget _UserNamedialog(BuildContext context) {
     return AlertDialog(
       elevation: 0.0,
@@ -158,7 +158,6 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-
   final String defaultNetworkImage =
       'https://img.freepik.com/free-photo/3d-illustration-boy-with-camera-his-hand_1142-36694.jpg?w=740&t=st=1708339994~exp=1708340594~hmac=f6cb1c250478ec9e716e1dad64912b805dff54a8792436a8bfbd213939b773a8';
   @override
@@ -168,8 +167,22 @@ class _SignUpPageState extends State<SignUpPage> {
         child: BlocListener<AuthenticationBloc, AuthenticationState>(
           listener: (context, state) {
             if (state is AuthenticationLoading) {
-              Center(
-                child: CircularProgressIndicator(),
+              showDialog(
+                context: context,
+                builder: (context) => Align(
+                  alignment: Alignment.center,
+                  child: Container(
+                    color: Colors.white,
+                    height: 50,
+                    width: 50,
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: ColorAssets.neomBlue,
+                      ),
+                    ),
+                  ),
+                ),
               );
             }
             if (state is AuthenticationSuccess) {
@@ -178,23 +191,34 @@ class _SignUpPageState extends State<SignUpPage> {
                 List<String> list = str.split(" ");
                 print(list[0]);
                 print(list[1]);
-                _userSession.userDetails = UserDetails(
-                    userName: null,
-                    userId: state.user.uid,
-                    email: state.user.email,
-                    firstName: list[0],
-                    lastName: list[1],
-                    imagepath: state.user.photoURL,
-                    number: phoneController.text,
-                    password: passwordController.text);
-                context.read<ProfilePageBloc>().add(SaveChangesEvent(
-                    userDetails: _userSession.userDetails!));
-              }
-
-            else{
+                if (state.isUserExist) {
+                  FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(state.user.uid)
+                      .get()
+                      .then((value) {
+                    return _userSession.userDetails = UserDetails.fromJson(
+                        value.data() as Map<String, dynamic>);
+                  });
+                } else {
+                  _userSession.userDetails = UserDetails(
+                      signUpType: SignUpType.google,
+                      userName: null,
+                      userId: state.user.uid,
+                      email: state.user.email,
+                      firstName: list[0],
+                      lastName: list[1],
+                      imagepath: state.user.photoURL,
+                      number: phoneController.text,
+                      password: passwordController.text);
+                }
+               _userSession.userDetails != null ? context.read<ProfilePageBloc>().add(
+                    SaveChangesEvent(userDetails: _userSession.userDetails!)) : null;
+              } else {
                 Future.delayed(Duration(seconds: 1));
 
                 _userSession.userDetails = UserDetails(
+                    signUpType: SignUpType.email,
                     userName: UserNamecontroller.text,
                     userId: state.user.uid,
                     email: emailController.text,
@@ -300,6 +324,7 @@ class _SignUpPageState extends State<SignUpPage> {
               if (state is PhoneAuthenticationSuccess) {
                 context.read<AuthenticationBloc>().add(
                     EmailSignUpRequestedEvent(UserDetails(
+                        signUpType: SignUpType.email,
                         imagepath: defaultNetworkImage,
                         userName: UserNamecontroller.text,
                         firstName: firstNamecontroller.text,
@@ -323,13 +348,18 @@ class _SignUpPageState extends State<SignUpPage> {
             },
             child: BlocListener<ProfilePageBloc, ProfilePageState>(
               listener: (context, state) {
-                if(state is ChangesSavedState){
-                  final bool isEmailVerified = FirebaseAuth.instance.currentUser!.emailVerified;
-                  print(isEmailVerified);                    
+                if (state is ChangesSavedState) {
+                  final bool isEmailVerified =
+                      FirebaseAuth.instance.currentUser!.emailVerified;
+                  print(isEmailVerified);
                   if (isEmailVerified) {
-                    _userSession.userDetails!.userName != null ? Navigator.pushNamed(context,ChatMainScreen.chatMainScreen) : Navigator.pushNamed(context,ProfilePage.profilepage); 
-                  }else{
-                    Navigator.pushNamed(context, VerifyEmailScreen.verifyemailscreen);
+                    _userSession.userDetails!.userName != null
+                        ? Navigator.pushNamed(
+                            context, ChatMainScreen.chatMainScreen)
+                        : Navigator.pushNamed(context, ProfilePage.profilepage);
+                  } else {
+                    Navigator.pushNamed(
+                        context, VerifyEmailScreen.verifyemailscreen);
                   }
                 }
               },
@@ -439,7 +469,6 @@ class _SignUpPageState extends State<SignUpPage> {
                               Container(
                                 child: IntlPhoneField(
                                   controller: phoneController,
-                                  
                                   keyboardType: TextInputType.phone,
                                   autovalidateMode:
                                       AutovalidateMode.onUserInteraction,
@@ -455,7 +484,6 @@ class _SignUpPageState extends State<SignUpPage> {
                                   decoration: InputDecoration(
                                     fillColor: Colors.white,
                                     filled: true,
-                                    
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius:
                                           BorderRadius.all(Radius.circular(10)),
@@ -592,13 +620,18 @@ class _SignUpPageState extends State<SignUpPage> {
                                 await firebaseFirestoreUseCase
                                     .doesUserEmailExist(emailController.text);
 
-                                    final bool userNameExist = await firebaseFirestoreUseCase.doesUserNameUserExist(UserNamecontroller.text,'');
+                            final bool userNameExist =
+                                await firebaseFirestoreUseCase
+                                    .doesUserNameUserExist(
+                                        UserNamecontroller.text, '');
                             if (userExist) {
                               _scaleDialog();
                             } else {
-                              userNameExist ? __UserNamescaleDialog() :context
-                                  .read<PhoneAuthenticationBloc>()
-                                  .add(VerifyPhoneNumberEvent(userNumber));
+                              userNameExist
+                                  ? __UserNamescaleDialog()
+                                  : context
+                                      .read<PhoneAuthenticationBloc>()
+                                      .add(VerifyPhoneNumberEvent(userNumber));
                             }
                             setState(() {
                               isClicked = false;
@@ -654,14 +687,13 @@ class _SignUpPageState extends State<SignUpPage> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            onPressed: ()  {
+                            onPressed: () {
                               setState(() {
                                 isClickedSignUpGoogle = true;
                               });
                               context
                                   .read<AuthenticationBloc>()
                                   .add(GoogleSignInRequestedEvent());
-                              
                             },
                             icon: Image.asset(
                               "assets/images/google_icon.png",

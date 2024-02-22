@@ -1,9 +1,8 @@
 import 'dart:async';
 
 import 'package:chat_app/common/constants/color_constants.dart';
+import 'package:chat_app/features/Presentation/pages/chat_screens/chat_home.dart';
 import 'package:chat_app/features/Presentation/pages/email_verification/account_success_screen.dart';
-import 'package:chat_app/features/Presentation/pages/user_profile/profile_page.dart';
-import 'package:chat_app/features/data/entity/user.dart';
 import 'package:chat_app/features/domain/usecase/firebase_firestore_usecase.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -68,16 +67,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen>
     if (isEmailVerified) {
       timer.cancel();
 
-      //Navigate to Profile Page
-
-      Navigator.pushNamed(
-        context,
-        ProfilePage.profilepage,
-        arguments: UserDetails(
-          email: user.email ?? null,
-          number: user.phoneNumber ?? null,
-        ),
-      );
+      Navigator.pushNamed(context, ChatHomePage.chatHomePage);
 
       // firebaseFirestoreUseCase.addUser(UserDetails(displayName: user.displayName, email: user.email, number: user.phoneNumber, password: ''));
     }
@@ -166,20 +156,20 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen>
                     onTap: () async {
                       if (isEmailVerified) {
                         setState(() {
-                        isClicked = true;
-                      });
-                      await Future.delayed(Duration(seconds: 1));
-                      await Navigator.push(
-                          context,
-                          PageTransition(
-                              duration: Duration(milliseconds: 900),
-                              child: AccountCreatedSuccessScreen(),
-                              curve: Curves.fastOutSlowIn,
-                              alignment: Alignment.center,
-                              type: PageTransitionType.scale));
-                      setState(() {
-                        isClicked = false;
-                      });
+                          isClicked = true;
+                        });
+                        await Future.delayed(Duration(seconds: 1));
+                        await Navigator.push(
+                            context,
+                            PageTransition(
+                                duration: Duration(milliseconds: 900),
+                                child: AccountCreatedSuccessScreen(),
+                                curve: Curves.fastOutSlowIn,
+                                alignment: Alignment.center,
+                                type: PageTransitionType.scale));
+                        setState(() {
+                          isClicked = false;
+                        });
                       }
                     },
                     child: AnimatedContainer(

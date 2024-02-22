@@ -9,12 +9,9 @@ class AddChatEvent extends ChatEvent {
   final String chatId;
   final Chat chat;
   final Message message;
-  AddChatEvent({ required this.chatId, required this.chat, required this.message});
+  AddChatEvent(
+      {required this.chatId, required this.chat, required this.message});
 }
-
-
-
-
 
 class LoadMessageEvent extends ChatEvent {
   final String chatId;
@@ -27,22 +24,22 @@ class AddMessageEvent extends ChatEvent {
   final Chat chat;
   final Message message;
   final String chatId;
-  AddMessageEvent({required this.chat,required this.message, required this.chatId});
+  AddMessageEvent(
+      {required this.chat, required this.message, required this.chatId});
 }
 
-
-
-class EditedMessageEvent extends ChatEvent{
-  final String chatId ;
+class EditedMessageEvent extends ChatEvent {
+  final String chatId;
   final String messageId;
   final String newMessage;
 
-  EditedMessageEvent({required this.chatId, required this.messageId, required this.newMessage});
-
-
+  EditedMessageEvent(
+      {required this.chatId,
+      required this.messageId,
+      required this.newMessage});
 }
-class LoadChatEvent extends ChatEvent{
-}
+
+class LoadChatEvent extends ChatEvent {}
 
 class UpdateMessageEvent extends ChatEvent {
   final List<Message> docs;
@@ -54,9 +51,10 @@ class DeleteMessageEvent extends ChatEvent {
   final List<String> MessageId;
 
   DeleteMessageEvent(this.MessageId, {required this.chatId});
-
 }
-class UpdateUnreadCountEvent extends ChatEvent{
 
-}
-class UpdatedChatEvent extends ChatEvent{}
+class UpdateUnreadCountEvent extends ChatEvent {}
+
+class UpdatedChatEvent extends ChatEvent {}
+
+class LogoutEvent extends ChatEvent {}

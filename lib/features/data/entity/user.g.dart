@@ -15,6 +15,7 @@ UserDetails _$UserDetailsFromJson(Map<String, dynamic> json) => UserDetails(
       number: json['number'] as String?,
       password: json['password'] as String?,
       imagepath: json['imagepath'] as String?,
+      signUpType: $enumDecodeNullable(_$SignUpTypeEnumMap, json['signUpType']),
     );
 
 Map<String, dynamic> _$UserDetailsToJson(UserDetails instance) {
@@ -34,5 +35,11 @@ Map<String, dynamic> _$UserDetailsToJson(UserDetails instance) {
   writeNotNull('number', instance.number);
   writeNotNull('password', instance.password);
   writeNotNull('imagepath', instance.imagepath);
+  writeNotNull('signUpType', _$SignUpTypeEnumMap[instance.signUpType]);
   return val;
 }
+
+const _$SignUpTypeEnumMap = {
+  SignUpType.google: 'google',
+  SignUpType.email: 'email',
+};

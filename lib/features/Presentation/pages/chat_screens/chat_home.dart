@@ -1,7 +1,7 @@
+import 'package:chat_app/features/Presentation/pages/auth_screens/welcome_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chat_app/common/constants/color_constants.dart';
 import 'package:chat_app/features/Presentation/Bloc/chat_bloc/chat_bloc.dart';
@@ -9,7 +9,6 @@ import 'package:chat_app/features/Presentation/Bloc/chat_bloc/chat_event.dart';
 import 'package:chat_app/features/Presentation/Bloc/chat_bloc/chat_state.dart';
 import 'package:chat_app/features/Presentation/Bloc/profile_page_bloc/profile_page_bloc.dart';
 import 'package:chat_app/features/Presentation/Bloc/profile_page_bloc/profile_page_states.dart';
-import 'package:chat_app/features/Presentation/pages/auth_screens/welcome_screen.dart';
 import 'package:chat_app/features/Presentation/pages/chat_screens/chat_screen.dart';
 import 'package:chat_app/features/Presentation/pages/user_profile/profile_page.dart';
 import 'package:chat_app/features/Presentation/widgets/my_chat_card.dart';
@@ -19,6 +18,8 @@ import 'package:chat_app/features/dependencyInjector/injector.dart';
 import 'package:chat_app/features/domain/usecase/authentication_usecase.dart';
 import 'package:chat_app/features/domain/usecase/firebase_firestore_usecase.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+
 
 class ChatHomePage extends StatefulWidget {
   static const chatHomePage = 'ChatHomePage';
@@ -35,12 +36,12 @@ class _ChatHomePageState extends State<ChatHomePage>
   final user = FirebaseAuth.instance.currentUser;
   int currentIndex = 0;
   AuthenticationUseCase authenticationUseCase = sl<AuthenticationUseCase>();
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+
   bool isPopUpMenuOn = false;
 
   final _userSession = sl<UserSession>();
   final TextEditingController searchController = TextEditingController();
-  bool _isLoading = false; // Local variable to track loading state
+  String? messageTimeStamp;
 
   @override
   void dispose() {
@@ -128,17 +129,7 @@ class _ChatHomePageState extends State<ChatHomePage>
                 },
                 onSelected: (item) async {
                   if (item == 0) {
-                     _googleSignIn.signOut();
-
-                    // Clear Firestore persistence
-                     FirebaseFirestore.instance.clearPersistence();
-
-                    // Sign out from FirebaseAuth
-                     FirebaseAuth.instance.signOut();
-
-                    // Navigate to the welcome screen after sign-out
-                    Navigator.pushReplacementNamed(
-                        context, WelcomeScreen.welcomescreen);
+                    context.read<ChatBloc>().add(LogoutEvent());
                   }
                 },
                 itemBuilder: (context) => [
@@ -151,24 +142,42 @@ class _ChatHomePageState extends State<ChatHomePage>
           body: BlocConsumer<ChatBloc, ChatState>(
             listener: (context, state) {
               if (state is ChatUpdatedState) {}
+              if (state is InitialChatState) {
+                showDialog(
+                  context: context,
+                  builder: (context) => Align(
+                    alignment: Alignment.center,
+                    child: Container(
+                      color: Colors.white,
+                      height: 50,
+                      width: 50,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: ColorAssets.neomBlue,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }
+              if (state is LogoutSuccessFullState) {
+                Navigator.pushNamed(context, WelcomeScreen.welcomescreen);
+              }
             },
             buildWhen: (previous, current) {
               return current is ChatUpdatedState ||
-                  current is InitialChatState ||
                   current is ChatErrorState ||
                   current is UpdateUnreadCountState ||
                   current is LoadChatEvent;
             },
             builder: (context, state) {
-              if (state is InitialChatState) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              } else if (state is ChatErrorState) {
+              if (state is ChatErrorState) {
                 return Center(
                   child: Text(state.error),
                 );
               }
+
               return Column(
                 children: [
                   Padding(
@@ -196,7 +205,7 @@ class _ChatHomePageState extends State<ChatHomePage>
                       ),
                     ),
                   ),
-                  _userSession.chats!.isEmpty
+                  _userSession.chats.isEmpty
                       ? Expanded(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -223,29 +232,45 @@ class _ChatHomePageState extends State<ChatHomePage>
                         )
                       : Expanded(
                           child: ListView.builder(
-                            itemCount: _userSession.chats?.length,
+                            itemCount: _userSession.chats.length,
                             itemBuilder: (BuildContext context, int index) {
                               List<String> otherUserId =
-                                  _userSession.chats![index].users!;
+                                  _userSession.chats[index].users!;
                               otherUserId.remove(user!.uid);
 
                               UserDetails anotherUser = _userSession
-                                  .chats![index].usersInfo![otherUserId.first]!;
+                                  .chats[index].usersInfo![otherUserId.first]!;
 
-                              return _userSession.chats![index].lastMessage !=
-                                      null
+                              Timestamp timestampString = _userSession
+                                  .chats[index].lastMessage!['timeStamp'];
+                                  
+                              DateTime timestamp =
+                                  timestampString.toDate();
+                              String formattedTime =
+                                  DateFormat('hh:mm a').format(timestamp);
+                              
+                                print(formattedTime);
+                              return _userSession.chats[index].lastMessage !=
+                                      null 
                                   ? UserChatCard(
+                                    showIconCase : _userSession.chats[index].lastMessage!['sender'] ==
+                                                _userSession.userDetails?.userId,
+                                    colorCondition: _userSession.message?[index].sender ==
+                                                _userSession.userDetails?.userId ? !(_userSession.message![index]
+                                                        .unseenby!
+                                                        .contains(otherUserId.first)) : false,
+                                      lastMessageTime: formattedTime,
                                       unseenCount: _userSession.unReadCount[
-                                                      _userSession.chats![index]
+                                                      _userSession.chats[index]
                                                           .chatId] !=
                                                   0 &&
-                                              _userSession.chats![index]
+                                              _userSession.chats[index]
                                                       .lastMessage!['sender'] !=
                                                   _userSession
                                                       .userDetails?.userId
                                           ? _userSession.unReadCount[
                                                   _userSession
-                                                      .chats![index].chatId]
+                                                      .chats[index].chatId]
                                               .toString()
                                           : '',
                                       ontap: () {
@@ -260,7 +285,7 @@ class _ChatHomePageState extends State<ChatHomePage>
                                       },
                                       image: anotherUser.imagepath ?? "",
                                       username: anotherUser.userName ?? "",
-                                      lastMessage: _userSession.chats![index]
+                                      lastMessage: _userSession.chats[index]
                                               .lastMessage!['content'] ??
                                           '',
                                     )
@@ -275,33 +300,5 @@ class _ChatHomePageState extends State<ChatHomePage>
         );
       },
     );
-  }
-
-  Future<void> signOut() async {
-    try {
-      setState(() {
-        // Set a loading state while signing out
-        _isLoading = true;
-      });
-
-      // Sign out from Google SignIn
-      await _googleSignIn.signOut();
-
-      // Clear Firestore persistence
-      await FirebaseFirestore.instance.clearPersistence();
-
-      // Sign out from FirebaseAuth
-      await FirebaseAuth.instance.signOut();
-
-      // Navigate to the welcome screen after sign-out
-      Navigator.pushReplacementNamed(context, WelcomeScreen.welcomescreen);
-    } catch (e) {
-      print("Error signing out: $e");
-    } finally {
-      setState(() {
-        // Reset loading state after sign-out attempt
-        _isLoading = false;
-      });
-    }
   }
 }

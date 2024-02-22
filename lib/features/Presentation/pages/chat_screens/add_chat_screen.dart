@@ -24,7 +24,15 @@ class _AddChatScreenState extends State<AddChatScreen> {
       sl<FirebaseFirestoreUseCase>();
   final user = FirebaseAuth.instance.currentUser;
   final TextEditingController searchController = TextEditingController();
-
+     final FocusNode focusNode = FocusNode();
+@override
+  void initState() {
+  focusNode.requestFocus();
+  focusNode.addListener(() { 
+    
+  });
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,6 +54,7 @@ class _AddChatScreenState extends State<AddChatScreen> {
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 child: SearchBar(
+                  focusNode: focusNode,
                     shape: MaterialStateProperty.all(RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12))),
                     controller: searchController,
@@ -60,6 +69,7 @@ class _AddChatScreenState extends State<AddChatScreen> {
                     hintText: "Search",
                     hintStyle: MaterialStateProperty.all(GoogleFonts.roboto(
                       fontSize: 18,
+
                       fontWeight: FontWeight.w500,
                     ))),
               ),
@@ -89,17 +99,19 @@ class _AddChatScreenState extends State<AddChatScreen> {
                     final searchKey = searchController.text.toLowerCase();
                     // Exclude the current user
                     return userName.contains(searchKey) &&
-                        (userName != _userSession.userDetails?.userName?.toLowerCase());
+                        (userName !=
+                            _userSession.userDetails?.userName?.toLowerCase());
                   }).toList();
 
                   return ListView.builder(
                     itemCount: filteredUsers.length,
                     itemBuilder: (context, index) {
                       final document = filteredUsers[index];
-                      
+
                       return UserChatCard(
-                        unseenCount:
-                            '5',
+                        
+                        lastMessageTime: '',
+                        unseenCount: '',
                         ontap: () {
                           Navigator.pushNamed(
                             context,

@@ -28,6 +28,7 @@ class ProfilePageBloc extends Bloc<ProfilePageEvents, ProfilePageState> {
           await firebaseFirestoreUseCase.getCurrentUserDetails(user!.uid);
       emit(ProfileLoadedState(
           userDetails: UserDetails(
+            signUpType: event.userDetails.signUpType,
         userName: _userSession.userDetails!.userName ?? "",
         userId: _userSession.userDetails!.userId ?? "",
         email: _userSession.userDetails!.email ?? "",
@@ -46,6 +47,7 @@ class ProfilePageBloc extends Bloc<ProfilePageEvents, ProfilePageState> {
       UpdateUserDetailsEvent event, Emitter<ProfilePageState> emit) async {
     try {
       await firebaseFirestoreUseCase.updateUser(UserDetails(
+        signUpType: event.userDetails.signUpType,
           userName: event.userDetails.userName,
           userId: event.userDetails.userId,
           email: event.userDetails.email,
@@ -57,6 +59,7 @@ class ProfilePageBloc extends Bloc<ProfilePageEvents, ProfilePageState> {
 
       emit(ProfileLoadedState(
           userDetails: UserDetails(
+            signUpType: event.userDetails.signUpType,
             userName: event.userDetails.userName,
             userId: event.userDetails.userId,
               email: event.userDetails.email,
@@ -103,6 +106,7 @@ class ProfilePageBloc extends Bloc<ProfilePageEvents, ProfilePageState> {
       final bool doesUserNameUserExist = _userSession.userDetails!.userName != null ? await firebaseFirestoreUseCase.doesUserNameUserExist(event.userDetails.userName!,event.userDetails.userId!) : false;
       if (docExist && !doesUserNameUserExist) {
         firebaseFirestoreUseCase.updateUser(UserDetails(
+          signUpType: event.userDetails.signUpType,
           userName: event.userDetails.userName,
           userId: event.userDetails.userId,
             email: event.userDetails.email,
@@ -115,6 +119,7 @@ class ProfilePageBloc extends Bloc<ProfilePageEvents, ProfilePageState> {
 
       if (!docExist && !doesUserNameUserExist) {
         firebaseFirestoreUseCase.addUser(UserDetails(
+          signUpType: event.userDetails.signUpType,
           userName: event.userDetails.userName,
             userId: event.userDetails.userId,
             email: event.userDetails.email,
@@ -125,6 +130,7 @@ class ProfilePageBloc extends Bloc<ProfilePageEvents, ProfilePageState> {
             password: event.userDetails.password));
       }
       _userSession.userDetails = UserDetails(
+        signUpType: event.userDetails.signUpType,
             userName: event.userDetails.userName,
             userId: event.userDetails.userId,
               email: event.userDetails.email,

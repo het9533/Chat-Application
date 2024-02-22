@@ -9,7 +9,7 @@ class AuthenticationLoading extends AuthenticationState {}
 class AuthenticationSuccess extends AuthenticationState {
   final User user;
   final bool isUserExist;
-  AuthenticationSuccess(this.user, this.isUserExist);
+  AuthenticationSuccess(this.user, this.isUserExist,);
 }
 
 class AuthenticationFailure extends AuthenticationState {
