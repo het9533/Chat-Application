@@ -213,7 +213,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       password: passwordController.text);
                 }
                _userSession.userDetails != null ? context.read<ProfilePageBloc>().add(
-                    SaveChangesEvent(userDetails: _userSession.userDetails!)) : null;
+                    SaveChangesEvent(userDetails: _userSession.userDetails!, image: null)) : null;
               } else {
                 Future.delayed(Duration(seconds: 1));
 
@@ -228,7 +228,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     number: phoneController.text,
                     password: passwordController.text);
                 context.read<ProfilePageBloc>().add(
-                    SaveChangesEvent(userDetails: _userSession.userDetails!));
+                    SaveChangesEvent(userDetails: _userSession.userDetails!, image: null));
               }
             }
 

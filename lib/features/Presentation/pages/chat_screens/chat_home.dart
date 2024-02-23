@@ -36,22 +36,19 @@ class _ChatHomePageState extends State<ChatHomePage>
   final user = FirebaseAuth.instance.currentUser;
   int currentIndex = 0;
   AuthenticationUseCase authenticationUseCase = sl<AuthenticationUseCase>();
-
   bool isPopUpMenuOn = false;
-
   final _userSession = sl<UserSession>();
   final TextEditingController searchController = TextEditingController();
   String? messageTimeStamp;
+  late ChatBloc _chatBloc;
 
   @override
   void dispose() {
     _chatBloc.chatstreamSubscription?.cancel();
     _chatBloc.countSubscriptions?.forEach((element) => element?.cancel());
-
     super.dispose();
   }
 
-  late ChatBloc _chatBloc;
 
   @override
   void initState() {

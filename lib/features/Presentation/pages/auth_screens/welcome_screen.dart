@@ -8,7 +8,7 @@ import 'package:chat_app/features/domain/usecase/firebase_firestore_usecase.dart
 import 'package:flutter/material.dart';
 
 class WelcomeScreen extends StatefulWidget {
-  static const welcomescreen = "welcomrscreen";
+  static const welcomescreen = "welcomescreen";
   const WelcomeScreen({super.key});
 
   @override

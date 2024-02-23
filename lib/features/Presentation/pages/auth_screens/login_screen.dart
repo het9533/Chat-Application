@@ -8,9 +8,9 @@ import 'package:chat_app/features/Presentation/pages/user_profile/profile_page.d
 import 'package:chat_app/features/Presentation/widgets/custom_text_fields.dart';
 import 'package:chat_app/features/Presentation/widgets/horizontal_or_line.dart';
 import 'package:chat_app/features/data/entity/user.dart';
+import 'package:chat_app/features/data/entity/user_session.dart';
 import 'package:chat_app/features/dependencyInjector/injector.dart';
 import 'package:chat_app/features/domain/usecase/firebase_firestore_usecase.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -30,18 +30,11 @@ class _LoginPageState extends State<LoginPage> {
   bool agree = false;
   bool obSecureText = true;
   bool isLoginWithGoogle = false;
-  bool userExist = false;
+  final UserSession _userSession = sl<UserSession>();
 
   final FirebaseFirestoreUseCase firebaseFirestoreUseCase =
       sl<FirebaseFirestoreUseCase>();
   final _formKey = GlobalKey<FormState>();
-
-  Future<bool> checkUserExist() async {
-    final user = FirebaseAuth.instance.currentUser!;
-    userExist = await firebaseFirestoreUseCase.checkIfDocExists(user.uid);
-    setState(() {});
-    return userExist;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,14 +52,24 @@ class _LoginPageState extends State<LoginPage> {
                 if (state.isUserExist) {
                   Navigator.pushNamed(context, ChatMainScreen.chatMainScreen);
                 } else {
-                  Navigator.pushNamed(context, ProfilePage.profilepage,
-                      arguments: UserDetails(
-                        signUpType: SignUpType.google,
-                        email: state.user.email,
-                        firstName: state.user.displayName,
-                        imagepath: state.user.photoURL,
-                        number: state.user.phoneNumber,
-                      ));
+                  List<String> parts = state.user.displayName!.split(" ");
+
+                  // Access individual parts
+                  String firstName = parts[0];
+                  String lastName = parts[1];
+
+                  _userSession.userDetails = UserDetails(
+                    userId: state.user.uid,
+                    signUpType: SignUpType.google,
+                    email: state.user.email,
+                    firstName: firstName,
+                    lastName: lastName,
+                    imagepath: state.user.photoURL,
+                    number: state.user.phoneNumber,
+                  );
+
+                  Navigator.pushReplacementNamed(
+                      context, ProfilePage.profilepage);
                 }
               }
               if (!isLoginWithGoogle) {
@@ -205,18 +208,17 @@ class _LoginPageState extends State<LoginPage> {
                           MaterialStateProperty.all(ColorAssets.neomBlue),
                     ),
                     onPressed: () {
-                      if (_formKey.currentState?.validate() ?? false){
-                         context.read<AuthenticationBloc>().add(
-                          EmailSignInRequestedEvent(UserDetails(
-                              signUpType: SignUpType.email,
-                              email: emailController.text,
-                              password: passwordController.text)));
+                      if (_formKey.currentState?.validate() ?? false) {
+                        context.read<AuthenticationBloc>().add(
+                            EmailSignInRequestedEvent(UserDetails(
+                                signUpType: SignUpType.email,
+                                email: emailController.text,
+                                password: passwordController.text)));
 
-                      setState(() {
-                        isLoginWithGoogle = false;
-                      });
+                        setState(() {
+                          isLoginWithGoogle = false;
+                        });
                       }
-                     
                     },
                     child: Text(
                       "Login",

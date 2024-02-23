@@ -57,7 +57,7 @@ class UserChatCard extends StatelessWidget {
                   Text(
                     username,
                     style: TextStyle(
-                      color: colorCondition ? Colors.pink : Color(0xFF13100D),
+                      color:  Color(0xFF13100D),
                       fontSize: 14,
                       fontFamily: 'Roboto',
                       fontWeight: FontWeight.w700,

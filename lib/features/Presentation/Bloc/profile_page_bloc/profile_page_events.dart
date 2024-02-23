@@ -1,4 +1,5 @@
 import 'package:chat_app/features/data/entity/user.dart';
+import 'package:image_picker/image_picker.dart';
 
 abstract class ProfilePageEvents {}
 
@@ -22,7 +23,8 @@ class ContinueButtonEvent extends ProfilePageEvents{}
 
 class SaveChangesEvent extends ProfilePageEvents {
    final UserDetails userDetails;
-  SaveChangesEvent({required this.userDetails});
+    XFile? image;
+  SaveChangesEvent({required this.userDetails , required this.image});
 }
 
 

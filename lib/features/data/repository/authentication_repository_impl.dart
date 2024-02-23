@@ -59,11 +59,10 @@ class AuthenticationRepositoryImplementation extends AuthenticationRepository {
   Future<Either<User, String>> createAccountWithEmail(
       UserDetails userDetails) async {
     try {
-      final credential = await EmailAuthProvider.credential(
+      final credential = await _auth.createUserWithEmailAndPassword(
           email: userDetails.email!, password: userDetails.password!);
-      final finalCredential =
-          await _auth.currentUser!.linkWithCredential(credential);
-      user = finalCredential.user;
+     
+      user = credential.user;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         return const Right("Weak-Password");
@@ -150,8 +149,7 @@ class AuthenticationRepositoryImplementation extends AuthenticationRepository {
       await _auth.verifyPhoneNumber(
         phoneNumber: phoneNumber,
         verificationCompleted: (PhoneAuthCredential credential) async {
-          print(" verificationCompleted credential : ${credential}");
-          await _auth.signInWithCredential(credential);
+          
         },
         verificationFailed: (FirebaseAuthException e) {
           throw e;
@@ -174,8 +172,6 @@ class AuthenticationRepositoryImplementation extends AuthenticationRepository {
         verificationId: receivedVerificationId,
         smsCode: smsCode,
       );
-      print(" verifyOTPCode credential : ${credential}");
-      await _auth.signInWithCredential(credential);
     } catch (e) {
       throw e;
     }

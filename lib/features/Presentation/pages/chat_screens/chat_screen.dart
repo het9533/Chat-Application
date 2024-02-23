@@ -345,8 +345,8 @@ class _ChatScreenState extends State<ChatScreen> {
                                                         .contains(widget
                                                             .chatUserDetails
                                                             .userId!))
-                                                    ? Colors.white
-                                                    : Colors.black,
+                                                    ? Colors.lightGreenAccent
+                                                    : Colors.white,
                                                 size: 15,
                                               )
                                             : Container(),

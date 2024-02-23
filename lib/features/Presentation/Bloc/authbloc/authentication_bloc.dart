@@ -65,8 +65,6 @@ void _onAuthentticatedUser(AuthentticatedUserEvent event, Emitter<Authentication
       print(user?.displayName);
       bool isUserExist = await firebaseFirestoreUseCase.checkIfDocExists(user!.uid);
       print(">>>>>>>>>>>>>>>>$isUserExist<<<<<<<<<<<<");
-
-      
       userOption.fold((l,) => emit(AuthenticationSuccess(l,isUserExist)), (r) => emit(AuthenticationFailure("Error signing in with Google")));
       // userOption.fold(
       //   (user) => emit(AuthenticationSuccess(user)),

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:chat_app/features/Presentation/Bloc/profile_page_bloc/profile_page_events.dart';
 import 'package:chat_app/features/Presentation/Bloc/profile_page_bloc/profile_page_states.dart';
 import 'package:chat_app/features/data/entity/user.dart';
@@ -5,6 +7,7 @@ import 'package:chat_app/features/data/entity/user_session.dart';
 import 'package:chat_app/features/dependencyInjector/injector.dart';
 import 'package:chat_app/features/domain/usecase/firebase_firestore_usecase.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -98,12 +101,22 @@ class ProfilePageBloc extends Bloc<ProfilePageEvents, ProfilePageState> {
   Future<void> _saveChanges(
       SaveChangesEvent event, Emitter<ProfilePageState> emit) async {
     try {
+
+        if (event.image != null) {
+        File file = File(event.image!.path);
+        final storageRef = FirebaseStorage.instance.ref();
+        final imageref = await storageRef
+            .child("UserProfile/user_${_userSession.userDetails?.email}")
+            .putFile(file);
+        final imageUrl = await imageref.ref.getDownloadURL();
+        event.userDetails.imagepath = imageUrl;
+      }
       final user = FirebaseAuth.instance.currentUser!;
   
       final bool docExist =
           await firebaseFirestoreUseCase.checkIfDocExists(user.uid);
       
-      final bool doesUserNameUserExist = _userSession.userDetails!.userName != null ? await firebaseFirestoreUseCase.doesUserNameUserExist(event.userDetails.userName!,event.userDetails.userId!) : false;
+      final bool doesUserNameUserExist = _userSession.userDetails!.userName == null ? await firebaseFirestoreUseCase.doesUserNameUserExist(event.userDetails.userName!,event.userDetails.userId!) : false;
       if (docExist && !doesUserNameUserExist) {
         firebaseFirestoreUseCase.updateUser(UserDetails(
           signUpType: event.userDetails.signUpType,
@@ -145,4 +158,11 @@ class ProfilePageBloc extends Bloc<ProfilePageEvents, ProfilePageState> {
       emit(ProfileErrorState(error: error.toString()));
     }
   }
+
+
+
+
+
+
+  
 }

@@ -38,11 +38,11 @@ class CustomTextFormField extends StatelessWidget {
         TextFormField(
          enabled: enabled,
         style: enabled ? TextStyle(
-            fontWeight: FontWeight.w400,
+          
+            fontWeight: FontWeight.w500,
             color: Colors.black,
         ) : TextStyle(
-            fontWeight: FontWeight.w300,
-            color: Colors.black
+            color: Colors.grey
         ),
 
         obscureText: obscureText,
@@ -50,14 +50,14 @@ class CustomTextFormField extends StatelessWidget {
           controller: controller,
                decoration:InputDecoration(
                 enabled: enabled,
-                filled: enabled,
+                filled: true,
                 fillColor: Colors.white,
             suffixIcon: suffixIcon,
             focusedBorder: OutlineInputBorder(
               borderRadius:
                     BorderRadius.all(Radius.circular(10)),
               borderSide: BorderSide(
-                color: enabled ? ColorAssets.kblackcolor : Colors.transparent,
+                color: ColorAssets.neomBlue,
                 width: 1
               ),
 
@@ -66,7 +66,7 @@ class CustomTextFormField extends StatelessWidget {
               borderRadius:
                     BorderRadius.all(Radius.circular(10)),
               borderSide: BorderSide(
-                color: ColorAssets.neomBlack,
+                color: Colors.grey,
                 width: 1
               ),
               
@@ -75,7 +75,7 @@ class CustomTextFormField extends StatelessWidget {
               borderRadius:
                     BorderRadius.all(Radius.circular(10)),
               borderSide: BorderSide(
-                color: ColorAssets.neomBlack,
+                color: Colors.grey,
                 width: 1,
               ),
               
@@ -84,7 +84,7 @@ class CustomTextFormField extends StatelessWidget {
               borderRadius:
                     BorderRadius.all(Radius.circular(10)),
               borderSide: BorderSide(
-                color: ColorAssets.neomBlack,
+                color: Colors.grey,
                 width: 1
               ),
               

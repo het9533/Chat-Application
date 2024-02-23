@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:chat_app/common/constants/color_constants.dart';
 import 'package:chat_app/features/Presentation/Bloc/profile_page_bloc/profile_page_bloc.dart';
 import 'package:chat_app/features/Presentation/Bloc/profile_page_bloc/profile_page_events.dart';
@@ -6,13 +5,11 @@ import 'package:chat_app/features/Presentation/Bloc/profile_page_bloc/profile_pa
 import 'package:chat_app/features/Presentation/pages/chat_screens/home_page.dart';
 import 'package:chat_app/features/Presentation/pages/email_verification/account_success_screen.dart';
 import 'package:chat_app/features/Presentation/widgets/booking_button.dart';
-import 'package:chat_app/features/Presentation/widgets/customCircle_page.dart';
 import 'package:chat_app/features/Presentation/widgets/custom_text_fields.dart';
 import 'package:chat_app/features/data/entity/user.dart';
 import 'package:chat_app/features/data/entity/user_session.dart';
 import 'package:chat_app/features/dependencyInjector/injector.dart';
 import 'package:chat_app/features/domain/usecase/firebase_firestore_usecase.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -22,7 +19,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:lottie/lottie.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 class ProfilePage extends StatefulWidget {
@@ -36,7 +32,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage>
     with SingleTickerProviderStateMixin {
-  bool editMode = true;
+  bool editMode = false;
   TextEditingController firstnamecontroller = TextEditingController();
   TextEditingController lastnamecontroller = TextEditingController();
   TextEditingController emailnamecontroller = TextEditingController();
@@ -44,15 +40,16 @@ class _ProfilePageState extends State<ProfilePage>
   TextEditingController userNameController = TextEditingController();
   firebase_storage.FirebaseStorage storage =
       firebase_storage.FirebaseStorage.instance;
-  String? myImageName;
-  Uint8List? myImagePath;
+    Uint8List? imageFile;
+      final ImagePicker image = ImagePicker();
+  XFile? imagepath;
   final UserSession _userSession = sl<UserSession>();
   final FirebaseFirestoreUseCase firebaseFirestoreUseCase =
       sl<FirebaseFirestoreUseCase>();
   final _formKey = GlobalKey<FormState>();
   final String defaultNetworkImage =
       'https://img.freepik.com/free-photo/3d-illustration-boy-with-camera-his-hand_1142-36694.jpg?w=740&t=st=1708339994~exp=1708340594~hmac=f6cb1c250478ec9e716e1dad64912b805dff54a8792436a8bfbd213939b773a8';
-  _ProfilePageState();
+
 
   @override
   void initState() {
@@ -103,46 +100,6 @@ class _ProfilePageState extends State<ProfilePage>
       transitionDuration: const Duration(milliseconds: 300),
     );
   }
-
-  Future<void> pickImage(ImageSource source) async {
-    try {
-      final XFile? imagePath = await ImagePicker().pickImage(source: source);
-      if (imagePath == null) return;
-      final imagePermanent = await saveFilePermanently(imagePath);
-      setState(() {
-        this.myImagePath = imagePermanent;
-      });
-    } on PlatformException catch (e) {
-      print("error $e");
-    }
-  }
-
-  Future<Uint8List> saveFilePermanently(XFile imagePath) async {
-    final directory = await getApplicationDocumentsDirectory();
-    final file = File("${directory.path}/images/${imagePath.name}");
-    await file.create(recursive: true);
-    await file.writeAsBytes(await imagePath.readAsBytes());
-    _userSession.userDetails?.imagepath = await imageUploadToFirebase(file);
-    myImagePath = await imagePath.readAsBytes();
-    myImageName = imagePath.name;
-
-    return myImagePath!;
-  }
-
-  Future<String> imageUploadToFirebase(File image) async {
-    FirebaseStorage storage = FirebaseStorage.instance;
-
-    final StorageReference = storage
-        .ref()
-        .child("UserProfile/user_${_userSession.userDetails?.email}");
-
-    final file = StorageReference.putFile(image);
-
-    String imagePathUrl = await file.snapshot.ref.getDownloadURL();
-
-    return imagePathUrl;
-  }
-
   void DeleteAccountData() async {
     firstnamecontroller.text = "";
     lastnamecontroller.text = "";
@@ -161,7 +118,7 @@ class _ProfilePageState extends State<ProfilePage>
     }
     http.Response response = await http.get(
         Uri.parse(_userSession.userDetails?.imagepath ?? defaultNetworkImage));
-    myImagePath = response.bodyBytes;
+    imageFile = response.bodyBytes;
 
     setState(() {});
   }
@@ -248,7 +205,12 @@ class _ProfilePageState extends State<ProfilePage>
               editMode = false;
             });
             if (state.doesUserNameUserExist) {
+             
+            if(_userSession.userDetails?.userName != userNameController.text){
               _scaleDialog(context);
+            }
+             
+              
             }
           }
           if (state is ContinueButtonState) {
@@ -275,74 +237,85 @@ class _ProfilePageState extends State<ProfilePage>
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
                   child: Column(
                     children: [
-                      if (myImagePath != null)
-                        Container(
-                          height: 150,
-                          width: 150,
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: MemoryImage(myImagePath!),
-                              fit: BoxFit.cover,
-                            ),
-                            shape: BoxShape.circle,
-                            border: Border.all(width: 1.5, color: Colors.black),
-                          ),
-                          child: editMode
-                              ? Center(
-                                  child: Container(
-                                    width: 50,
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      color: Colors.black.withOpacity(0.5),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: InkWell(
-                                      onTap: () {
-                                        pickImage(ImageSource.gallery);
-                                      },
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(15),
-                                        child: SvgPicture.asset(
-                                          "assets/images/edit.svg",
+                     Center(
+                            child: Hero(
+                              tag: 'Profile',
+                              child: Container(
+                                width: 120,
+                                height: 120,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(80),
+                                  color: Colors.transparent,
+                                ),
+                                alignment: Alignment.center,
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    if (imageFile != null)
+                                      Container(
+                                        height: 120,
+                                        width: 120,
+                                        clipBehavior: Clip.hardEdge,
+                                        decoration: const BoxDecoration(
+                                          shape: BoxShape.circle,
                                         ),
+                                        child: Image(
+                                          image: MemoryImage(imageFile!),
+                                          fit: BoxFit.cover,
+                                        ),
+                                      )
+                                    else if (_userSession.userDetails?.imagepath !=
+                                        null)
+                                      Container(
+                                        height: 120,
+                                        width: 120,
+                                        clipBehavior: Clip.hardEdge,
+                                        decoration: const BoxDecoration(
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Image(
+                                          image: NetworkImage(
+                                              _userSession.userDetails!.imagepath!),
+                                          fit: BoxFit.cover,
+                                        ),
+                                      )
+                                    else
+                                      const Icon(
+                                        CupertinoIcons.profile_circled,
+                                        color: Colors.grey,
+                                        size: 120,
                                       ),
-                                    ),
-                                  ),
-                                )
-                              : null,
-                        )
-                      else
-                        Container(
-                          height: 150,
-                          width: 150,
-                          child: CustomPaint(
-                            child: editMode
-                                ? Center(
-                                    child: Container(
-                                      width: 50,
-                                      height: 50,
-                                      decoration: BoxDecoration(
-                                        color: Colors.black.withOpacity(0.5),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: InkWell(
-                                        onTap: () {
-                                          pickImage(ImageSource.gallery);
+                                    if (editMode)
+                                      InkWell(
+                                        onTap: () async {
+                                          imagepath = await image.pickImage(
+                                              source: ImageSource.gallery);
+
+                                          if (imagepath == null) return;
+                                          imageFile =
+                                              await imagepath!.readAsBytes();
+                                          setState(() {});
                                         },
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(15),
-                                          child: SvgPicture.asset(
+                                        child: Container(
+                                          height: 40,
+                                          width: 40,
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(50),
+                                            color: Colors.transparent
+                                                .withOpacity(0.5),
+                                          ),
+                                          alignment: Alignment.center,
+                                          child:SvgPicture.asset(
                                             "assets/images/edit.svg",
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  )
-                                : null,
-                            painter: customCirclePainter(),
-                            size: Size(150, 150),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
                       SizedBox(
                         height: 30,
                       ),
@@ -351,7 +324,7 @@ class _ProfilePageState extends State<ProfilePage>
                         child: Column(
                           children: [
                             CustomTextFormField(
-                              enabled: editMode ? true : false,
+                              enabled: editMode? userNameController.text.isEmpty ? true : false : false,
                               label: "Username",
                               hint: "Username",
                               controller: userNameController,
@@ -481,8 +454,10 @@ class _ProfilePageState extends State<ProfilePage>
                     }
 
                     context.read<ProfilePageBloc>().add(SaveChangesEvent(
-                        userDetails: _userSession.userDetails!));
-                  } else {}
+                        userDetails: _userSession.userDetails!, image: imagepath));
+                  } else {
+
+                  }
                 }
               },
               OnFirstButtonPressed: () {
