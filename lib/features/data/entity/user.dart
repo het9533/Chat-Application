@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'user.g.dart';
@@ -7,8 +8,9 @@ enum SignUpType {
   email,
 }
 
+
 @JsonSerializable()
-class UserDetails {
+class UserDetails extends Equatable{
   String? userName;
   String? userId;
   String? firstName;
@@ -35,4 +37,7 @@ class UserDetails {
       _$UserDetailsFromJson(json);
 
   Map<String, dynamic> toJson() => _$UserDetailsToJson(this);
+  
+  @override
+  List<Object?> get props => [userId];
 }

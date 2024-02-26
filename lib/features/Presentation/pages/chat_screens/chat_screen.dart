@@ -3,7 +3,7 @@ import 'package:chat_app/features/Presentation/Bloc/chat_bloc/chat_event.dart';
 import 'package:chat_app/features/Presentation/Bloc/chat_bloc/chat_state.dart';
 import 'package:chat_app/features/Presentation/pages/chat_screens/edit_message_screen.dart';
 import 'package:chat_app/features/Presentation/widgets/delete_alert_box.dart';
-import 'package:chat_app/features/data/entity/user.dart';
+import 'package:chat_app/features/data/entity/user_session.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:emoji_keyboard_flutter/emoji_keyboard_flutter.dart';
 import 'package:flutter/material.dart';
@@ -17,11 +17,10 @@ import 'package:chat_app/features/domain/usecase/chat_features_usercase.dart';
 import 'package:intl/intl.dart';
 
 class ChatScreen extends StatefulWidget {
-  final UserDetails userDetails;
-  final UserDetails chatUserDetails;
+  Chat? chatModel;
+  final ChatType chatType;
   static const chatScreen = 'chatScreen';
-  ChatScreen(
-      {Key? key, required this.userDetails, required this.chatUserDetails})
+  ChatScreen({Key? key, required this.chatType, this.chatModel})
       : super(key: key);
 
   @override
@@ -41,11 +40,16 @@ class _ChatScreenState extends State<ChatScreen> {
   List<String> selectedMessage = [];
   bool selectionMode = false;
   String? messageTimeStamp;
+  final UserSession _userSession = sl<UserSession>();
 
   @override
   void initState() {
-    chatId = chatFeaturesUseCase.chatRoomId(
-        widget.userDetails.userId!, widget.chatUserDetails.userId!);
+    if (widget.chatType == ChatType.private) {
+      chatId = chatFeaturesUseCase.chatRoomId(_userSession.userDetails!.userId!,
+          _userSession.endUserDetails!.userId!);
+    } else {
+      chatId = widget.chatModel!.chatId!;
+    }
     chatBloc = context.read<ChatBloc>();
     focusNode.addListener(() {
       if (focusNode.hasFocus) {
@@ -99,27 +103,47 @@ class _ChatScreenState extends State<ChatScreen> {
                             Navigator.pop(context);
                           },
                           icon: Icon(Icons.arrow_back)),
-                      Container(
-                        width: 30,
-                        height: 30,
-                        decoration: BoxDecoration(
-                            color: Colors.red,
-                            image: DecorationImage(
-                                image: NetworkImage(
-                                    widget.chatUserDetails.imagepath!),
-                                fit: BoxFit.cover),
-                            shape: BoxShape.circle),
-                      ),
+                      widget.chatType == ChatType.group
+                          ? Container(
+                              width: 30,
+                              height: 30,
+                              decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  image: DecorationImage(
+                                      image: NetworkImage(
+                                          widget.chatModel!.groupImage!),
+                                      fit: BoxFit.cover),
+                                  shape: BoxShape.circle),
+                            )
+                          : Container(
+                              width: 30,
+                              height: 30,
+                              decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  image: DecorationImage(
+                                      image: NetworkImage(_userSession
+                                          .endUserDetails!.imagepath!),
+                                      fit: BoxFit.cover),
+                                  shape: BoxShape.circle),
+                            ),
                       SizedBox(
                         width: 10,
                       ),
-                      Text(
-                        widget.chatUserDetails.userName!,
-                        style: GoogleFonts.roboto(
-                            color: ColorAssets.neomBlack,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w500),
-                      ),
+                      widget.chatType == ChatType.group
+                          ? Text(
+                              widget.chatModel!.groupName!,
+                              style: GoogleFonts.roboto(
+                                  color: ColorAssets.neomBlack,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w500),
+                            )
+                          : Text(
+                              _userSession.endUserDetails!.userName!,
+                              style: GoogleFonts.roboto(
+                                  color: ColorAssets.neomBlack,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w500),
+                            ),
                       Spacer(),
                       !selectionMode
                           ? PopupMenuButton(
@@ -144,7 +168,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                                 element.messageId ==
                                                 selectedMessage[0])
                                             .sender ==
-                                        widget.userDetails.userId)
+                                        _userSession.userDetails!.userId!)
                                   IconButton(
                                       onPressed: () {
                                         final String editMessage =
@@ -152,7 +176,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                         selectedMessage.clear();
                                         setState(() {
                                           isEditMessage = false;
-                                          isMessageSelected=false;
+                                          isMessageSelected = false;
                                           selectionMode = false;
                                         });
                                         Navigator.push(
@@ -181,26 +205,29 @@ class _ChatScreenState extends State<ChatScreen> {
                                   Container(),
                                 IconButton(
                                     onPressed: () {
-                                        setState(() {
-                                          isEditMessage = false;
-                                          isMessageSelected=false;
-                                          selectionMode = false;
-                                        });
-                                     DeleteAccountDialouge(context: context , 
-                                     onNoPressed: () {
-                                        setState(() {
-                                          isEditMessage = false;
-                                          isMessageSelected=false;
-                                          selectionMode = false;
-                                          selectedMessage.clear();
-                                        });
-                                       Navigator.pop(context);
-                                     },
-                                     onYesPressed: (){
-                                      Navigator.pop(context);
-                                      context.read<ChatBloc>().add(DeleteMessageEvent(selectedMessage, chatId: chatId));
-                                     });
-                                     
+                                      setState(() {
+                                        isEditMessage = false;
+                                        isMessageSelected = false;
+                                        selectionMode = false;
+                                      });
+                                      DeleteAccountDialouge(
+                                          context: context,
+                                          onNoPressed: () {
+                                            setState(() {
+                                              isEditMessage = false;
+                                              isMessageSelected = false;
+                                              selectionMode = false;
+                                              selectedMessage.clear();
+                                            });
+                                            Navigator.pop(context);
+                                          },
+                                          onYesPressed: () {
+                                            Navigator.pop(context);
+                                            context.read<ChatBloc>().add(
+                                                DeleteMessageEvent(
+                                                    selectedMessage,
+                                                    chatId: chatId));
+                                          });
                                     },
                                     icon: Icon(Icons.delete))
                               ],
@@ -279,27 +306,27 @@ class _ChatScreenState extends State<ChatScreen> {
                         },
                         child: Container(
                           margin: EdgeInsets.symmetric(vertical: 3),
-                          alignment:
-                              messages[index].sender == widget.userDetails.userId!
-                                  ? Alignment.topRight
-                                  : Alignment.topLeft,
-                          color:
-                              selectedMessage.contains(messages[index].messageId!)
-                                  ? ColorAssets.neomBlue.withOpacity(0.15)
-                                  : Colors.transparent,
+                          alignment: messages[index].sender ==
+                                  _userSession.userDetails!.userId!
+                              ? Alignment.topRight
+                              : Alignment.topLeft,
+                          color: selectedMessage
+                                  .contains(messages[index].messageId!)
+                              ? ColorAssets.neomBlue.withOpacity(0.15)
+                              : Colors.transparent,
                           child: Container(
                             constraints: BoxConstraints(minWidth: 100),
                             padding: EdgeInsets.symmetric(
                                 vertical: 8.0, horizontal: 10.0),
-                            margin:
-                                EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                            margin: EdgeInsets.symmetric(
+                                vertical: 5, horizontal: 10),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.only(
                                   topLeft: Radius.circular(15),
                                   bottomLeft: Radius.circular(15),
                                   topRight: Radius.circular(15)),
                               color: messages[index].sender ==
-                                      widget.userDetails.userId!
+                                      _userSession.userDetails!.userId!
                                   ? ColorAssets.neomBlue
                                   : Colors.grey.shade300,
                             ),
@@ -312,7 +339,8 @@ class _ChatScreenState extends State<ChatScreen> {
                                     messages[index].content!,
                                     style: GoogleFonts.roboto(
                                         color: messages[index].sender ==
-                                                widget.userDetails.userId!
+                                                _userSession
+                                                    .userDetails!.userId!
                                             ? Colors.white
                                             : Colors.black,
                                         fontSize: 16),
@@ -330,21 +358,23 @@ class _ChatScreenState extends State<ChatScreen> {
                                           formattedTime,
                                           style: GoogleFonts.roboto(
                                               color: messages[index].sender ==
-                                                      widget.userDetails.userId!
+                                                      _userSession
+                                                          .userDetails!.userId!
                                                   ? Colors.white
                                                   : Colors.black,
                                               fontSize: 12),
                                         ),
                                         SizedBox(width: 5),
                                         messages[index].sender ==
-                                                widget.userDetails.userId!
+                                                _userSession
+                                                    .userDetails!.userId!
                                             ? Icon(
                                                 Icons.done_all,
                                                 color: !(messages[index]
                                                         .unseenby!
-                                                        .contains(widget
-                                                            .chatUserDetails
-                                                            .userId!))
+                                                        .contains(_userSession
+                                                            .endUserDetails
+                                                            ?.userId!))
                                                     ? Colors.lightGreenAccent
                                                     : Colors.white,
                                                 size: 15,
@@ -433,40 +463,49 @@ class _ChatScreenState extends State<ChatScreen> {
                               .collection('message')
                               .doc()
                               .id;
-      
-                          final chat = Chat(
+                         if (widget.chatType == ChatType.private) {
+                            final chat = Chat(
                             chatId: chatId,
                             createdAt: DateTime.now(),
-                            groupImage: widget.chatUserDetails.imagepath!,
-                            groupName: widget.chatUserDetails.userName!,
+                            groupImage: _userSession.endUserDetails?.imagepath!,
+                            groupName: _userSession.endUserDetails?.userName,
                             lastMessage: {
                               'content': _messageController.text,
-                              'sender': widget.userDetails.userId!,
+                              'sender': _userSession.userDetails!.userId!,
                               'timeStamp': DateTime.now(),
                             },
-                            usersInfo: {
-                              widget.userDetails.userId!: widget.userDetails,
-                              widget.chatUserDetails.userId!:
-                                  widget.chatUserDetails
-                            },
+                            usersInfo: {},
                             type: ChatType.private,
                             users: [
-                              widget.userDetails.userId!,
-                              widget.chatUserDetails.userId!
+                              _userSession.userDetails!.userId!,
+                              _userSession.endUserDetails!.userId!
                             ],
                           );
                           final messageObj = Message(
                             unseenby: [
-                              widget.userDetails.userId!,
-                              widget.chatUserDetails.userId!
+                              _userSession.userDetails!.userId!,
+                              _userSession.endUserDetails!.userId!
                             ],
                             messageId: mId,
                             content: _messageController.text,
                             timeStamp: DateTime.now(),
-                            sender: widget.userDetails.userId!,
+                            sender: _userSession.userDetails!.userId!,
                           );
                           context.read<ChatBloc>().add(AddMessageEvent(
                               chat: chat, message: messageObj, chatId: chatId));
+                         }else{
+                           
+                          final messageObj = Message(
+                            unseenby: widget.chatModel?.users,
+                            messageId: mId,
+                            content: _messageController.text,
+                            timeStamp: DateTime.now(),
+                            sender: _userSession.userDetails!.userId!,
+                          );
+                          context.read<ChatBloc>().add(AddMessageEvent(
+                              chat: widget.chatModel!, message: messageObj, chatId: chatId));
+                         }
+                          
                           _messageController.clear();
                         },
                       ),
@@ -475,7 +514,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
                 ValueListenableBuilder(
                   valueListenable: ValueNotifier(0),
-                  builder: (BuildContext context, dynamic value, Widget? child) {
+                  builder:
+                      (BuildContext context, dynamic value, Widget? child) {
                     return Visibility(
                       visible: showEmojiKeyboard,
                       child: EmojiKeyboard(

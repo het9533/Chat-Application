@@ -146,7 +146,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     try {
       await chatFeaturesUseCase.sendMessage(
           event.chatId, event.chat, event.message);
-
       emit(ChatAddedState());
     } catch (error) {
       emit(ChatErrorState(error: error.toString()));

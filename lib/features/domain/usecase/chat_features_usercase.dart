@@ -11,7 +11,7 @@ class ChatFeaturesUseCase {
     return chatFeaturesRepository.chatRoomId(user1, user2);
   }
 
-  Future<void> sendMessage(String chatId, Chat chat, Message message) async {
+  Future<void> sendMessage(String chatId, Chat chat, Message? message) async {
     return await chatFeaturesRepository.sendMessage(chatId, chat, message);
   }
 

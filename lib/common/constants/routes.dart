@@ -2,6 +2,8 @@ import 'package:chat_app/features/Presentation/pages/auth_screens/login_screen.d
 import 'package:chat_app/features/Presentation/pages/auth_screens/signup_page.dart';
 import 'package:chat_app/features/Presentation/pages/auth_screens/welcome_screen.dart';
 import 'package:chat_app/features/Presentation/pages/chat_screens/add_chat_screen.dart';
+import 'package:chat_app/features/Presentation/pages/chat_screens/add_group_chat_screen.dart';
+import 'package:chat_app/features/Presentation/pages/chat_screens/add_group_detail_screen.dart';
 import 'package:chat_app/features/Presentation/pages/chat_screens/chat_home.dart';
 import 'package:chat_app/features/Presentation/pages/chat_screens/chat_screen.dart';
 import 'package:chat_app/features/Presentation/pages/chat_screens/edit_message_screen.dart';
@@ -9,6 +11,7 @@ import 'package:chat_app/features/Presentation/pages/chat_screens/home_page.dart
 import 'package:chat_app/features/Presentation/pages/email_verification/account_success_screen.dart';
 import 'package:chat_app/features/Presentation/pages/email_verification/email_verification_screen.dart';
 import 'package:chat_app/features/Presentation/pages/user_profile/profile_page.dart';
+import 'package:chat_app/features/data/entity/user.dart';
 import 'package:chat_app/features/dependencyInjector/injector.dart';
 import 'package:chat_app/features/domain/usecase/firebase_firestore_usecase.dart';
 import 'package:flutter/material.dart';
@@ -54,13 +57,26 @@ class AppNavigator {
         var args = settings.arguments as List<dynamic>;
         return MaterialPageRoute(
             builder: (context) => ChatScreen(
-                  userDetails: args[0],
-                  chatUserDetails: args[1],
+                  chatModel: args[0],
+                  chatType: args[1],
+                  
                 ),
             settings: settings);
       case AddChatScreen.addChatScreen:
         return MaterialPageRoute(
           builder: (context) => AddChatScreen(),
+        );
+        case CreateGroupScreen.createGroupScreen:
+        return MaterialPageRoute(
+          builder: (context) => CreateGroupScreen(),
+        );
+        case CreateGroupDetailScreen.createGroupDetailScreen:
+        var args = settings.arguments as List<UserDetails>;
+        return MaterialPageRoute(
+          builder: (context) => CreateGroupDetailScreen(
+            groupParticipants: args,
+          ),
+          settings: settings
         );
       case EditMessageScreen.editMessageScreen:
         var args = settings.arguments as List<dynamic>;

@@ -14,18 +14,20 @@ class ChatFeaturesRepositoryImplementation extends ChatFeaturesRepository {
   }
 
   @override
-  Future<void> sendMessage(String chatId, Chat chat, Message message) async {
+  Future<void> sendMessage(String chatId, Chat chat, Message? message) async {
     try {
       await FirebaseFirestore.instance
           .collection('chats')
           .doc(chatId)
           .set(chat.toJson());
-      await FirebaseFirestore.instance
+      if (message != null) {
+        await FirebaseFirestore.instance
           .collection('chats')
           .doc(chatId)
           .collection('messages')
           .doc(message.messageId)
           .set(message.toJson());
+      }
     } catch (e) {
       print('Error sending message: $e');
       throw Exception('Failed to send message');

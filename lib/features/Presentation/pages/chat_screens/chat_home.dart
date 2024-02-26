@@ -247,9 +247,7 @@ class _ChatHomePageState extends State<ChatHomePage>
                                   DateFormat('hh:mm a').format(timestamp);
                               
                                 print(formattedTime);
-                              return _userSession.chats[index].lastMessage !=
-                                      null 
-                                  ? UserChatCard(
+                              return UserChatCard(
                                     showIconCase : _userSession.chats[index].lastMessage!['sender'] ==
                                                 _userSession.userDetails?.userId,
                                     colorCondition: _userSession.message?[index].sender ==
@@ -285,8 +283,8 @@ class _ChatHomePageState extends State<ChatHomePage>
                                       lastMessage: _userSession.chats[index]
                                               .lastMessage!['content'] ??
                                           '',
-                                    )
-                                  : Container();
+                                    );
+                                 
                             },
                           ),
                         ),

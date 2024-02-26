@@ -1,5 +1,6 @@
 import 'package:chat_app/common/constants/color_constants.dart';
 import 'package:chat_app/features/Presentation/pages/chat_screens/add_chat_screen.dart';
+import 'package:chat_app/features/Presentation/pages/chat_screens/add_group_chat_screen.dart';
 import 'package:chat_app/features/Presentation/pages/chat_screens/chat_home.dart';
 import 'package:chat_app/features/Presentation/pages/chat_screens/favourite.dart';
 import 'package:chat_app/features/Presentation/pages/chat_screens/settings.dart';
@@ -98,6 +99,7 @@ class _MyButtomNavBarState extends State<ChatMainScreen> {
                     title: Text('New group'),
                     subtitle: Text('Join the Friends around you'),
                     onTap: () {
+                      Navigator.pushReplacementNamed(context, CreateGroupScreen.createGroupScreen);
                       // Do something for 'New Community' option
                     },
                   ),

@@ -1,4 +1,5 @@
 import 'package:chat_app/features/data/entity/user.dart';
+import 'package:chat_app/features/data/model/chat_model.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -113,13 +114,14 @@ class _AddChatScreenState extends State<AddChatScreen> {
                         lastMessageTime: '',
                         unseenCount: '',
                         ontap: () {
+                          _userSession.endUserDetails = UserDetails.fromJson(
+                                  document.data() as Map<String, dynamic>);
                           Navigator.pushNamed(
                             context,
                             ChatScreen.chatScreen,
                             arguments: [
-                              _userSession.userDetails,
-                              UserDetails.fromJson(
-                                  document.data() as Map<String, dynamic>)
+                              null,
+                              ChatType.private
                             ],
                           );
                         },

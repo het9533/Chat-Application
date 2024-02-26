@@ -8,9 +8,9 @@ class InitialChatEvent extends ChatEvent {}
 class AddChatEvent extends ChatEvent {
   final String chatId;
   final Chat chat;
-  final Message message;
+  final Message? message;
   AddChatEvent(
-      {required this.chatId, required this.chat, required this.message});
+      {required this.chatId, required this.chat,  this.message});
 }
 
 class LoadMessageEvent extends ChatEvent {
@@ -22,10 +22,9 @@ class DeleteChatEvent extends ChatEvent {}
 
 class AddMessageEvent extends ChatEvent {
   final Chat chat;
-  final Message message;
+  Message? message;
   final String chatId;
-  AddMessageEvent(
-      {required this.chat, required this.message, required this.chatId});
+  AddMessageEvent({required this.chat , required this.chatId ,this.message});
 }
 
 class EditedMessageEvent extends ChatEvent {
