@@ -12,14 +12,12 @@ import 'package:chat_app/features/Presentation/Bloc/profile_page_bloc/profile_pa
 import 'package:chat_app/features/Presentation/pages/chat_screens/chat_screen.dart';
 import 'package:chat_app/features/Presentation/pages/user_profile/profile_page.dart';
 import 'package:chat_app/features/Presentation/widgets/my_chat_card.dart';
-import 'package:chat_app/features/data/entity/user.dart';
 import 'package:chat_app/features/data/entity/user_session.dart';
 import 'package:chat_app/features/dependencyInjector/injector.dart';
 import 'package:chat_app/features/domain/usecase/authentication_usecase.dart';
 import 'package:chat_app/features/domain/usecase/firebase_firestore_usecase.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-
 
 class ChatHomePage extends StatefulWidget {
   static const chatHomePage = 'ChatHomePage';
@@ -48,7 +46,6 @@ class _ChatHomePageState extends State<ChatHomePage>
     _chatBloc.countSubscriptions?.forEach((element) => element?.cancel());
     super.dispose();
   }
-
 
   @override
   void initState() {
@@ -232,59 +229,68 @@ class _ChatHomePageState extends State<ChatHomePage>
                             itemCount: _userSession.chats.length,
                             itemBuilder: (BuildContext context, int index) {
                               List<String> otherUserId =
-                                  _userSession.chats[index].users!;
+                                  _userSession.chats[index].users!.toList();
                               otherUserId.remove(user!.uid);
 
-                              UserDetails anotherUser = _userSession
-                                  .chats[index].usersInfo![otherUserId.first]!;
+                              
 
                               Timestamp timestampString = _userSession
                                   .chats[index].lastMessage!['timeStamp'];
-                                  
-                              DateTime timestamp =
-                                  timestampString.toDate();
+
+                              DateTime timestamp = timestampString.toDate();
                               String formattedTime =
                                   DateFormat('hh:mm a').format(timestamp);
-                              
-                                print(formattedTime);
+
                               return UserChatCard(
-                                    showIconCase : _userSession.chats[index].lastMessage!['sender'] ==
-                                                _userSession.userDetails?.userId,
-                                    colorCondition: _userSession.message?[index].sender ==
-                                                _userSession.userDetails?.userId ? !(_userSession.message![index]
-                                                        .unseenby!
-                                                        .contains(otherUserId.first)) : false,
-                                      lastMessageTime: formattedTime,
-                                      unseenCount: _userSession.unReadCount[
-                                                      _userSession.chats[index]
-                                                          .chatId] !=
-                                                  0 &&
-                                              _userSession.chats[index]
-                                                      .lastMessage!['sender'] !=
-                                                  _userSession
-                                                      .userDetails?.userId
-                                          ? _userSession.unReadCount[
-                                                  _userSession
-                                                      .chats[index].chatId]
-                                              .toString()
-                                          : '',
-                                      ontap: () {
-                                        Navigator.pushNamed(
-                                          context,
-                                          ChatScreen.chatScreen,
-                                          arguments: [
-                                            _userSession.userDetails,
-                                            anotherUser
-                                          ],
-                                        );
-                                      },
-                                      image: anotherUser.imagepath ?? "",
-                                      username: anotherUser.userName ?? "",
-                                      lastMessage: _userSession.chats[index]
-                                              .lastMessage!['content'] ??
-                                          '',
-                                    );
-                                 
+                                showIconCase: (_userSession
+                                        .chats[index].lastMessage!['sender'] ==
+                                    _userSession.userDetails?.userId && _userSession.chats[index]
+                                            .lastMessage!['content'] !=
+                                        ''),
+                                colorCondition:(_userSession.message != null) ? _userSession
+                                            .message![index].sender ==
+                                        _userSession.userDetails?.userId
+                                    ? !(_userSession.message![index].unseenby!
+                                        .contains(otherUserId.first))
+                                    : false : false,
+                                lastMessageTime: formattedTime,
+                                unseenCount: _userSession.unReadCount[
+                                                _userSession
+                                                    .chats[index].chatId] !=
+                                            0 &&
+                                        _userSession.chats[index]
+                                                .lastMessage!['sender'] !=
+                                            _userSession.userDetails?.userId
+                                    ? _userSession.unReadCount[
+                                            _userSession.chats[index].chatId]
+                                        .toString()
+                                    : '',
+                                ontap: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    ChatScreen.chatScreen,
+                                    arguments: [
+                                      _userSession.chats[index],
+                                      _userSession.chats[index].type
+                                    ],
+                                  );
+                                },
+                                image:
+                                    _userSession.chats[index].groupImage ?? "",
+                                username:
+                                    _userSession.chats[index].groupName ?? "",
+                                lastMessage: _userSession.chats[index]
+                                            .lastMessage!['content'] ==
+                                        ''
+                                    ? _userSession.chats[index]
+                                                .lastMessage!['sender'] ==
+                                            _userSession.userDetails?.userId
+                                        ? 'You Created a Group '
+                                        : '${_userSession.chats[index].usersInfo![_userSession.chats[index].lastMessage!['sender']]?.userName} Created Group'
+                                    : _userSession.chats[index]
+                                            .lastMessage!['content'] ??
+                                        '',
+                              );
                             },
                           ),
                         ),

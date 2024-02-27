@@ -1,6 +1,8 @@
 import 'package:chat_app/common/constants/color_constants.dart';
 import 'package:chat_app/features/Presentation/pages/chat_screens/add_group_detail_screen.dart';
 import 'package:chat_app/features/data/entity/user.dart';
+import 'package:chat_app/features/data/entity/user_session.dart';
+import 'package:chat_app/features/dependencyInjector/injector.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -17,14 +19,17 @@ class CreateGroupScreen extends StatefulWidget {
 class _CreateGroupScreenState extends State<CreateGroupScreen> {
   final TextEditingController searchController = TextEditingController();
   final FocusNode focusNode = FocusNode();
+  final UserSession _userSession = sl<UserSession>();
   final user = FirebaseAuth.instance.currentUser;
   final List<UserDetails> groupParticipants = [];
+  
   
 
   @override
   void initState() {
     focusNode.requestFocus();
     focusNode.addListener(() {});
+    groupParticipants.add(_userSession.userDetails!);
     super.initState();
   
   }
@@ -37,7 +42,9 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
         scrolledUnderElevation: 0.0,
         backgroundColor: ColorAssets.neomCream,
         leading: IconButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pop(context);
+          },
           icon: Icon(Icons.arrow_back),
         ),
         title: Text(

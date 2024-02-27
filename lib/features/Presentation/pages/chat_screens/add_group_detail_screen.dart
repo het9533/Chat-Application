@@ -7,7 +7,9 @@ import 'package:chat_app/features/Presentation/Bloc/chat_bloc/chat_event.dart';
 import 'package:chat_app/features/Presentation/Bloc/chat_bloc/chat_state.dart';
 import 'package:chat_app/features/Presentation/pages/chat_screens/chat_screen.dart';
 import 'package:chat_app/features/data/entity/user.dart';
+import 'package:chat_app/features/data/entity/user_session.dart';
 import 'package:chat_app/features/data/model/chat_model.dart';
+import 'package:chat_app/features/dependencyInjector/injector.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -31,6 +33,7 @@ class CreateGroupDetailScreen extends StatefulWidget {
 class _CreateGroupDetailScreenState extends State<CreateGroupDetailScreen> {
   final FocusNode focusNode = FocusNode();
   final user = FirebaseAuth.instance.currentUser;
+  final UserSession _userSession = sl<UserSession>();
   TextEditingController groupNameController = TextEditingController();
   firebase_storage.FirebaseStorage storage =
       firebase_storage.FirebaseStorage.instance;
@@ -54,7 +57,9 @@ class _CreateGroupDetailScreenState extends State<CreateGroupDetailScreen> {
         scrolledUnderElevation: 0.0,
         backgroundColor: ColorAssets.neomCream,
         leading: IconButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pop(context);
+          },
           icon: Icon(Icons.arrow_back),
         ),
         title: Text(
@@ -88,14 +93,20 @@ class _CreateGroupDetailScreenState extends State<CreateGroupDetailScreen> {
             GroupImageUrl = imageUrl;
           }
 
-           chat = Chat(
-              chatId: gId,
-              createdAt: DateTime.now(),
-              groupImage: GroupImageUrl ?? AppConstant.defaultIcon,
-              groupName: groupNameController.text,
-              usersInfo: usersInfo,
-              type: ChatType.group,
-              users: users);
+          chat = Chat(
+            chatId: gId,
+            createdAt: DateTime.now(),
+            groupImage: GroupImageUrl ?? AppConstant.defaultNetworkImage,
+            groupName: groupNameController.text,
+            usersInfo: usersInfo,
+            type: ChatType.group,
+            users: users.toList(),
+            lastMessage: {
+              'content': '',
+              'sender': _userSession.userDetails!.userId,
+              'timeStamp': DateTime.now(),
+            },
+          );
 
           context.read<ChatBloc>().add(AddChatEvent(chat: chat!, chatId: gId));
         },
@@ -107,12 +118,10 @@ class _CreateGroupDetailScreenState extends State<CreateGroupDetailScreen> {
       ),
       body: BlocListener<ChatBloc, ChatState>(
         listener: (context, state) {
-        if (state is ChatAddedState) {
-          Navigator.pushReplacementNamed(context, ChatScreen.chatScreen, arguments: [
-            chat,
-            ChatType.group
-          ]);
-        }
+          if (state is ChatAddedState) {
+            Navigator.pushReplacementNamed(context, ChatScreen.chatScreen,
+                arguments: [chat, ChatType.group]);
+          }
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

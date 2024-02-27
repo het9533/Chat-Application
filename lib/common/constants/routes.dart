@@ -58,8 +58,7 @@ class AppNavigator {
         return MaterialPageRoute(
             builder: (context) => ChatScreen(
                   chatModel: args[0],
-                  chatType: args[1],
-                  
+                  chatType: args[1]
                 ),
             settings: settings);
       case AddChatScreen.addChatScreen:

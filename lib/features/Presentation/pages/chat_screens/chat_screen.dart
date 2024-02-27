@@ -41,9 +41,11 @@ class _ChatScreenState extends State<ChatScreen> {
   bool selectionMode = false;
   String? messageTimeStamp;
   final UserSession _userSession = sl<UserSession>();
+  final ScrollController controller = ScrollController();
 
   @override
   void initState() {
+    print(widget.chatModel!.users);
     if (widget.chatType == ChatType.private) {
       chatId = chatFeaturesUseCase.chatRoomId(_userSession.userDetails!.userId!,
           _userSession.endUserDetails!.userId!);
@@ -129,21 +131,36 @@ class _ChatScreenState extends State<ChatScreen> {
                       SizedBox(
                         width: 10,
                       ),
-                      widget.chatType == ChatType.group
-                          ? Text(
-                              widget.chatModel!.groupName!,
-                              style: GoogleFonts.roboto(
-                                  color: ColorAssets.neomBlack,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w500),
-                            )
-                          : Text(
-                              _userSession.endUserDetails!.userName!,
-                              style: GoogleFonts.roboto(
-                                  color: ColorAssets.neomBlack,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w500),
-                            ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          widget.chatType == ChatType.group
+                              ? Text(
+                                  widget.chatModel!.groupName!,
+                                  style: GoogleFonts.roboto(
+                                      color: ColorAssets.neomBlack,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w500),
+                                )
+                              : Text(
+                                  _userSession.endUserDetails!.userName!,
+                                  style: GoogleFonts.roboto(
+                                      color: ColorAssets.neomBlack,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w500),
+                                ),
+                          (widget.chatType == ChatType.group &&
+                                  widget.chatModel != null)
+                              ? Text(
+                                  'You, ${widget.chatModel!.usersInfo!.values.where((e) => e.userId != _userSession.userDetails!.userId).map((e) => e.userName).join(', ')}',
+                                  style: GoogleFonts.roboto(
+                                    color: ColorAssets.neomBlack,
+                                    fontSize: 14,
+                                  ),
+                                )
+                              : Container(),
+                        ],
+                      ),
                       Spacer(),
                       !selectionMode
                           ? PopupMenuButton(
@@ -238,15 +255,19 @@ class _ChatScreenState extends State<ChatScreen> {
                 Expanded(
                     child: BlocConsumer<ChatBloc, ChatState>(
                         listener: (context, state) {
-                  if (state is InitialChatState) {}
-                  if (state is ChatLoadedState) {}
-                  if (state is ChatUpdatedState) {}
-                  if (state is ChatErrorState) {}
-                  if (state is MessageLoadedState) {}
-                  if (state is MessageUpdatedState) {
+                  if (state is InitialChatState) {
+                  } else if (state is ChatLoadedState) {
+                  } else if (state is ChatUpdatedState) {
+                  } else if (state is ChatErrorState) {
+                  } else if (state is MessageLoadedState) {
+                  } else if (state is MessageUpdatedState) {
                     messages = state.docs
                         .map((e) => Message.fromJson(e.toJson()))
                         .toList();
+                    WidgetsBinding.instance.addPostFrameCallback(
+                      (_) => controller
+                          .jumpTo(controller.position.maxScrollExtent),
+                    );
                   }
                 }, buildWhen: (previous, current) {
                   return current is MessageUpdatedState ||
@@ -269,127 +290,177 @@ class _ChatScreenState extends State<ChatScreen> {
                     selectedMessage.clear();
                   }
                   if (state is EditedMessageState) {}
-                  return ListView.builder(
-                    reverse: true,
-                    itemCount: messages.length,
-                    itemBuilder: (context, index) {
-                      String timestampString =
-                          messages[index].timeStamp.toString();
-                      DateTime timestamp = DateTime.parse(timestampString);
-                      String formattedTime =
-                          DateFormat('hh:mm a').format(timestamp);
-                      messageTimeStamp = formattedTime;
-                      return InkWell(
-                        onLongPress: () {
-                          selectedMessage.add(messages[index].messageId!);
-                          print(selectedMessage);
-                          setState(() {
-                            selectionMode = true;
-                          });
-                        },
-                        onTap: () {
-                          if (selectionMode) {
-                            if (selectedMessage
-                                .contains(messages[index].messageId)) {
-                              selectedMessage.remove(messages[index].messageId);
-                              setState(() {});
-                            } else {
-                              selectedMessage.add(messages[index].messageId!);
-                              setState(() {});
-                            }
-                          }
-                          if (selectedMessage.isEmpty) {
-                            setState(() {
-                              selectionMode = false;
-                            });
-                          }
-                        },
-                        child: Container(
-                          margin: EdgeInsets.symmetric(vertical: 3),
-                          alignment: messages[index].sender ==
-                                  _userSession.userDetails!.userId!
-                              ? Alignment.topRight
-                              : Alignment.topLeft,
-                          color: selectedMessage
-                                  .contains(messages[index].messageId!)
-                              ? ColorAssets.neomBlue.withOpacity(0.15)
-                              : Colors.transparent,
-                          child: Container(
-                            constraints: BoxConstraints(minWidth: 100),
-                            padding: EdgeInsets.symmetric(
-                                vertical: 8.0, horizontal: 10.0),
-                            margin: EdgeInsets.symmetric(
-                                vertical: 5, horizontal: 10),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(15),
-                                  bottomLeft: Radius.circular(15),
-                                  topRight: Radius.circular(15)),
-                              color: messages[index].sender ==
+                  return CustomScrollView(
+                    controller: controller,
+                    slivers: [
+                      (widget.chatModel?.type == ChatType.group)
+                          ? SliverPadding(
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 10, horizontal: 30),
+                              sliver: SliverToBoxAdapter(
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  child: (widget.chatModel
+                                              ?.lastMessage?['sender'] ==
+                                          _userSession.userDetails?.userId)
+                                      ? Text(
+                                          'You created a group',
+                                          style: TextStyle(color: Colors.grey),
+                                        )
+                                      : Text(
+                                          "${widget.chatModel?.usersInfo![widget.chatModel?.lastMessage!['sender']]?.userName} created group",
+                                          style: TextStyle(color: Colors.grey)),
+                                ),
+                              ),
+                            )
+                          : SliverToBoxAdapter(child: Container()),
+                      SliverList.builder(
+                        itemCount: messages.length,
+                        itemBuilder: (context, index) {
+                          final reversedIndex = messages.length - index - 1;
+
+                          String timestampString =
+                              messages[reversedIndex].timeStamp.toString();
+                          DateTime timestamp = DateTime.parse(timestampString);
+                          String formattedTime =
+                              DateFormat('hh:mm a').format(timestamp);
+                          messageTimeStamp = formattedTime;
+                          return InkWell(
+                            onLongPress: () {
+                              selectedMessage
+                                  .add(messages[reversedIndex].messageId!);
+                              // print(selectedMessage);
+                              setState(() {
+                                selectionMode = true;
+                              });
+                            },
+                            onTap: () {
+                              if (selectionMode) {
+                                if (selectedMessage.contains(
+                                    messages[reversedIndex].messageId)) {
+                                  selectedMessage.remove(
+                                      messages[reversedIndex].messageId);
+                                  setState(() {});
+                                } else {
+                                  selectedMessage
+                                      .add(messages[reversedIndex].messageId!);
+                                  setState(() {});
+                                }
+                              }
+                              if (selectedMessage.isEmpty) {
+                                setState(() {
+                                  selectionMode = false;
+                                });
+                              }
+                            },
+                            child: Container(
+                              margin: EdgeInsets.symmetric(vertical: 3),
+                              alignment: messages[reversedIndex].sender ==
                                       _userSession.userDetails!.userId!
-                                  ? ColorAssets.neomBlue
-                                  : Colors.grey.shade300,
-                            ),
-                            child: IntrinsicWidth(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    messages[index].content!,
-                                    style: GoogleFonts.roboto(
-                                        color: messages[index].sender ==
-                                                _userSession
-                                                    .userDetails!.userId!
-                                            ? Colors.white
-                                            : Colors.black,
-                                        fontSize: 16),
-                                  ),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                  Align(
-                                    alignment: Alignment.centerRight,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          formattedTime,
-                                          style: GoogleFonts.roboto(
-                                              color: messages[index].sender ==
-                                                      _userSession
-                                                          .userDetails!.userId!
-                                                  ? Colors.white
-                                                  : Colors.black,
-                                              fontSize: 12),
+                                  ? Alignment.topRight
+                                  : Alignment.topLeft,
+                              color: selectedMessage.contains(
+                                      messages[reversedIndex].messageId!)
+                                  ? ColorAssets.neomBlue.withOpacity(0.15)
+                                  : Colors.transparent,
+                              child: Container(
+                                constraints: BoxConstraints(minWidth: 100),
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 8.0, horizontal: 10.0),
+                                margin: EdgeInsets.symmetric(
+                                    vertical: 5, horizontal: 10),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(15),
+                                      bottomLeft: Radius.circular(15),
+                                      topRight: Radius.circular(15)),
+                                  color: messages[reversedIndex].sender ==
+                                          _userSession.userDetails!.userId!
+                                      ? ColorAssets.neomBlue
+                                      : Colors.grey.shade300,
+                                ),
+                                child: IntrinsicWidth(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        messages[reversedIndex].content!,
+                                        style: GoogleFonts.roboto(
+                                            color: messages[reversedIndex]
+                                                        .sender ==
+                                                    _userSession
+                                                        .userDetails!.userId!
+                                                ? Colors.white
+                                                : Colors.black,
+                                            fontSize: 16),
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      Align(
+                                        alignment: Alignment.centerRight,
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              formattedTime,
+                                              style: GoogleFonts.roboto(
+                                                  color: messages[reversedIndex]
+                                                              .sender ==
+                                                          _userSession
+                                                              .userDetails!
+                                                              .userId!
+                                                      ? Colors.white
+                                                      : Colors.black,
+                                                  fontSize: 12),
+                                            ),
+                                            SizedBox(width: 5),
+                                            messages[reversedIndex].sender ==
+                                                    _userSession
+                                                        .userDetails!.userId!
+                                                ? widget.chatType ==
+                                                        ChatType.group
+                                                    ? Icon(
+                                                        Icons.done_all,
+                                                        color: !(messages[
+                                                                    reversedIndex]
+                                                                .unseenby!
+                                                                .contains(messages[reversedIndex].sender))
+                                                            ? Colors
+                                                                .lightGreenAccent
+                                                            : Colors.white,
+                                                        size: 15,
+                                                      )
+                                                    : Icon(
+                                                        Icons.done_all,
+                                                        color: !(messages[
+                                                                    reversedIndex]
+                                                                .unseenby!
+                                                                .contains(_userSession
+                                                                    .endUserDetails
+                                                                    ?.userId!))
+                                                            ? Colors
+                                                                .lightGreenAccent
+                                                            : Colors.white,
+                                                        size: 15,
+                                                      )
+                                                : Container(),
+                                          ],
                                         ),
-                                        SizedBox(width: 5),
-                                        messages[index].sender ==
-                                                _userSession
-                                                    .userDetails!.userId!
-                                            ? Icon(
-                                                Icons.done_all,
-                                                color: !(messages[index]
-                                                        .unseenby!
-                                                        .contains(_userSession
-                                                            .endUserDetails
-                                                            ?.userId!))
-                                                    ? Colors.lightGreenAccent
-                                                    : Colors.white,
-                                                size: 15,
-                                              )
-                                            : Container(),
-                                      ],
-                                    ),
-                                  )
-                                ],
+                                      )
+                                    ],
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                      );
-                    },
+                          );
+                        },
+                      )
+                    ],
                   );
                 })),
                 Padding(
@@ -463,49 +534,74 @@ class _ChatScreenState extends State<ChatScreen> {
                               .collection('message')
                               .doc()
                               .id;
-                         if (widget.chatType == ChatType.private) {
+                          if (widget.chatType == ChatType.private) {
                             final chat = Chat(
-                            chatId: chatId,
-                            createdAt: DateTime.now(),
-                            groupImage: _userSession.endUserDetails?.imagepath!,
-                            groupName: _userSession.endUserDetails?.userName,
-                            lastMessage: {
-                              'content': _messageController.text,
-                              'sender': _userSession.userDetails!.userId!,
-                              'timeStamp': DateTime.now(),
-                            },
-                            usersInfo: {},
-                            type: ChatType.private,
-                            users: [
-                              _userSession.userDetails!.userId!,
-                              _userSession.endUserDetails!.userId!
-                            ],
-                          );
-                          final messageObj = Message(
-                            unseenby: [
-                              _userSession.userDetails!.userId!,
-                              _userSession.endUserDetails!.userId!
-                            ],
-                            messageId: mId,
-                            content: _messageController.text,
-                            timeStamp: DateTime.now(),
-                            sender: _userSession.userDetails!.userId!,
-                          );
-                          context.read<ChatBloc>().add(AddMessageEvent(
-                              chat: chat, message: messageObj, chatId: chatId));
-                         }else{
-                           
-                          final messageObj = Message(
-                            unseenby: widget.chatModel?.users,
-                            messageId: mId,
-                            content: _messageController.text,
-                            timeStamp: DateTime.now(),
-                            sender: _userSession.userDetails!.userId!,
-                          );
-                          context.read<ChatBloc>().add(AddMessageEvent(
-                              chat: widget.chatModel!, message: messageObj, chatId: chatId));
-                         }
-                          
+                              chatId: chatId,
+                              createdAt: DateTime.now(),
+                              groupImage:
+                                  _userSession.endUserDetails?.imagepath!,
+                              groupName: _userSession.endUserDetails?.userName,
+                              lastMessage: {
+                                'content': _messageController.text,
+                                'sender': _userSession.userDetails!.userId!,
+                                'timeStamp': DateTime.now(),
+                              },
+                              usersInfo: {
+                                _userSession.userDetails!.userId!:
+                                    _userSession.userDetails!,
+                                _userSession.endUserDetails!.userId!:
+                                    _userSession.endUserDetails!
+                              },
+                              type: ChatType.private,
+                              users: [
+                                _userSession.userDetails!.userId!,
+                                _userSession.endUserDetails!.userId!
+                              ],
+                            );
+                            final messageObj = Message(
+                              unseenby: [
+                                _userSession.userDetails!.userId!,
+                                _userSession.endUserDetails!.userId!
+                              ],
+                              messageId: mId,
+                              content: _messageController.text,
+                              timeStamp: DateTime.now(),
+                              sender: _userSession.userDetails!.userId!,
+                            );
+                            widget.chatModel = chat;
+                            context.read<ChatBloc>().add(AddMessageEvent(
+                                chat: chat,
+                                message: messageObj,
+                                chatId: chatId));
+                          } else {
+                            final chatModel = Chat(
+                              chatId: chatId,
+                              createdAt: DateTime.now(),
+                              groupImage: widget.chatModel?.groupImage,
+                              groupName: widget.chatModel?.groupName,
+                              lastMessage: {
+                                'content': _messageController.text,
+                                'sender': _userSession.userDetails!.userId!,
+                                'timeStamp': DateTime.now(),
+                              },
+                              usersInfo: widget.chatModel?.usersInfo,
+                              type: ChatType.group,
+                              users: widget.chatModel?.users?.toList(),
+                            );
+                            print(widget.chatModel?.users?.toList());
+                            final messageObj = Message(
+                              unseenby: widget.chatModel?.users?.toList(),
+                              messageId: mId,
+                              content: _messageController.text,
+                              timeStamp: DateTime.now(),
+                              sender: _userSession.userDetails!.userId!,
+                            );
+
+                            context.read<ChatBloc>().add(AddMessageEvent(
+                                chat: chatModel,
+                                message: messageObj,
+                                chatId: chatId));
+                          }
                           _messageController.clear();
                         },
                       ),
